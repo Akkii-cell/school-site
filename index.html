@@ -1336,7 +1336,7 @@
       <div class="modal-head">
         <div>
           <h2 class="modal-title" id="adminModalTitle">管理者ログイン</h2>
-          <p class="helper-text">投稿の追加・編集・削除と、通報管理ができます。</p>
+          <p class="helper-text">Firebase Authentication を使用して管理者を認証します。</p>
         </div>
         <button class="close-button" type="button" data-close-modal="adminModal" aria-label="閉じる">×</button>
       </div>
@@ -1482,6 +1482,12 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
     import {
+      getAuth,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+    import {
       getFirestore,
       collection,
       addDoc,
@@ -1492,12 +1498,7 @@
       onSnapshot
     } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
-    // Static sites cannot fully hide admin credentials.
-    const ADMIN_CREDENTIALS = {
-      email: "daishi_a@icloud.com",
-      password: "AKki0311144618"
-    };
-
+    // Firebase設定（認証情報は含まない）
     const firebaseConfig = {
       apiKey: "AIzaSyDTPxjik7ErpYO2VtnkdjomaT15rBzbFlE",
       authDomain: "school-site-475fc.firebaseapp.com",
@@ -1510,7 +1511,6 @@
 
     const STORAGE_KEYS = {
       userName: "shirokane7_user_name",
-      admin: "shirokane7_admin_mode",
       posts: "shirokane7_posts"
     };
 
@@ -1534,6 +1534,7 @@
     const state = {
       userName: "",
       isAdmin: false,
+      authUser: null,
       posts: [],
       legacyPosts: [],
       remotePosts: [],
@@ -1578,10 +1579,12 @@
     let toastTimer = null;
     let unsubscribePosts = null;
     let unsubscribeComments = null;
+    let unsubscribeAuth = null;
     let hasLoadedPostSnapshot = false;
     let hasLoadedCommentSnapshot = false;
 
     const firebaseApp = initializeApp(firebaseConfig);
+    const auth = getAuth(firebaseApp);
     const db = getFirestore(firebaseApp);
     const postsCollectionRef = collection(db, FIRESTORE_COLLECTIONS.posts);
     const commentsCollectionRef = collection(db, FIRESTORE_COLLECTIONS.comments);
@@ -1758,7 +1761,6 @@
       const savedPosts = localStorage.getItem(STORAGE_KEYS.posts);
 
       state.userName = savedName ? savedName.trim() : "";
-      state.isAdmin = readAdminState();
       state.posts = [];
       state.remotePosts = [];
       state.remoteComments = [];
@@ -1773,35 +1775,10 @@
         console.error("投稿データの読み込みに失敗しました", error);
         state.legacyPosts = [];
       }
-
-      // 管理者状態は現在のセッションだけで扱う。
-      if (!state.userName) {
-        state.isAdmin = false;
-        saveAdmin();
-      }
     }
 
     function saveUserName() {
       localStorage.setItem(STORAGE_KEYS.userName, state.userName);
-    }
-
-    function readAdminState() {
-      const sessionValue = sessionStorage.getItem(STORAGE_KEYS.admin);
-      if (sessionValue !== null) {
-        return sessionValue === "true";
-      }
-
-      // 旧バージョンで localStorage に残っていた管理者状態は引き継がない。
-      localStorage.removeItem(STORAGE_KEYS.admin);
-      return false;
-    }
-
-    function saveAdmin() {
-      if (state.isAdmin) {
-        sessionStorage.setItem(STORAGE_KEYS.admin, "true");
-      } else {
-        sessionStorage.removeItem(STORAGE_KEYS.admin);
-      }
     }
 
     function normalizePostDoc(snapshot) {
@@ -1872,7 +1849,6 @@
     async function migrateLegacyPostsToFirestore() {
       if (!state.legacyPosts.length) return;
 
-      // 旧 localStorage データがある場合だけ、一度だけ Firestore へ移行する。
       for (const legacyPost of state.legacyPosts) {
         const postPayload = {
           title: legacyPost.title || "",
@@ -2880,7 +2856,6 @@
 
       const dataUrl = await readFileAsDataUrl(file);
       const image = await loadImage(dataUrl);
-      // Firestore に文字列として保存するため、画像はかなり小さめに圧縮する。
       const maxSize = 960;
       const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
       const width = Math.max(1, Math.round(image.width * scale));
@@ -3174,21 +3149,25 @@
       }
     }
 
-    function handleAdminSubmit(event) {
+    async function handleAdminSubmit(event) {
       event.preventDefault();
 
       const email = document.getElementById("adminEmail").value.trim();
       const password = document.getElementById("adminPassword").value;
 
-      if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-        state.isAdmin = true;
-        saveAdmin();
-        render();
-        closeModal("adminModal");
+      const submitButton = event.target.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
         showToast("管理者モードを有効にしました。");
+        closeModal("adminModal");
         event.target.reset();
-      } else {
+      } catch (error) {
+        console.error("ログインエラー:", error);
         showToast("メールアドレスまたはパスワードが違います。");
+      } finally {
+        submitButton.disabled = false;
       }
     }
 
@@ -3202,11 +3181,8 @@
         return;
       }
 
-      // 利用者が変わる可能性があるので、名前更新時は管理者状態を解除する。
       state.userName = name;
-      state.isAdmin = false;
       saveUserName();
-      saveAdmin();
       render();
       closeModal("nameModal");
       showToast("名前を保存しました。");
@@ -3312,11 +3288,16 @@
       }
     }
 
-    function resetAdminMode() {
-      state.isAdmin = false;
-      saveAdmin();
-      render();
-      showToast("管理者モードを終了しました。");
+    async function resetAdminMode() {
+      try {
+        await signOut(auth);
+        state.isAdmin = false;
+        render();
+        showToast("管理者モードを終了しました。");
+      } catch (error) {
+        console.error("ログアウトエラー:", error);
+        showToast("ログアウトに失敗しました。");
+      }
     }
 
     function bindEvents() {
@@ -3365,10 +3346,6 @@
       window.addEventListener("storage", (event) => {
         if (event.key === STORAGE_KEYS.userName) {
           state.userName = event.newValue ? event.newValue.trim() : "";
-          if (!state.userName) {
-            state.isAdmin = false;
-            saveAdmin();
-          }
           render();
         }
       });
@@ -3379,6 +3356,18 @@
       bindEvents();
       render();
       await initializeSharedData();
+
+      // Firebase Authentication の状態監視
+      unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          state.authUser = user;
+          state.isAdmin = true;
+        } else {
+          state.authUser = null;
+          state.isAdmin = false;
+        }
+        render();
+      });
 
       if (!state.userName) {
         openNameModal();
