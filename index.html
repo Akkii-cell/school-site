@@ -1,105 +1,2325 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>School Site</title>
-
-<style>
-body {
-  font-family: -apple-system, sans-serif;
-  background: #f5f5f7;
-  margin: 0;
-}
-
-header {
-  background: white;
-  padding: 15px;
-  font-weight: bold;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.container {
-  padding: 20px;
-}
-
-.card {
-  background: white;
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 12px;
-}
-
-input, textarea {
-  width: 100%;
-  margin-top: 5px;
-  margin-bottom: 10px;
-}
-
-button {
-  padding: 8px 15px;
-  border: none;
-  border-radius: 8px;
-  background: black;
-  color: white;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>港区白金の丘中学校 第7学年 共有サイト</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f5f7;
+      --surface: rgba(255, 255, 255, 0.92);
+      --surface-strong: #ffffff;
+      --surface-soft: #fafafc;
+      --border: rgba(15, 23, 42, 0.08);
+      --text: #111827;
+      --muted: #6b7280;
+      --muted-soft: #94a3b8;
+      --accent: #0071e3;
+      --accent-soft: rgba(0, 113, 227, 0.1);
+      --success: #0f9f6e;
+      --warning: #d97706;
+      --danger: #d92d20;
+      --shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+      --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.06);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+      --max-width: 1220px;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(0, 113, 227, 0.08), transparent 32%),
+        radial-gradient(circle at top right, rgba(15, 169, 107, 0.08), transparent 28%),
+        var(--bg);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+    img {
+      max-width: 100%;
+      display: block;
+    }
+    button {
+      border: none;
+      cursor: pointer;
+    }
+    .shell {
+      width: min(var(--max-width), calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 120px;
+    }
+    .site-header {
+      display: grid;
+      grid-template-columns: 1.7fr 1fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+    .card,
+    .frosted,
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(24px);
+    }
+    .hero-card {
+      padding: 32px;
+      overflow: hidden;
+      position: relative;
+    }
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -100px -120px auto;
+      width: 280px;
+      height: 280px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(0, 113, 227, 0.16), transparent 62%);
+      pointer-events: none;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      margin: 0 0 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--accent);
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      box-shadow: var(--shadow-soft);
+    }
+    h1,
+    h2,
+    h3,
+    h4,
+    p {
+      margin: 0;
+    }
+    .hero-title {
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+      margin-bottom: 14px;
+      max-width: 12ch;
+    }
+    .hero-lead {
+      max-width: 60ch;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+    .identity-card {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .identity-top {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    .avatar-badge {
+      width: 62px;
+      height: 62px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #0a84ff, #40c8ff);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      box-shadow: 0 18px 40px rgba(10, 132, 255, 0.3);
+      flex-shrink: 0;
+    }
+    .identity-label {
+      font-size: 0.84rem;
+      color: var(--muted-soft);
+      margin-bottom: 6px;
+    }
+    .identity-name {
+      font-size: 1.55rem;
+      letter-spacing: -0.03em;
+      margin-bottom: 4px;
+    }
+    .identity-role {
+      color: var(--muted);
+      font-size: 0.95rem;
+      min-height: 1.2em;
+    }
+    .identity-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .stat-card {
+      padding: 22px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+    }
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 10px;
+    }
+    .stat-value {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      margin-bottom: 8px;
+    }
+    .stat-note {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .toolbar {
+      display: grid;
+      gap: 16px;
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+    .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+    }
+    .date-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .range-label {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      min-width: 220px;
+    }
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.9fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .primary-column,
+    .secondary-column {
+      display: grid;
+      gap: 18px;
+    }
+    .panel {
+      padding: 24px;
+    }
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .panel-title {
+      font-size: 1.2rem;
+      letter-spacing: -0.03em;
+    }
+    .panel-subtitle {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-top: 4px;
+    }
+    .post-stack,
+    .day-detail-list,
+    .report-list,
+    .quick-list {
+      display: grid;
+      gap: 14px;
+    }
+    .post-card {
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.92));
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow-soft);
+    }
+    .post-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .post-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge.schedule {
+      background: rgba(0, 113, 227, 0.1);
+      color: var(--accent);
+    }
+    .badge.homework {
+      background: rgba(15, 159, 110, 0.12);
+      color: var(--success);
+    }
+    .badge.notice {
+      background: rgba(217, 119, 6, 0.12);
+      color: var(--warning);
+    }
+    .badge.class-badge {
+      background: rgba(15, 23, 42, 0.06);
+      color: #334155;
+    }
+    .badge.flag-badge {
+      background: rgba(217, 45, 32, 0.12);
+      color: var(--danger);
+    }
+    .post-date {
+      color: var(--muted);
+      font-size: 0.92rem;
+      white-space: nowrap;
+    }
+    .post-title {
+      font-size: clamp(1.25rem, 2vw, 1.45rem);
+      line-height: 1.25;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+    .post-body {
+      color: #344054;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .post-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .comments-section {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(148, 163, 184, 0.16);
+      display: grid;
+      gap: 14px;
+    }
+    .section-label {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+    .comment-list {
+      display: grid;
+      gap: 12px;
+    }
+    .comment-item {
+      background: rgba(248, 250, 252, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: grid;
+      gap: 10px;
+    }
+    .comment-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .comment-author {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .comment-time {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+    .comment-text {
+      color: #374151;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .comment-image {
+      width: min(100%, 260px);
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      cursor: zoom-in;
+    }
+    .comment-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .comment-form {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+    }
+    .form-grid {
+      display: grid;
+      gap: 14px;
+    }
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+    .field label {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: rgba(0, 113, 227, 0.42);
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.12);
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.7;
+    }
+    .comment-form textarea {
+      min-height: 94px;
+    }
+    .upload-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .file-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 46px;
+      padding: 0 16px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.06);
+      color: #334155;
+      font-weight: 600;
+    }
+    .hidden-file {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      border: 0;
+      clip: rect(0 0 0 0);
+      overflow: hidden;
+    }
+    .draft-image-preview {
+      width: 120px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      display: none;
+    }
+    .draft-image-preview.active {
+      display: block;
+    }
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+    .week-day {
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.9);
+      min-height: 180px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+    .week-day.today {
+      border-color: rgba(0, 113, 227, 0.28);
+      box-shadow: inset 0 0 0 1px rgba(0, 113, 227, 0.14);
+    }
+    .week-day-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+    }
+    .week-day-title strong {
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+    .mini-post {
+      border-radius: 16px;
+      padding: 12px;
+      background: rgba(245, 247, 250, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      display: grid;
+      gap: 8px;
+    }
+    .mini-post h4 {
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+    .mini-post p {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+    .calendar-wrap {
+      display: grid;
+      gap: 16px;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .calendar-weekday {
+      padding: 6px 0 2px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+    .calendar-day {
+      min-height: 112px;
+      border-radius: 20px;
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      background: rgba(255, 255, 255, 0.88);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      text-align: left;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+    .calendar-day:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-soft);
+    }
+    .calendar-day.is-outside {
+      opacity: 0.45;
+    }
+    .calendar-day.is-selected {
+      border-color: rgba(0, 113, 227, 0.28);
+      box-shadow: inset 0 0 0 1px rgba(0, 113, 227, 0.14);
+    }
+    .calendar-day.is-today .calendar-number {
+      color: var(--accent);
+      font-weight: 800;
+    }
+    .calendar-number {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .calendar-summary {
+      display: grid;
+      gap: 6px;
+    }
+    .calendar-dot-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .calendar-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+    .calendar-count {
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.4;
+    }
+    .empty-state {
+      padding: 28px 22px;
+      border-radius: 20px;
+      background: rgba(248, 250, 252, 0.9);
+      border: 1px dashed rgba(148, 163, 184, 0.22);
+      color: var(--muted);
+      line-height: 1.8;
+    }
+    .quick-item,
+    .report-item {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(248, 250, 252, 0.86);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      display: grid;
+      gap: 8px;
+    }
+    .quick-item strong,
+    .report-item strong {
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+    .inline-meta {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+    .fab {
+      position: fixed;
+      right: 18px;
+      bottom: calc(18px + env(safe-area-inset-bottom));
+      min-width: 164px;
+      min-height: 56px;
+      padding: 0 20px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #0071e3, #35a0ff);
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 24px 50px rgba(0, 113, 227, 0.28);
+      z-index: 30;
+    }
+    .button,
+    .ghost-button,
+    .tonal-button,
+    .danger-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 46px;
+      padding: 0 16px;
+      border-radius: 999px;
+      font-weight: 700;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+    .button:hover,
+    .ghost-button:hover,
+    .tonal-button:hover,
+    .danger-button:hover,
+    .fab:hover {
+      transform: translateY(-1px);
+    }
+    .button {
+      background: linear-gradient(135deg, #0071e3, #2e90fa);
+      color: #fff;
+      box-shadow: 0 16px 32px rgba(0, 113, 227, 0.22);
+    }
+    .ghost-button {
+      background: rgba(255, 255, 255, 0.88);
+      color: #1f2937;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+    .tonal-button {
+      background: rgba(0, 113, 227, 0.1);
+      color: var(--accent);
+    }
+    .danger-button {
+      background: rgba(217, 45, 32, 0.12);
+      color: var(--danger);
+    }
+    .segmented {
+      display: inline-flex;
+      padding: 4px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.06);
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .segment {
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 999px;
+      background: transparent;
+      color: #475467;
+      font-weight: 700;
+    }
+    .segment.active {
+      background: #fff;
+      color: var(--text);
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+    }
+    .chip {
+      min-height: 42px;
+      padding: 0 15px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.05);
+      color: #334155;
+      font-weight: 700;
+    }
+    .chip.active {
+      background: rgba(0, 113, 227, 0.12);
+      color: var(--accent);
+    }
+    .helper-text {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 22px;
+      background: rgba(15, 23, 42, 0.44);
+      backdrop-filter: blur(16px);
+      z-index: 100;
+      opacity: 1;
+      pointer-events: auto;
+      transition: opacity 0.2s ease;
+    }
+    .modal.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .modal-panel {
+      width: min(720px, 100%);
+      max-height: min(90vh, 960px);
+      overflow: auto;
+      padding: 28px;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.98);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      box-shadow: 0 30px 70px rgba(15, 23, 42, 0.22);
+    }
+    .modal-panel.narrow {
+      width: min(520px, 100%);
+    }
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .modal-title {
+      font-size: 1.55rem;
+      letter-spacing: -0.04em;
+      margin-bottom: 6px;
+    }
+    .close-button {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.06);
+      color: #334155;
+      flex-shrink: 0;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    .name-screen {
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+    }
+    .name-screen::after {
+      content: "";
+      position: absolute;
+      right: -110px;
+      bottom: -110px;
+      width: 240px;
+      height: 240px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(0, 113, 227, 0.16), transparent 60%);
+      pointer-events: none;
+    }
+    .name-screen .modal-title {
+      font-size: clamp(1.85rem, 4vw, 2.5rem);
+    }
+    .name-screen .helper-text {
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+    .divider {
+      height: 1px;
+      background: rgba(148, 163, 184, 0.18);
+      margin: 16px 0;
+    }
+    .lightbox-image {
+      width: 100%;
+      border-radius: 24px;
+      overflow: hidden;
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(24px + env(safe-area-inset-bottom));
+      transform: translateX(-50%) translateY(18px);
+      padding: 14px 18px;
+      border-radius: 999px;
+      background: rgba(17, 24, 39, 0.92);
+      color: #fff;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      z-index: 120;
+      max-width: calc(100vw - 32px);
+      text-align: center;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    @media (max-width: 1080px) {
+      .site-header,
+      .main-grid,
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      .main-grid {
+        gap: 16px;
+      }
+      .secondary-column {
+        order: -1;
+      }
+    }
+    @media (max-width: 760px) {
+      .shell {
+        width: min(calc(100vw - 18px), var(--max-width));
+        padding-top: 14px;
+      }
+      .hero-card,
+      .identity-card,
+      .toolbar,
+      .panel,
+      .stat-card,
+      .modal-panel {
+        border-radius: 24px;
+      }
+      .hero-card,
+      .identity-card,
+      .panel,
+      .toolbar,
+      .modal-panel {
+        padding: 20px;
+      }
+      .hero-title {
+        max-width: 100%;
+      }
+      .calendar-grid {
+        gap: 8px;
+      }
+      .calendar-day {
+        min-height: 86px;
+        padding: 10px;
+        border-radius: 18px;
+      }
+      .calendar-count {
+        font-size: 0.72rem;
+      }
+      .range-label {
+        min-width: 0;
+        width: 100%;
+      }
+      .post-card {
+        padding: 18px;
+      }
+      .post-meta,
+      .comment-head,
+      .toolbar-row,
+      .modal-head {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .identity-top {
+        align-items: flex-start;
+      }
+      .comment-image {
+        width: 100%;
+      }
+      .fab {
+        left: 14px;
+        right: 14px;
+        width: calc(100vw - 28px);
+      }
+    }
+  </style>
 </head>
-
 <body>
-
-<header>
-  📅 学校連絡サイト
-</header>
-
-<div class="container">
-
-<div class="card">
-  <h3>名前を入力</h3>
-  <input id="nameInput">
-  <button onclick="saveName()">保存</button>
-</div>
-
-<div class="card">
-  <h3>コメント</h3>
-  <textarea id="commentInput"></textarea>
-  <button onclick="addComment()">送信</button>
-</div>
-
-<div id="comments"></div>
-
-</div>
-
-<script>
-let name = localStorage.getItem("name") || "";
-
-function saveName(){
-  name = document.getElementById("nameInput").value;
-  localStorage.setItem("name", name);
-}
-
-function addComment(){
-  let text = document.getElementById("commentInput").value;
-  let data = JSON.parse(localStorage.getItem("comments") || "[]");
-
-  data.push({name: name, text: text});
-  localStorage.setItem("comments", JSON.stringify(data));
-
-  render();
-}
-
-function render(){
-  let data = JSON.parse(localStorage.getItem("comments") || "[]");
-  let html = "";
-
-  data.forEach(c => {
-    html += `<div class="card"><b>${c.name}</b><br>${c.text}</div>`;
-  });
-
-  document.getElementById("comments").innerHTML = html;
-}
-
-render();
-</script>
-
+  <main class="shell">
+    <section class="site-header">
+      <article class="hero-card frosted">
+        <p class="eyebrow">港区白金の丘中学校 / 第7学年</p>
+        <h1 class="hero-title">予定・宿題・連絡を、毎日見やすく。</h1>
+        <p class="hero-lead">
+          1組・2組向けに、授業予定、宿題、連絡事項をひとつにまとめた共有サイトです。
+          コメントや画像付きのやり取りにも対応し、ブラウザだけでそのまま使えます。
+        </p>
+      </article>
+      <aside class="identity-card frosted">
+        <div class="identity-top">
+          <div class="avatar-badge" id="avatarBadge">七</div>
+          <div>
+            <p class="identity-label">現在の利用者</p>
+            <h2 class="identity-name" id="currentUserName">名前未設定</h2>
+            <p class="identity-role" id="currentUserRole">名前を設定するとコメントできます。</p>
+          </div>
+        </div>
+        <div class="identity-actions">
+          <button class="ghost-button" id="changeNameButton" type="button">名前を変更</button>
+          <button class="button" id="adminLoginButton" type="button">管理者ログイン</button>
+          <button class="danger-button" id="adminLogoutButton" type="button" hidden>管理者ログアウト</button>
+        </div>
+      </aside>
+    </section>
+    <section class="stats-grid" id="statsGrid" aria-label="概要"></section>
+    <section class="toolbar frosted">
+      <div class="toolbar-row">
+        <div class="date-nav">
+          <button class="ghost-button" type="button" data-nav="prev">前へ</button>
+          <button class="ghost-button" type="button" data-nav="today">今日</button>
+          <button class="ghost-button" type="button" data-nav="next">次へ</button>
+          <div class="range-label" id="rangeLabel">読み込み中...</div>
+        </div>
+        <div class="segmented" role="tablist" aria-label="表示切替">
+          <button class="segment" type="button" data-view="day">日表示</button>
+          <button class="segment" type="button" data-view="week">週表示</button>
+          <button class="segment" type="button" data-view="month">月表示</button>
+        </div>
+      </div>
+      <div class="toolbar-row">
+        <div class="chip-row" id="classFilterRow" aria-label="クラス絞り込み">
+          <button class="chip" type="button" data-class-filter="all">全クラス</button>
+          <button class="chip" type="button" data-class-filter="1組">1組</button>
+          <button class="chip" type="button" data-class-filter="2組">2組</button>
+        </div>
+        <div class="chip-row" id="categoryFilterRow" aria-label="カテゴリ絞り込み">
+          <button class="chip" type="button" data-category-filter="all">すべて</button>
+          <button class="chip" type="button" data-category-filter="予定">予定</button>
+          <button class="chip" type="button" data-category-filter="宿題">宿題</button>
+          <button class="chip" type="button" data-category-filter="連絡事項">連絡事項</button>
+        </div>
+      </div>
+    </section>
+    <section class="main-grid">
+      <div class="primary-column">
+        <section class="panel frosted">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title" id="viewTitle">表示内容</h2>
+              <p class="panel-subtitle" id="viewSubtitle">読み込み中...</p>
+            </div>
+          </div>
+          <div id="viewContainer"></div>
+        </section>
+      </div>
+      <aside class="secondary-column">
+        <section class="panel frosted">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">選択した日</h2>
+              <p class="panel-subtitle" id="selectedDayLabel">読み込み中...</p>
+            </div>
+          </div>
+          <div id="selectedDayPanel"></div>
+        </section>
+        <section class="panel frosted">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">今後の予定</h2>
+              <p class="panel-subtitle">近い日付の投稿をまとめています。</p>
+            </div>
+          </div>
+          <div id="upcomingPanel"></div>
+        </section>
+        <section class="panel frosted" id="reportPanelCard" hidden>
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">通報されたコメント</h2>
+              <p class="panel-subtitle">管理者のみ確認できます。</p>
+            </div>
+          </div>
+          <div id="reportPanel"></div>
+        </section>
+      </aside>
+    </section>
+  </main>
+  <button class="fab" id="createPostButton" type="button" hidden>＋ 投稿を追加</button>
+  <div class="modal hidden" id="nameModal" role="dialog" aria-modal="true" aria-labelledby="nameModalTitle">
+    <div class="modal-panel narrow name-screen">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="nameModalTitle">名前を入力してください</h2>
+          <p class="helper-text">
+            ここで入力した名前は端末内に保存され、コメント投稿時に表示されます。
+          </p>
+        </div>
+      </div>
+      <form id="nameForm" class="form-grid">
+        <div class="field">
+          <label for="userNameInput">表示名</label>
+          <input id="userNameInput" name="userName" type="text" maxlength="20" placeholder="例：白金 太郎" required>
+        </div>
+        <p class="helper-text">
+          管理者ログインは別画面です。ここではコメントに表示する名前だけを設定します。
+        </p>
+        <div class="modal-actions">
+          <button class="button" type="submit">この名前で始める</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="modal hidden" id="adminModal" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
+    <div class="modal-panel narrow">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="adminModalTitle">管理者ログイン</h2>
+          <p class="helper-text">投稿の追加・編集・削除と、通報管理ができます。</p>
+        </div>
+        <button class="close-button" type="button" data-close-modal="adminModal" aria-label="閉じる">×</button>
+      </div>
+      <form id="adminForm" class="form-grid">
+        <div class="field">
+          <label for="adminEmail">メールアドレス</label>
+          <input id="adminEmail" name="email" type="email" placeholder="メールアドレス" required>
+        </div>
+        <div class="field">
+          <label for="adminPassword">パスワード</label>
+          <input id="adminPassword" name="password" type="password" placeholder="パスワード" required>
+        </div>
+        <div class="modal-actions">
+          <button class="ghost-button" type="button" data-close-modal="adminModal">キャンセル</button>
+          <button class="button" type="submit">ログイン</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="modal hidden" id="postModal" role="dialog" aria-modal="true" aria-labelledby="postModalTitle">
+    <div class="modal-panel">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="postModalTitle">投稿を追加</h2>
+          <p class="helper-text">予定・宿題・連絡事項を、対象クラスごとに登録できます。</p>
+        </div>
+        <button class="close-button" type="button" data-close-modal="postModal" aria-label="閉じる">×</button>
+      </div>
+      <form id="postForm" class="form-grid">
+        <input type="hidden" id="postIdInput">
+        <div class="field">
+          <label for="postTitle">タイトル</label>
+          <input id="postTitle" type="text" maxlength="70" placeholder="タイトルを入力" required>
+        </div>
+        <div class="field">
+          <label for="postBody">本文</label>
+          <textarea id="postBody" placeholder="本文を入力" required></textarea>
+        </div>
+        <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+          <div class="field">
+            <label for="postDate">日付</label>
+            <input id="postDate" type="date" required>
+          </div>
+          <div class="field">
+            <label for="postCategory">カテゴリ</label>
+            <select id="postCategory" required>
+              <option value="予定">予定</option>
+              <option value="宿題">宿題</option>
+              <option value="連絡事項">連絡事項</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="postClassTarget">対象クラス</label>
+            <select id="postClassTarget" required>
+              <option value="両方">1組・2組</option>
+              <option value="1組">1組</option>
+              <option value="2組">2組</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="ghost-button" type="button" data-close-modal="postModal">キャンセル</button>
+          <button class="button" type="submit">保存する</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="modal hidden" id="commentEditModal" role="dialog" aria-modal="true" aria-labelledby="commentEditModalTitle">
+    <div class="modal-panel narrow">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="commentEditModalTitle">コメントを編集</h2>
+          <p class="helper-text">文章を修正し、必要なら画像も外せます。</p>
+        </div>
+        <button class="close-button" type="button" data-close-modal="commentEditModal" aria-label="閉じる">×</button>
+      </div>
+      <form id="commentEditForm" class="form-grid">
+        <input type="hidden" id="editCommentPostId">
+        <input type="hidden" id="editCommentId">
+        <div class="field">
+          <label for="editCommentText">コメント</label>
+          <textarea id="editCommentText" required></textarea>
+        </div>
+        <div class="field" id="commentEditImageField" hidden>
+          <label>添付画像</label>
+          <img id="editCommentImagePreview" class="draft-image-preview active" alt="編集中の画像">
+          <label class="helper-text">
+            <input type="checkbox" id="removeCommentImage">
+            画像を削除する
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button class="ghost-button" type="button" data-close-modal="commentEditModal">キャンセル</button>
+          <button class="button" type="submit">更新する</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="modal hidden" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="reportModalTitle">
+    <div class="modal-panel narrow">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="reportModalTitle">コメントを通報</h2>
+          <p class="helper-text">内容に問題がある場合のみ送信してください。</p>
+        </div>
+        <button class="close-button" type="button" data-close-modal="reportModal" aria-label="閉じる">×</button>
+      </div>
+      <div class="helper-text" id="reportTargetPreview"></div>
+      <div class="divider"></div>
+      <form id="reportForm" class="form-grid">
+        <input type="hidden" id="reportPostId">
+        <input type="hidden" id="reportCommentId">
+        <div class="field">
+          <label for="reportReason">通報理由</label>
+          <textarea id="reportReason" placeholder="例：不適切な表現、関係のない画像、個人情報など"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="ghost-button" type="button" data-close-modal="reportModal">キャンセル</button>
+          <button class="danger-button" type="submit">通報する</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="modal hidden" id="imageLightbox" role="dialog" aria-modal="true" aria-labelledby="imageLightboxTitle">
+    <div class="modal-panel narrow">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="imageLightboxTitle">画像プレビュー</h2>
+          <p class="helper-text">画像を拡大表示しています。</p>
+        </div>
+        <button class="close-button" type="button" data-close-modal="imageLightbox" aria-label="閉じる">×</button>
+      </div>
+      <img id="lightboxImage" class="lightbox-image" alt="コメント画像">
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    // 注意:
+    // GitHub Pages のような静的サイトでは、管理者用の認証情報を完全に秘匿できません。
+    // この実装はデモ・学内簡易運用向けです。厳密な認証が必要なら別途バックエンドが必要です。
+    const ADMIN_CREDENTIALS = {
+      email: "daishi_a@icloud.com",
+      password: "AKki0311144618"
+    };
+    const STORAGE_KEYS = {
+      userName: "shirokane7_user_name",
+      admin: "shirokane7_admin_mode",
+      posts: "shirokane7_posts"
+    };
+    const CATEGORY_CLASS = {
+      "予定": "schedule",
+      "宿題": "homework",
+      "連絡事項": "notice"
+    };
+    const CATEGORY_ICON = {
+      "予定": "予定",
+      "宿題": "宿題",
+      "連絡事項": "連絡"
+    };
+    const state = {
+      userName: "",
+      isAdmin: false,
+      posts: [],
+      view: "day",
+      classFilter: "all",
+      categoryFilter: "all",
+      currentDate: todayKey(),
+      selectedDate: todayKey(),
+      reportTarget: null
+    };
+    const refs = {
+      viewContainer: document.getElementById("viewContainer"),
+      selectedDayPanel: document.getElementById("selectedDayPanel"),
+      upcomingPanel: document.getElementById("upcomingPanel"),
+      reportPanel: document.getElementById("reportPanel"),
+      reportPanelCard: document.getElementById("reportPanelCard"),
+      currentUserName: document.getElementById("currentUserName"),
+      currentUserRole: document.getElementById("currentUserRole"),
+      avatarBadge: document.getElementById("avatarBadge"),
+      rangeLabel: document.getElementById("rangeLabel"),
+      viewTitle: document.getElementById("viewTitle"),
+      viewSubtitle: document.getElementById("viewSubtitle"),
+      statsGrid: document.getElementById("statsGrid"),
+      nameModal: document.getElementById("nameModal"),
+      adminModal: document.getElementById("adminModal"),
+      postModal: document.getElementById("postModal"),
+      commentEditModal: document.getElementById("commentEditModal"),
+      reportModal: document.getElementById("reportModal"),
+      imageLightbox: document.getElementById("imageLightbox"),
+      lightboxImage: document.getElementById("lightboxImage"),
+      createPostButton: document.getElementById("createPostButton"),
+      adminLoginButton: document.getElementById("adminLoginButton"),
+      adminLogoutButton: document.getElementById("adminLogoutButton"),
+      toast: document.getElementById("toast"),
+      selectedDayLabel: document.getElementById("selectedDayLabel"),
+      reportTargetPreview: document.getElementById("reportTargetPreview")
+    };
+    let toastTimer = null;
+    function todayKey() {
+      return formatDateKey(new Date());
+    }
+    function formatDateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return year + "-" + month + "-" + day;
+    }
+    function parseDateKey(dateKey) {
+      const [year, month, day] = dateKey.split("-").map(Number);
+      return new Date(year, month - 1, day);
+    }
+    function addDays(dateKey, amount) {
+      const date = parseDateKey(dateKey);
+      date.setDate(date.getDate() + amount);
+      return formatDateKey(date);
+    }
+    function addMonths(dateKey, amount) {
+      const date = parseDateKey(dateKey);
+      const currentDay = date.getDate();
+      date.setDate(1);
+      date.setMonth(date.getMonth() + amount);
+      const monthDays = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+      date.setDate(Math.min(currentDay, monthDays));
+      return formatDateKey(date);
+    }
+    function dateLabel(dateKey, options) {
+      return new Intl.DateTimeFormat("ja-JP", options).format(parseDateKey(dateKey));
+    }
+    function getWeekDates(dateKey) {
+      const base = parseDateKey(dateKey);
+      const day = base.getDay();
+      const mondayOffset = day === 0 ? -6 : 1 - day;
+      const start = new Date(base);
+      start.setDate(base.getDate() + mondayOffset);
+      return Array.from({ length: 7 }, (_, index) => {
+        const current = new Date(start);
+        current.setDate(start.getDate() + index);
+        return formatDateKey(current);
+      });
+    }
+    function startOfMonth(dateKey) {
+      const base = parseDateKey(dateKey);
+      return new Date(base.getFullYear(), base.getMonth(), 1);
+    }
+    function endOfMonth(dateKey) {
+      const base = parseDateKey(dateKey);
+      return new Date(base.getFullYear(), base.getMonth() + 1, 0);
+    }
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+    function formatMultiline(text) {
+      return escapeHtml(text).replace(/\n/g, "<br>");
+    }
+    function truncate(text, length) {
+      return text.length > length ? text.slice(0, length) + "…" : text;
+    }
+    function uniqueId(prefix) {
+      return prefix + "_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
+    }
+    function clonePosts(posts) {
+      return JSON.parse(JSON.stringify(posts));
+    }
+    function loadState() {
+      const savedName = localStorage.getItem(STORAGE_KEYS.userName);
+      const savedAdmin = localStorage.getItem(STORAGE_KEYS.admin);
+      const savedPosts = localStorage.getItem(STORAGE_KEYS.posts);
+      state.userName = savedName ? savedName.trim() : "";
+      state.isAdmin = savedAdmin === "true";
+      try {
+        const parsedPosts = savedPosts ? JSON.parse(savedPosts) : [];
+        state.posts = Array.isArray(parsedPosts) ? parsedPosts : [];
+      } catch (error) {
+        console.error("投稿データの読み込みに失敗しました", error);
+        state.posts = [];
+      }
+    }
+    function saveUserName() {
+      localStorage.setItem(STORAGE_KEYS.userName, state.userName);
+    }
+    function saveAdmin() {
+      localStorage.setItem(STORAGE_KEYS.admin, String(state.isAdmin));
+    }
+    function savePosts() {
+      localStorage.setItem(STORAGE_KEYS.posts, JSON.stringify(state.posts));
+    }
+    function showToast(message) {
+      refs.toast.textContent = message;
+      refs.toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        refs.toast.classList.remove("show");
+      }, 2400);
+    }
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add("hidden");
+      if (document.querySelectorAll(".modal:not(.hidden)").length === 0) {
+        document.body.style.overflow = "";
+      }
+    }
+    function openNameModal(changeMode = false) {
+      document.getElementById("userNameInput").value = changeMode ? state.userName : "";
+      openModal("nameModal");
+    }
+    function visibleForClass(post) {
+      if (state.classFilter === "all") return true;
+      return post.classTarget === "両方" || post.classTarget === state.classFilter;
+    }
+    function visibleForCategory(post) {
+      return state.categoryFilter === "all" || post.category === state.categoryFilter;
+    }
+    function getVisiblePosts() {
+      return clonePosts(state.posts)
+        .filter(visibleForClass)
+        .filter(visibleForCategory)
+        .sort((left, right) => {
+          if (left.date !== right.date) return left.date.localeCompare(right.date);
+          return left.createdAt.localeCompare(right.createdAt);
+        });
+    }
+    function getPostsForDate(dateKey) {
+      return getVisiblePosts().filter((post) => post.date === dateKey);
+    }
+    function getUpcomingPosts() {
+      return getVisiblePosts()
+        .filter((post) => post.date >= todayKey())
+        .slice(0, 5);
+    }
+    function getReportEntries() {
+      const entries = [];
+      state.posts.forEach((post) => {
+        (post.comments || []).forEach((comment) => {
+          if (comment.flagged || (comment.reports && comment.reports.length > 0)) {
+            entries.push({
+              postId: post.id,
+              postTitle: post.title,
+              commentId: comment.id,
+              author: comment.author,
+              text: comment.text,
+              reportCount: comment.reportCount || (comment.reports ? comment.reports.length : 0),
+              reports: comment.reports || []
+            });
+          }
+        });
+      });
+      return entries.sort((left, right) => right.reportCount - left.reportCount);
+    }
+    function render() {
+      renderIdentity();
+      renderToolbarState();
+      renderStats();
+      renderView();
+      renderSelectedDay();
+      renderUpcoming();
+      renderReports();
+    }
+    function renderIdentity() {
+      refs.currentUserName.textContent = state.userName || "名前未設定";
+      refs.currentUserRole.textContent = state.isAdmin
+        ? "管理者"
+        : "コメント投稿者として利用中";
+      refs.avatarBadge.textContent = state.userName ? state.userName.trim().charAt(0) : "七";
+      refs.adminLoginButton.hidden = state.isAdmin;
+      refs.adminLogoutButton.hidden = !state.isAdmin;
+      refs.createPostButton.hidden = !state.isAdmin;
+    }
+    function renderToolbarState() {
+      const viewLabels = {
+        day: "日表示",
+        week: "週表示",
+        month: "月表示"
+      };
+      refs.rangeLabel.textContent = getRangeLabel();
+      refs.viewTitle.textContent = viewLabels[state.view];
+      refs.viewSubtitle.textContent = getSubtitle();
+      document.querySelectorAll("[data-view]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.view === state.view);
+      });
+      document.querySelectorAll("[data-class-filter]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.classFilter === state.classFilter);
+      });
+      document.querySelectorAll("[data-category-filter]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.categoryFilter === state.categoryFilter);
+      });
+    }
+    function renderStats() {
+      const visiblePosts = getVisiblePosts();
+      const todayPosts = getPostsForDate(todayKey());
+      const reportCount = getReportEntries().length;
+      const commentCount = state.posts.reduce((total, post) => total + (post.comments ? post.comments.length : 0), 0);
+      const cards = [
+        {
+          label: "表示中の投稿",
+          value: String(visiblePosts.length),
+          note: state.classFilter === "all" ? "全クラスを対象に表示中" : state.classFilter + "に絞り込み中"
+        },
+        {
+          label: "今日の件数",
+          value: String(todayPosts.length),
+          note: todayPosts.length ? "今日の日付に登録された投稿があります" : "今日はまだ投稿がありません"
+        },
+        {
+          label: "コメント数",
+          value: String(commentCount),
+          note: "投稿ごとに画像付きコメントも可能です"
+        },
+        {
+          label: "通報中",
+          value: String(reportCount),
+          note: state.isAdmin ? "管理者パネルで確認できます" : "気になるコメントは通報できます"
+        }
+      ];
+      refs.statsGrid.innerHTML = cards.map((card) => {
+        return `
+          <article class="stat-card">
+            <p class="stat-label">${card.label}</p>
+            <div class="stat-value">${card.value}</div>
+            <p class="stat-note">${card.note}</p>
+          </article>
+        `;
+      }).join("");
+    }
+    function getRangeLabel() {
+      if (state.view === "day") {
+        return dateLabel(state.currentDate, {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          weekday: "short"
+        });
+      }
+      if (state.view === "week") {
+        const weekDates = getWeekDates(state.currentDate);
+        return (
+          dateLabel(weekDates[0], { month: "numeric", day: "numeric" }) +
+          " - " +
+          dateLabel(weekDates[6], { month: "numeric", day: "numeric" })
+        );
+      }
+      return dateLabel(state.currentDate, {
+        year: "numeric",
+        month: "long"
+      });
+    }
+    function getSubtitle() {
+      if (state.view === "day") {
+        return "選択した1日の投稿を、コメント付きでまとめて表示します。";
+      }
+      if (state.view === "week") {
+        return "1週間の流れを日ごとに一覧で確認できます。";
+      }
+      return "カレンダーから日付を選ぶと、その日の詳細を右側に表示します。";
+    }
+    function renderView() {
+      if (state.view === "day") {
+        renderDayView();
+        return;
+      }
+      if (state.view === "week") {
+        renderWeekView();
+        return;
+      }
+      renderMonthView();
+    }
+    function renderDayView() {
+      const posts = getPostsForDate(state.currentDate);
+      if (!posts.length) {
+        refs.viewContainer.innerHTML = `
+          <div class="empty-state">
+            この日には投稿がありません。管理者モードで予定・宿題・連絡事項を追加するとここに表示されます。
+          </div>
+        `;
+        return;
+      }
+      refs.viewContainer.innerHTML = `
+        <div class="post-stack">
+          ${posts.map(renderPostCard).join("")}
+        </div>
+      `;
+    }
+    function renderWeekView() {
+      const weekDates = getWeekDates(state.currentDate);
+      const daysHtml = weekDates.map((dateKey) => {
+        const posts = getPostsForDate(dateKey);
+        const isToday = dateKey === todayKey();
+        return `
+          <section class="week-day ${isToday ? "today" : ""}">
+            <div class="week-day-title">
+              <strong>${escapeHtml(dateLabel(dateKey, { month: "numeric", day: "numeric", weekday: "short" }))}</strong>
+              <button class="tonal-button" type="button" data-select-date="${dateKey}">詳細</button>
+            </div>
+            ${
+              posts.length
+                ? posts.map((post) => `
+                    <article class="mini-post">
+                      <div class="post-badges">
+                        <span class="badge ${CATEGORY_CLASS[post.category]}">${CATEGORY_ICON[post.category]}</span>
+                        <span class="badge class-badge">${escapeHtml(classLabel(post.classTarget))}</span>
+                      </div>
+                      <h4>${escapeHtml(post.title)}</h4>
+                      <p>${escapeHtml(truncate(post.body, 60))}</p>
+                    </article>
+                  `).join("")
+                : `<div class="helper-text">登録はありません。</div>`
+            }
+          </section>
+        `;
+      }).join("");
+      refs.viewContainer.innerHTML = `<div class="week-grid">${daysHtml}</div>`;
+    }
+    function renderMonthView() {
+      const monthStart = startOfMonth(state.currentDate);
+      const monthEnd = endOfMonth(state.currentDate);
+      const startWeekday = monthStart.getDay();
+      const offset = startWeekday === 0 ? -6 : 1 - startWeekday;
+      const firstCellDate = new Date(monthStart);
+      firstCellDate.setDate(monthStart.getDate() + offset);
+      const visiblePosts = getVisiblePosts();
+      const cells = Array.from({ length: 42 }, (_, index) => {
+        const cellDate = new Date(firstCellDate);
+        cellDate.setDate(firstCellDate.getDate() + index);
+        const dateKey = formatDateKey(cellDate);
+        const posts = visiblePosts.filter((post) => post.date === dateKey);
+        const isOutside = cellDate.getMonth() !== monthStart.getMonth();
+        const isToday = dateKey === todayKey();
+        const isSelected = dateKey === state.selectedDate;
+        return `
+          <button
+            class="calendar-day ${isOutside ? "is-outside" : ""} ${isToday ? "is-today" : ""} ${isSelected ? "is-selected" : ""}"
+            type="button"
+            data-select-date="${dateKey}"
+          >
+            <div class="calendar-number">${cellDate.getDate()}</div>
+            <div class="calendar-summary">
+              <div class="calendar-dot-row">
+                ${posts.slice(0, 3).map(() => `<span class="calendar-dot"></span>`).join("")}
+              </div>
+              <div class="calendar-count">${posts.length ? posts.length + "件" : ""}</div>
+            </div>
+          </button>
+        `;
+      }).join("");
+      refs.viewContainer.innerHTML = `
+        <div class="calendar-wrap">
+          <div class="calendar-grid">
+            ${["月", "火", "水", "木", "金", "土", "日"].map((day) => `<div class="calendar-weekday">${day}</div>`).join("")}
+            ${cells}
+          </div>
+          <div class="helper-text">
+            日付をタップすると、右側にその日の予定・宿題・連絡事項が表示されます。
+          </div>
+        </div>
+      `;
+    }
+    function renderSelectedDay() {
+      const posts = getPostsForDate(state.selectedDate);
+      refs.selectedDayLabel.textContent = dateLabel(state.selectedDate, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        weekday: "short"
+      });
+      if (!posts.length) {
+        refs.selectedDayPanel.innerHTML = `
+          <div class="empty-state">
+            この日にはまだ投稿がありません。
+          </div>
+        `;
+        return;
+      }
+      refs.selectedDayPanel.innerHTML = `
+        <div class="day-detail-list">
+          ${posts.map((post) => `
+            <article class="quick-item">
+              <div class="post-badges">
+                <span class="badge ${CATEGORY_CLASS[post.category]}">${CATEGORY_ICON[post.category]}</span>
+                <span class="badge class-badge">${escapeHtml(classLabel(post.classTarget))}</span>
+              </div>
+              <strong>${escapeHtml(post.title)}</strong>
+              <div class="inline-meta">${escapeHtml(truncate(post.body, 88))}</div>
+              <button class="tonal-button" type="button" data-focus-post="${post.id}">投稿を見る</button>
+            </article>
+          `).join("")}
+        </div>
+      `;
+    }
+    function renderUpcoming() {
+      const upcomingPosts = getUpcomingPosts();
+      if (!upcomingPosts.length) {
+        refs.upcomingPanel.innerHTML = `
+          <div class="empty-state">今後の投稿はまだ登録されていません。</div>
+        `;
+        return;
+      }
+      refs.upcomingPanel.innerHTML = `
+        <div class="quick-list">
+          ${upcomingPosts.map((post) => `
+            <article class="quick-item">
+              <div class="post-badges">
+                <span class="badge ${CATEGORY_CLASS[post.category]}">${CATEGORY_ICON[post.category]}</span>
+                <span class="badge class-badge">${escapeHtml(classLabel(post.classTarget))}</span>
+              </div>
+              <strong>${escapeHtml(post.title)}</strong>
+              <div class="inline-meta">
+                ${escapeHtml(dateLabel(post.date, { month: "numeric", day: "numeric", weekday: "short" }))} / ${escapeHtml(truncate(post.body, 70))}
+              </div>
+            </article>
+          `).join("")}
+        </div>
+      `;
+    }
+    function renderReports() {
+      const reports = getReportEntries();
+      refs.reportPanelCard.hidden = !state.isAdmin;
+      if (!state.isAdmin) {
+        refs.reportPanel.innerHTML = "";
+        return;
+      }
+      if (!reports.length) {
+        refs.reportPanel.innerHTML = `<div class="empty-state">現在、通報されたコメントはありません。</div>`;
+        return;
+      }
+      refs.reportPanel.innerHTML = `
+        <div class="report-list">
+          ${reports.map((entry) => `
+            <article class="report-item">
+              <div class="post-badges">
+                <span class="badge flag-badge">通報 ${entry.reportCount}件</span>
+              </div>
+              <strong>${escapeHtml(entry.author)} / ${escapeHtml(entry.postTitle)}</strong>
+              <div class="inline-meta">${escapeHtml(truncate(entry.text, 84))}</div>
+              <div class="helper-text">
+                ${(entry.reports || []).map((report) => "・" + escapeHtml(report.reason || "理由未入力")).join("<br>")}
+              </div>
+              <div class="comment-actions">
+                <button class="tonal-button" type="button" data-clear-report="${entry.postId}|${entry.commentId}">通報解除</button>
+                <button class="danger-button" type="button" data-delete-comment="${entry.postId}|${entry.commentId}">コメント削除</button>
+              </div>
+            </article>
+          `).join("")}
+        </div>
+      `;
+    }
+    function renderPostCard(post) {
+      const comments = post.comments || [];
+      const canAdminEdit = state.isAdmin;
+      return `
+        <article class="post-card" id="post-${post.id}">
+          <div class="post-meta">
+            <div class="post-badges">
+              <span class="badge ${CATEGORY_CLASS[post.category]}">${CATEGORY_ICON[post.category]}</span>
+              <span class="badge class-badge">${escapeHtml(classLabel(post.classTarget))}</span>
+            </div>
+            <div class="post-date">${escapeHtml(dateLabel(post.date, { year: "numeric", month: "numeric", day: "numeric", weekday: "short" }))}</div>
+          </div>
+          <h3 class="post-title">${escapeHtml(post.title)}</h3>
+          <div class="post-body">${formatMultiline(post.body)}</div>
+          ${
+            canAdminEdit
+              ? `
+                <div class="post-actions">
+                  <button class="tonal-button" type="button" data-edit-post="${post.id}">編集</button>
+                  <button class="danger-button" type="button" data-delete-post="${post.id}">削除</button>
+                </div>
+              `
+              : ""
+          }
+          <section class="comments-section">
+            <div class="section-label">コメント ${comments.length}件</div>
+            <div class="comment-list">
+              ${comments.length ? comments.map((comment) => renderComment(post, comment)).join("") : `<div class="helper-text">まだコメントはありません。</div>`}
+            </div>
+            ${renderCommentForm(post.id)}
+          </section>
+        </article>
+      `;
+    }
+    function renderComment(post, comment) {
+      const canEdit = state.isAdmin || comment.author === state.userName;
+      const canDelete = state.isAdmin;
+      return `
+        <article class="comment-item">
+          <div class="comment-head">
+            <div>
+              <div class="comment-author">${escapeHtml(comment.author)}</div>
+              <div class="comment-time">${escapeHtml(comment.updatedAt ? "更新: " + relativeDate(comment.updatedAt) : relativeDate(comment.createdAt))}</div>
+            </div>
+            <div class="post-badges">
+              ${(comment.flagged || (comment.reportCount || 0) > 0) ? `<span class="badge flag-badge">通報 ${comment.reportCount || 0}件</span>` : ""}
+            </div>
+          </div>
+          <div class="comment-text">${formatMultiline(comment.text)}</div>
+          ${
+            comment.image
+              ? `
+                <div class="comment-image" data-open-image="${comment.id}">
+                  <img src="${comment.image}" alt="コメント画像">
+                </div>
+              `
+              : ""
+          }
+          <div class="comment-actions">
+            ${canEdit ? `<button class="ghost-button" type="button" data-edit-comment="${post.id}|${comment.id}">編集</button>` : ""}
+            ${canDelete ? `<button class="danger-button" type="button" data-delete-comment="${post.id}|${comment.id}">削除</button>` : ""}
+            <button class="tonal-button" type="button" data-report-comment="${post.id}|${comment.id}">通報</button>
+          </div>
+        </article>
+      `;
+    }
+    function renderCommentForm(postId) {
+      return `
+        <form class="comment-form" data-comment-form="${postId}">
+          <div class="field">
+            <label for="comment-text-${postId}">${escapeHtml(state.userName || "利用者")}としてコメント</label>
+            <textarea id="comment-text-${postId}" name="commentText" placeholder="コメントを入力" required></textarea>
+          </div>
+          <div class="upload-row">
+            <label class="file-label" for="comment-file-${postId}">画像を追加</label>
+            <input class="hidden-file" id="comment-file-${postId}" type="file" accept="image/*" data-comment-file="${postId}">
+            <span class="helper-text" id="file-meta-${postId}">任意 / 小さめの画像推奨</span>
+          </div>
+          <img id="file-preview-${postId}" class="draft-image-preview" alt="画像プレビュー">
+          <div class="modal-actions" style="margin-top: 0;">
+            <button class="button" type="submit">コメントを送信</button>
+          </div>
+        </form>
+      `;
+    }
+    function relativeDate(isoString) {
+      const created = new Date(isoString);
+      return new Intl.DateTimeFormat("ja-JP", {
+        month: "numeric",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(created);
+    }
+    function classLabel(classTarget) {
+      if (classTarget === "両方") return "1組・2組";
+      return classTarget;
+    }
+    function navigateRange(direction) {
+      if (state.view === "day") {
+        if (direction === "today") {
+          state.currentDate = todayKey();
+        } else {
+          state.currentDate = addDays(state.currentDate, direction === "next" ? 1 : -1);
+        }
+        state.selectedDate = state.currentDate;
+        render();
+        return;
+      }
+      if (state.view === "week") {
+        if (direction === "today") {
+          state.currentDate = todayKey();
+        } else {
+          state.currentDate = addDays(state.currentDate, direction === "next" ? 7 : -7);
+        }
+        state.selectedDate = state.currentDate;
+        render();
+        return;
+      }
+      if (direction === "today") {
+        state.currentDate = todayKey();
+        state.selectedDate = todayKey();
+      } else {
+        state.currentDate = addMonths(state.currentDate, direction === "next" ? 1 : -1);
+      }
+      render();
+    }
+    function setView(view) {
+      state.view = view;
+      if (view === "day") {
+        state.currentDate = state.selectedDate;
+      }
+      if (view === "week") {
+        state.currentDate = state.selectedDate;
+      }
+      render();
+    }
+    function focusPost(postId) {
+      const postElement = document.getElementById("post-" + postId);
+      if (!postElement) {
+        state.currentDate = state.selectedDate;
+        if (state.view === "month") {
+          state.view = "day";
+        }
+        render();
+        requestAnimationFrame(() => focusPost(postId));
+        return;
+      }
+      postElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      postElement.style.boxShadow = "0 0 0 3px rgba(0, 113, 227, 0.14), var(--shadow-soft)";
+      setTimeout(() => {
+        postElement.style.boxShadow = "";
+      }, 1600);
+    }
+    function findPost(postId) {
+      return state.posts.find((post) => post.id === postId);
+    }
+    function findComment(post, commentId) {
+      return (post.comments || []).find((comment) => comment.id === commentId);
+    }
+    function upsertPost(postData) {
+      const existingIndex = state.posts.findIndex((post) => post.id === postData.id);
+      if (existingIndex >= 0) {
+        state.posts[existingIndex] = postData;
+      } else {
+        state.posts.push(postData);
+      }
+      savePosts();
+      render();
+    }
+    function deletePost(postId) {
+      state.posts = state.posts.filter((post) => post.id !== postId);
+      savePosts();
+      render();
+    }
+    function clearReport(postId, commentId) {
+      const post = findPost(postId);
+      if (!post) return;
+      const comment = findComment(post, commentId);
+      if (!comment) return;
+      comment.flagged = false;
+      comment.reportCount = 0;
+      comment.reports = [];
+      savePosts();
+      render();
+      showToast("通報フラグを解除しました。");
+    }
+    function removeComment(postId, commentId) {
+      const post = findPost(postId);
+      if (!post) return;
+      post.comments = (post.comments || []).filter((comment) => comment.id !== commentId);
+      savePosts();
+      render();
+      showToast("コメントを削除しました。");
+    }
+    function openPostModal(postId = null) {
+      const formTitle = document.getElementById("postModalTitle");
+      const idInput = document.getElementById("postIdInput");
+      const titleInput = document.getElementById("postTitle");
+      const bodyInput = document.getElementById("postBody");
+      const dateInput = document.getElementById("postDate");
+      const categoryInput = document.getElementById("postCategory");
+      const classTargetInput = document.getElementById("postClassTarget");
+      if (postId) {
+        const post = findPost(postId);
+        if (!post) return;
+        formTitle.textContent = "投稿を編集";
+        idInput.value = post.id;
+        titleInput.value = post.title;
+        bodyInput.value = post.body;
+        dateInput.value = post.date;
+        categoryInput.value = post.category;
+        classTargetInput.value = post.classTarget;
+      } else {
+        formTitle.textContent = "投稿を追加";
+        idInput.value = "";
+        titleInput.value = "";
+        bodyInput.value = "";
+        dateInput.value = state.selectedDate || todayKey();
+        categoryInput.value = "予定";
+        classTargetInput.value = "両方";
+      }
+      openModal("postModal");
+      setTimeout(() => titleInput.focus(), 50);
+    }
+    function openCommentEdit(postId, commentId) {
+      const post = findPost(postId);
+      if (!post) return;
+      const comment = findComment(post, commentId);
+      if (!comment) return;
+      document.getElementById("editCommentPostId").value = postId;
+      document.getElementById("editCommentId").value = commentId;
+      document.getElementById("editCommentText").value = comment.text;
+      document.getElementById("removeCommentImage").checked = false;
+      const imageField = document.getElementById("commentEditImageField");
+      const preview = document.getElementById("editCommentImagePreview");
+      if (comment.image) {
+        imageField.hidden = false;
+        preview.src = comment.image;
+      } else {
+        imageField.hidden = true;
+        preview.removeAttribute("src");
+      }
+      openModal("commentEditModal");
+    }
+    function openReportModal(postId, commentId) {
+      const post = findPost(postId);
+      if (!post) return;
+      const comment = findComment(post, commentId);
+      if (!comment) return;
+      document.getElementById("reportPostId").value = postId;
+      document.getElementById("reportCommentId").value = commentId;
+      document.getElementById("reportReason").value = "";
+      refs.reportTargetPreview.innerHTML = `
+        <strong>${escapeHtml(comment.author)}</strong><br>
+        ${escapeHtml(truncate(comment.text, 90))}
+      `;
+      openModal("reportModal");
+    }
+    function openImage(commentId) {
+      let image = "";
+      state.posts.some((post) => {
+        return (post.comments || []).some((comment) => {
+          if (comment.id === commentId) {
+            image = comment.image || "";
+            return true;
+          }
+          return false;
+        });
+      });
+      if (!image) return;
+      refs.lightboxImage.src = image;
+      openModal("imageLightbox");
+    }
+    async function fileToImageData(file) {
+      if (!file) return "";
+      if (!file.type.startsWith("image/")) {
+        throw new Error("画像ファイルを選択してください。");
+      }
+      const dataUrl = await readFileAsDataUrl(file);
+      const image = await loadImage(dataUrl);
+      const maxSize = 1400;
+      const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+      const width = Math.max(1, Math.round(image.width * scale));
+      const height = Math.max(1, Math.round(image.height * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d");
+      context.drawImage(image, 0, 0, width, height);
+      let converted = canvas.toDataURL(file.type === "image/png" ? "image/png" : "image/jpeg", 0.84);
+      if (converted.length > 1_800_000) {
+        converted = canvas.toDataURL("image/jpeg", 0.74);
+      }
+      if (converted.length > 2_400_000) {
+        throw new Error("画像が大きすぎます。小さめの画像を選んでください。");
+      }
+      return converted;
+    }
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(new Error("画像の読み込みに失敗しました。"));
+        reader.readAsDataURL(file);
+      });
+    }
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error("画像の読み込みに失敗しました。"));
+        image.src = src;
+      });
+    }
+    async function handleCommentSubmit(event) {
+      const form = event.target;
+      const postId = form.dataset.commentForm;
+      if (!postId) return;
+      event.preventDefault();
+      if (!state.userName) {
+        openNameModal();
+        return;
+      }
+      const post = findPost(postId);
+      if (!post) return;
+      const textArea = form.querySelector('textarea[name="commentText"]');
+      const fileInput = form.querySelector('input[type="file"]');
+      const text = textArea.value.trim();
+      if (!text) {
+        showToast("コメントを入力してください。");
+        return;
+      }
+      form.querySelector('button[type="submit"]').disabled = true;
+      try {
+        const imageData = fileInput.files && fileInput.files[0]
+          ? await fileToImageData(fileInput.files[0])
+          : "";
+        const comment = {
+          id: uniqueId("comment"),
+          author: state.userName,
+          text,
+          image: imageData,
+          createdAt: new Date().toISOString(),
+          updatedAt: "",
+          flagged: false,
+          reportCount: 0,
+          reports: []
+        };
+        post.comments = post.comments || [];
+        post.comments.push(comment);
+        savePosts();
+        render();
+        showToast("コメントを追加しました。");
+      } catch (error) {
+        console.error(error);
+        showToast(error.message || "コメントの送信に失敗しました。");
+      } finally {
+        form.querySelector('button[type="submit"]').disabled = false;
+      }
+    }
+    function handleFilePreviewChange(event) {
+      const input = event.target;
+      const postId = input.dataset.commentFile;
+      if (!postId) return;
+      const meta = document.getElementById("file-meta-" + postId);
+      const preview = document.getElementById("file-preview-" + postId);
+      const file = input.files && input.files[0];
+      if (!file) {
+        meta.textContent = "任意 / 小さめの画像推奨";
+        preview.classList.remove("active");
+        preview.removeAttribute("src");
+        return;
+      }
+      meta.textContent = file.name;
+      const reader = new FileReader();
+      reader.onload = () => {
+        preview.src = String(reader.result || "");
+        preview.classList.add("active");
+      };
+      reader.readAsDataURL(file);
+    }
+    function handlePostSubmit(event) {
+      event.preventDefault();
+      if (!state.isAdmin) return;
+      const id = document.getElementById("postIdInput").value;
+      const title = document.getElementById("postTitle").value.trim();
+      const body = document.getElementById("postBody").value.trim();
+      const date = document.getElementById("postDate").value;
+      const category = document.getElementById("postCategory").value;
+      const classTarget = document.getElementById("postClassTarget").value;
+      if (!title || !body || !date) {
+        showToast("未入力の項目があります。");
+        return;
+      }
+      const previous = id ? findPost(id) : null;
+      const postData = {
+        id: id || uniqueId("post"),
+        title,
+        body,
+        date,
+        category,
+        classTarget,
+        comments: previous ? previous.comments || [] : [],
+        createdAt: previous ? previous.createdAt : new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      upsertPost(postData);
+      state.selectedDate = date;
+      state.currentDate = date;
+      closeModal("postModal");
+      showToast(id ? "投稿を更新しました。" : "投稿を追加しました。");
+    }
+    function handleCommentEditSubmit(event) {
+      event.preventDefault();
+      const postId = document.getElementById("editCommentPostId").value;
+      const commentId = document.getElementById("editCommentId").value;
+      const text = document.getElementById("editCommentText").value.trim();
+      const removeImage = document.getElementById("removeCommentImage").checked;
+      if (!text) {
+        showToast("コメントを入力してください。");
+        return;
+      }
+      const post = findPost(postId);
+      if (!post) return;
+      const comment = findComment(post, commentId);
+      if (!comment) return;
+      comment.text = text;
+      if (removeImage) {
+        comment.image = "";
+      }
+      comment.updatedAt = new Date().toISOString();
+      savePosts();
+      render();
+      closeModal("commentEditModal");
+      showToast("コメントを更新しました。");
+    }
+    function handleReportSubmit(event) {
+      event.preventDefault();
+      if (!state.userName) {
+        openNameModal();
+        return;
+      }
+      const postId = document.getElementById("reportPostId").value;
+      const commentId = document.getElementById("reportCommentId").value;
+      const reason = document.getElementById("reportReason").value.trim();
+      const post = findPost(postId);
+      if (!post) return;
+      const comment = findComment(post, commentId);
+      if (!comment) return;
+      comment.reports = comment.reports || [];
+      const alreadyReported = comment.reports.some((report) => report.reporter === state.userName);
+      if (alreadyReported) {
+        showToast("同じ名前からはすでに通報済みです。");
+        return;
+      }
+      comment.reports.push({
+        reporter: state.userName,
+        reason: reason || "理由未入力",
+        createdAt: new Date().toISOString()
+      });
+      comment.flagged = true;
+      comment.reportCount = comment.reports.length;
+      savePosts();
+      render();
+      closeModal("reportModal");
+      showToast("通報を受け付けました。");
+    }
+    function handleAdminSubmit(event) {
+      event.preventDefault();
+      const email = document.getElementById("adminEmail").value.trim();
+      const password = document.getElementById("adminPassword").value;
+      if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+        state.isAdmin = true;
+        saveAdmin();
+        render();
+        closeModal("adminModal");
+        showToast("管理者モードを有効にしました。");
+        event.target.reset();
+      } else {
+        showToast("メールアドレスまたはパスワードが違います。");
+      }
+    }
+    function handleNameSubmit(event) {
+      event.preventDefault();
+      const input = document.getElementById("userNameInput");
+      const name = input.value.trim();
+      if (!name) {
+        showToast("名前を入力してください。");
+        return;
+      }
+      state.userName = name;
+      saveUserName();
+      render();
+      closeModal("nameModal");
+      showToast("名前を保存しました。");
+    }
+    function handleViewClick(event) {
+      const target = event.target.closest("button");
+      if (!target) return;
+      if (target.dataset.view) {
+        setView(target.dataset.view);
+      }
+      if (target.dataset.classFilter) {
+        state.classFilter = target.dataset.classFilter;
+        render();
+      }
+      if (target.dataset.categoryFilter) {
+        state.categoryFilter = target.dataset.categoryFilter;
+        render();
+      }
+      if (target.dataset.nav) {
+        navigateRange(target.dataset.nav);
+      }
+    }
+    function handleDynamicClick(event) {
+      const button = event.target.closest("button, .comment-image");
+      if (!button) return;
+      if (button.dataset.selectDate) {
+        state.selectedDate = button.dataset.selectDate;
+        if (state.view === "day") {
+          state.currentDate = button.dataset.selectDate;
+        }
+        render();
+        return;
+      }
+      if (button.dataset.focusPost) {
+        focusPost(button.dataset.focusPost);
+        return;
+      }
+      if (button.dataset.editPost) {
+        openPostModal(button.dataset.editPost);
+        return;
+      }
+      if (button.dataset.deletePost) {
+        if (confirm("この投稿を削除しますか？コメントもすべて削除されます。")) {
+          deletePost(button.dataset.deletePost);
+          showToast("投稿を削除しました。");
+        }
+        return;
+      }
+      if (button.dataset.editComment) {
+        const [postId, commentId] = button.dataset.editComment.split("|");
+        openCommentEdit(postId, commentId);
+        return;
+      }
+      if (button.dataset.deleteComment) {
+        const [postId, commentId] = button.dataset.deleteComment.split("|");
+        if (confirm("このコメントを削除しますか？")) {
+          removeComment(postId, commentId);
+        }
+        return;
+      }
+      if (button.dataset.reportComment) {
+        const [postId, commentId] = button.dataset.reportComment.split("|");
+        openReportModal(postId, commentId);
+        return;
+      }
+      if (button.dataset.clearReport) {
+        const [postId, commentId] = button.dataset.clearReport.split("|");
+        clearReport(postId, commentId);
+        return;
+      }
+      if (button.dataset.openImage) {
+        openImage(button.dataset.openImage);
+      }
+    }
+    function resetAdminMode() {
+      state.isAdmin = false;
+      saveAdmin();
+      render();
+      showToast("管理者モードを終了しました。");
+    }
+    function bindEvents() {
+      document.addEventListener("click", (event) => {
+        const target = event.target;
+        const modalCloseTarget = target.closest("[data-close-modal]");
+        if (modalCloseTarget) {
+          closeModal(modalCloseTarget.dataset.closeModal);
+          return;
+        }
+        if (target.classList.contains("modal")) {
+          closeModal(target.id);
+          return;
+        }
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          const openModalElement = document.querySelector(".modal:not(.hidden)");
+          if (openModalElement) {
+            closeModal(openModalElement.id);
+          }
+        }
+      });
+      document.querySelector(".toolbar").addEventListener("click", handleViewClick);
+      refs.viewContainer.addEventListener("click", handleDynamicClick);
+      refs.selectedDayPanel.addEventListener("click", handleDynamicClick);
+      refs.upcomingPanel.addEventListener("click", handleDynamicClick);
+      refs.reportPanel.addEventListener("click", handleDynamicClick);
+      refs.viewContainer.addEventListener("submit", handleCommentSubmit);
+      refs.viewContainer.addEventListener("change", handleFilePreviewChange);
+      document.getElementById("nameForm").addEventListener("submit", handleNameSubmit);
+      document.getElementById("adminForm").addEventListener("submit", handleAdminSubmit);
+      document.getElementById("postForm").addEventListener("submit", handlePostSubmit);
+      document.getElementById("commentEditForm").addEventListener("submit", handleCommentEditSubmit);
+      document.getElementById("reportForm").addEventListener("submit", handleReportSubmit);
+      document.getElementById("changeNameButton").addEventListener("click", () => openNameModal(true));
+      refs.adminLoginButton.addEventListener("click", () => openModal("adminModal"));
+      refs.adminLogoutButton.addEventListener("click", resetAdminMode);
+      refs.createPostButton.addEventListener("click", () => openPostModal());
+    }
+    function init() {
+      loadState();
+      bindEvents();
+      render();
+      if (!state.userName) {
+        openNameModal();
+      }
+    }
+    init();
+  </script>
 </body>
 </html>
