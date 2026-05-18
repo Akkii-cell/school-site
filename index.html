@@ -1,1 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>School Site</title>
 
+<style>
+body {
+  font-family: -apple-system, sans-serif;
+  background: #f5f5f7;
+  margin: 0;
+}
+
+header {
+  background: white;
+  padding: 15px;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.container {
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 12px;
+}
+
+input, textarea {
+  width: 100%;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 8px;
+  background: black;
+  color: white;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  📅 学校連絡サイト
+</header>
+
+<div class="container">
+
+<div class="card">
+  <h3>名前を入力</h3>
+  <input id="nameInput">
+  <button onclick="saveName()">保存</button>
+</div>
+
+<div class="card">
+  <h3>コメント</h3>
+  <textarea id="commentInput"></textarea>
+  <button onclick="addComment()">送信</button>
+</div>
+
+<div id="comments"></div>
+
+</div>
+
+<script>
+let name = localStorage.getItem("name") || "";
+
+function saveName(){
+  name = document.getElementById("nameInput").value;
+  localStorage.setItem("name", name);
+}
+
+function addComment(){
+  let text = document.getElementById("commentInput").value;
+  let data = JSON.parse(localStorage.getItem("comments") || "[]");
+
+  data.push({name: name, text: text});
+  localStorage.setItem("comments", JSON.stringify(data));
+
+  render();
+}
+
+function render(){
+  let data = JSON.parse(localStorage.getItem("comments") || "[]");
+  let html = "";
+
+  data.forEach(c => {
+    html += `<div class="card"><b>${c.name}</b><br>${c.text}</div>`;
+  });
+
+  document.getElementById("comments").innerHTML = html;
+}
+
+render();
+</script>
+
+</body>
+</html>
