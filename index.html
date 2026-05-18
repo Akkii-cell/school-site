@@ -1446,17 +1446,44 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      deleteDoc,
+      updateDoc,
+      doc,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
     // Static sites cannot fully hide admin credentials.
     const ADMIN_CREDENTIALS = {
       email: "daishi_a@icloud.com",
       password: "AKki0311144618"
     };
 
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTPxjik7ErpYO2VtnkdjomaT15rBzbFlE",
+      authDomain: "school-site-475fc.firebaseapp.com",
+      projectId: "school-site-475fc",
+      storageBucket: "school-site-475fc.firebasestorage.app",
+      messagingSenderId: "69139986081",
+      appId: "1:69139986081:web:11c1b1b8277e503e9ee2e0",
+      measurementId: "G-SCENXEX3ZH"
+    };
+
     const STORAGE_KEYS = {
       userName: "shirokane7_user_name",
       admin: "shirokane7_admin_mode",
       posts: "shirokane7_posts"
+    };
+
+    const FIRESTORE_COLLECTIONS = {
+      posts: "posts",
+      comments: "comments"
     };
 
     const CATEGORY_CLASS = {
@@ -1475,6 +1502,10 @@
       userName: "",
       isAdmin: false,
       posts: [],
+      legacyPosts: [],
+      remotePosts: [],
+      remoteComments: [],
+      isLoadingRemote: true,
       view: "day",
       classFilter: "all",
       categoryFilter: "all",
@@ -1511,6 +1542,15 @@
     };
 
     let toastTimer = null;
+    let unsubscribePosts = null;
+    let unsubscribeComments = null;
+    let hasLoadedPostSnapshot = false;
+    let hasLoadedCommentSnapshot = false;
+
+    const firebaseApp = initializeApp(firebaseConfig);
+    const db = getFirestore(firebaseApp);
+    const postsCollectionRef = collection(db, FIRESTORE_COLLECTIONS.posts);
+    const commentsCollectionRef = collection(db, FIRESTORE_COLLECTIONS.comments);
 
     function todayKey() {
       return formatDateKey(new Date());
@@ -1598,18 +1638,28 @@
 
     function loadState() {
       const savedName = localStorage.getItem(STORAGE_KEYS.userName);
-      const savedAdmin = localStorage.getItem(STORAGE_KEYS.admin);
       const savedPosts = localStorage.getItem(STORAGE_KEYS.posts);
 
       state.userName = savedName ? savedName.trim() : "";
-      state.isAdmin = savedAdmin === "true";
+      state.isAdmin = readAdminState();
+      state.posts = [];
+      state.remotePosts = [];
+      state.remoteComments = [];
+      state.legacyPosts = [];
+      state.isLoadingRemote = true;
 
       try {
         const parsedPosts = savedPosts ? JSON.parse(savedPosts) : [];
-        state.posts = Array.isArray(parsedPosts) ? parsedPosts : [];
+        state.legacyPosts = Array.isArray(parsedPosts) ? parsedPosts : [];
       } catch (error) {
         console.error("投稿データの読み込みに失敗しました", error);
-        state.posts = [];
+        state.legacyPosts = [];
+      }
+
+      // 管理者状態は現在のセッションだけで扱う。
+      if (!state.userName) {
+        state.isAdmin = false;
+        saveAdmin();
       }
     }
 
@@ -1617,12 +1667,180 @@
       localStorage.setItem(STORAGE_KEYS.userName, state.userName);
     }
 
-    function saveAdmin() {
-      localStorage.setItem(STORAGE_KEYS.admin, String(state.isAdmin));
+    function readAdminState() {
+      const sessionValue = sessionStorage.getItem(STORAGE_KEYS.admin);
+      if (sessionValue !== null) {
+        return sessionValue === "true";
+      }
+
+      // 旧バージョンで localStorage に残っていた管理者状態は引き継がない。
+      localStorage.removeItem(STORAGE_KEYS.admin);
+      return false;
     }
 
-    function savePosts() {
-      localStorage.setItem(STORAGE_KEYS.posts, JSON.stringify(state.posts));
+    function saveAdmin() {
+      if (state.isAdmin) {
+        sessionStorage.setItem(STORAGE_KEYS.admin, "true");
+      } else {
+        sessionStorage.removeItem(STORAGE_KEYS.admin);
+      }
+    }
+
+    function normalizePostDoc(snapshot) {
+      const data = snapshot.data() || {};
+      return {
+        id: snapshot.id,
+        title: data.title || "",
+        body: data.body || "",
+        date: data.date || todayKey(),
+        category: data.category || "予定",
+        classTarget: data.classTarget || "両方",
+        createdAt: data.createdAt || new Date(0).toISOString(),
+        updatedAt: data.updatedAt || data.createdAt || new Date(0).toISOString()
+      };
+    }
+
+    function normalizeCommentDoc(snapshot) {
+      const data = snapshot.data() || {};
+      return {
+        id: snapshot.id,
+        postId: data.postId || "",
+        author: data.author || "匿名",
+        text: data.text || "",
+        image: data.image || "",
+        createdAt: data.createdAt || new Date(0).toISOString(),
+        updatedAt: data.updatedAt || "",
+        flagged: Boolean(data.flagged),
+        reportCount: Number(data.reportCount || 0),
+        reports: Array.isArray(data.reports) ? data.reports : []
+      };
+    }
+
+    function sortPostsByDate(posts) {
+      return clonePosts(posts).sort((left, right) => {
+        if (left.date !== right.date) return left.date.localeCompare(right.date);
+        return left.createdAt.localeCompare(right.createdAt);
+      });
+    }
+
+    function sortCommentsByDate(comments) {
+      return comments.slice().sort((left, right) => {
+        return left.createdAt.localeCompare(right.createdAt);
+      });
+    }
+
+    function rebuildPostsFromRemote() {
+      const commentsByPost = new Map();
+
+      state.remoteComments.forEach((comment) => {
+        if (!comment.postId) return;
+        const bucket = commentsByPost.get(comment.postId) || [];
+        bucket.push(comment);
+        commentsByPost.set(comment.postId, bucket);
+      });
+
+      state.posts = sortPostsByDate(
+        state.remotePosts.map((post) => ({
+          ...post,
+          comments: sortCommentsByDate(commentsByPost.get(post.id) || [])
+        }))
+      );
+
+      state.isLoadingRemote = !(hasLoadedPostSnapshot && hasLoadedCommentSnapshot);
+      render();
+    }
+
+    async function migrateLegacyPostsToFirestore() {
+      if (!state.legacyPosts.length) return;
+
+      // 旧 localStorage データがある場合だけ、一度だけ Firestore へ移行する。
+      for (const legacyPost of state.legacyPosts) {
+        const postPayload = {
+          title: legacyPost.title || "",
+          body: legacyPost.body || "",
+          date: legacyPost.date || todayKey(),
+          category: legacyPost.category || "予定",
+          classTarget: legacyPost.classTarget || "両方",
+          createdAt: legacyPost.createdAt || new Date().toISOString(),
+          updatedAt: legacyPost.updatedAt || legacyPost.createdAt || new Date().toISOString()
+        };
+
+        const postRef = await addDoc(postsCollectionRef, postPayload);
+        const legacyComments = Array.isArray(legacyPost.comments) ? legacyPost.comments : [];
+
+        for (const legacyComment of legacyComments) {
+          await addDoc(commentsCollectionRef, {
+            postId: postRef.id,
+            author: legacyComment.author || "匿名",
+            text: legacyComment.text || "",
+            image: legacyComment.image || "",
+            createdAt: legacyComment.createdAt || new Date().toISOString(),
+            updatedAt: legacyComment.updatedAt || "",
+            flagged: Boolean(legacyComment.flagged),
+            reportCount: Number(legacyComment.reportCount || (legacyComment.reports ? legacyComment.reports.length : 0) || 0),
+            reports: Array.isArray(legacyComment.reports) ? legacyComment.reports : []
+          });
+        }
+      }
+
+      localStorage.removeItem(STORAGE_KEYS.posts);
+      state.legacyPosts = [];
+      showToast("端末内の投稿データを Firebase に移行しました。");
+    }
+
+    function subscribeToFirestoreData() {
+      if (unsubscribePosts) unsubscribePosts();
+      if (unsubscribeComments) unsubscribeComments();
+
+      hasLoadedPostSnapshot = false;
+      hasLoadedCommentSnapshot = false;
+      state.isLoadingRemote = true;
+
+      unsubscribePosts = onSnapshot(postsCollectionRef, (snapshot) => {
+        hasLoadedPostSnapshot = true;
+        state.remotePosts = snapshot.docs.map(normalizePostDoc);
+        rebuildPostsFromRemote();
+      }, (error) => {
+        console.error("投稿データの同期に失敗しました", error);
+        state.isLoadingRemote = false;
+        render();
+        showToast("投稿データの同期に失敗しました。");
+      });
+
+      unsubscribeComments = onSnapshot(commentsCollectionRef, (snapshot) => {
+        hasLoadedCommentSnapshot = true;
+        state.remoteComments = snapshot.docs.map(normalizeCommentDoc);
+        rebuildPostsFromRemote();
+      }, (error) => {
+        console.error("コメントデータの同期に失敗しました", error);
+        state.isLoadingRemote = false;
+        render();
+        showToast("コメントデータの同期に失敗しました。");
+      });
+    }
+
+    async function initializeSharedData() {
+      try {
+        const remotePostsSnapshot = await getDocs(postsCollectionRef);
+        const remoteCommentsSnapshot = await getDocs(commentsCollectionRef);
+
+        if (remotePostsSnapshot.empty && remoteCommentsSnapshot.empty && state.legacyPosts.length) {
+          await migrateLegacyPostsToFirestore();
+        }
+
+        subscribeToFirestoreData();
+      } catch (error) {
+        console.error("Firestore の初期化に失敗しました", error);
+        state.isLoadingRemote = false;
+        state.posts = sortPostsByDate(
+          state.legacyPosts.map((post) => ({
+            ...post,
+            comments: sortCommentsByDate(post.comments || [])
+          }))
+        );
+        render();
+        showToast("Firebase に接続できなかったため、この端末の保存データを表示しています。");
+      }
     }
 
     function showToast(message) {
@@ -1721,8 +1939,16 @@
         : "コメント投稿者として利用中";
       refs.avatarBadge.textContent = state.userName ? state.userName.trim().charAt(0) : "七";
       refs.adminLoginButton.hidden = state.isAdmin;
-      refs.adminLogoutButton.hidden = !state.isAdmin;
-      refs.createPostButton.hidden = !state.isAdmin;
+      refs.adminLogoutButton.hidden = !(state.isAdmin && state.userName);
+      refs.createPostButton.hidden = !(state.isAdmin && state.userName);
+    }
+
+    function renderLoadingState(message = "共有データを読み込み中です...") {
+      return `
+        <div class="empty-state">
+          ${message}
+        </div>
+      `;
     }
 
     function renderToolbarState() {
@@ -1799,6 +2025,11 @@
     }
 
     function renderDayView() {
+      if (state.isLoadingRemote) {
+        refs.viewContainer.innerHTML = renderLoadingState();
+        return;
+      }
+
       const posts = getPostsForDate(state.currentDate);
 
       if (!posts.length) {
@@ -1818,6 +2049,11 @@
     }
 
     function renderWeekView() {
+      if (state.isLoadingRemote) {
+        refs.viewContainer.innerHTML = renderLoadingState();
+        return;
+      }
+
       const weekDates = getWeekDates(state.currentDate);
       const daysHtml = weekDates.map((dateKey) => {
         const posts = getPostsForDate(dateKey);
@@ -1850,6 +2086,11 @@
     }
 
     function renderMonthView() {
+      if (state.isLoadingRemote) {
+        refs.viewContainer.innerHTML = renderLoadingState();
+        return;
+      }
+
       const monthStart = startOfMonth(state.currentDate);
       const monthEnd = endOfMonth(state.currentDate);
       const startWeekday = monthStart.getDay();
@@ -1898,6 +2139,12 @@
     }
 
     function renderSelectedDay() {
+      if (state.isLoadingRemote) {
+        refs.selectedDayLabel.textContent = "読み込み中...";
+        refs.selectedDayPanel.innerHTML = renderLoadingState();
+        return;
+      }
+
       const posts = getPostsForDate(state.selectedDate);
       refs.selectedDayLabel.textContent = dateLabel(state.selectedDate, {
         year: "numeric",
@@ -1933,6 +2180,11 @@
     }
 
     function renderUpcoming() {
+      if (state.isLoadingRemote) {
+        refs.upcomingPanel.innerHTML = renderLoadingState();
+        return;
+      }
+
       const upcomingPosts = getUpcomingPosts();
 
       if (!upcomingPosts.length) {
@@ -1966,6 +2218,11 @@
 
       if (!state.isAdmin) {
         refs.reportPanel.innerHTML = "";
+        return;
+      }
+
+      if (state.isLoadingRemote) {
+        refs.reportPanel.innerHTML = renderLoadingState();
         return;
       }
 
@@ -2175,43 +2432,81 @@
       return (post.comments || []).find((comment) => comment.id === commentId);
     }
 
-    function upsertPost(postData) {
-      const existingIndex = state.posts.findIndex((post) => post.id === postData.id);
-      if (existingIndex >= 0) {
-        state.posts[existingIndex] = postData;
-      } else {
-        state.posts.push(postData);
+    function createPostPayload(postData) {
+      return {
+        title: postData.title,
+        body: postData.body,
+        date: postData.date,
+        category: postData.category,
+        classTarget: postData.classTarget,
+        createdAt: postData.createdAt,
+        updatedAt: postData.updatedAt
+      };
+    }
+
+    function createCommentPayload(commentData) {
+      return {
+        postId: commentData.postId,
+        author: commentData.author,
+        text: commentData.text,
+        image: commentData.image || "",
+        createdAt: commentData.createdAt,
+        updatedAt: commentData.updatedAt || "",
+        flagged: Boolean(commentData.flagged),
+        reportCount: Number(commentData.reportCount || 0),
+        reports: Array.isArray(commentData.reports) ? commentData.reports : []
+      };
+    }
+
+    async function savePostToFirestore(postData) {
+      if (postData.id) {
+        await updateDoc(doc(db, FIRESTORE_COLLECTIONS.posts, postData.id), createPostPayload(postData));
+        return postData.id;
       }
-      savePosts();
-      render();
+
+      const createdRef = await addDoc(postsCollectionRef, createPostPayload(postData));
+      return createdRef.id;
     }
 
-    function deletePost(postId) {
-      state.posts = state.posts.filter((post) => post.id !== postId);
-      savePosts();
-      render();
+    async function deletePostFromFirestore(postId) {
+      const post = findPost(postId);
+      if (!post) return;
+
+      let relatedComments = post.comments || [];
+      if (!relatedComments.length) {
+        const commentsSnapshot = await getDocs(commentsCollectionRef);
+        relatedComments = commentsSnapshot.docs
+          .map(normalizeCommentDoc)
+          .filter((comment) => comment.postId === postId);
+      }
+
+      const deletions = [deleteDoc(doc(db, FIRESTORE_COLLECTIONS.posts, postId))];
+      relatedComments.forEach((comment) => {
+        deletions.push(deleteDoc(doc(db, FIRESTORE_COLLECTIONS.comments, comment.id)));
+      });
+
+      await Promise.all(deletions);
     }
 
-    function clearReport(postId, commentId) {
+    async function clearReport(postId, commentId) {
       const post = findPost(postId);
       if (!post) return;
       const comment = findComment(post, commentId);
       if (!comment) return;
 
-      comment.flagged = false;
-      comment.reportCount = 0;
-      comment.reports = [];
-      savePosts();
-      render();
+      await updateDoc(doc(db, FIRESTORE_COLLECTIONS.comments, commentId), {
+        flagged: false,
+        reportCount: 0,
+        reports: []
+      });
       showToast("通報フラグを解除しました。");
     }
 
-    function removeComment(postId, commentId) {
+    async function removeComment(postId, commentId) {
       const post = findPost(postId);
       if (!post) return;
-      post.comments = (post.comments || []).filter((comment) => comment.id !== commentId);
-      savePosts();
-      render();
+
+      await deleteDoc(doc(db, FIRESTORE_COLLECTIONS.comments, commentId));
       showToast("コメントを削除しました。");
     }
 
@@ -2314,7 +2609,8 @@
 
       const dataUrl = await readFileAsDataUrl(file);
       const image = await loadImage(dataUrl);
-      const maxSize = 1400;
+      // Firestore に文字列として保存するため、画像はかなり小さめに圧縮する。
+      const maxSize = 960;
       const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
       const width = Math.max(1, Math.round(image.width * scale));
       const height = Math.max(1, Math.round(image.height * scale));
@@ -2326,12 +2622,12 @@
       context.drawImage(image, 0, 0, width, height);
 
       let converted = canvas.toDataURL(file.type === "image/png" ? "image/png" : "image/jpeg", 0.84);
-      if (converted.length > 1_800_000) {
-        converted = canvas.toDataURL("image/jpeg", 0.74);
+      if (converted.length > 380_000) {
+        converted = canvas.toDataURL("image/jpeg", 0.62);
       }
 
-      if (converted.length > 2_400_000) {
-        throw new Error("画像が大きすぎます。小さめの画像を選んでください。");
+      if (converted.length > 380_000) {
+        throw new Error("画像が大きすぎます。Firestore 保存用に、もっと小さい画像を選んでください。");
       }
 
       return converted;
@@ -2386,7 +2682,7 @@
           : "";
 
         const comment = {
-          id: uniqueId("comment"),
+          postId,
           author: state.userName,
           text,
           image: imageData,
@@ -2397,10 +2693,7 @@
           reports: []
         };
 
-        post.comments = post.comments || [];
-        post.comments.push(comment);
-        savePosts();
-        render();
+        await addDoc(commentsCollectionRef, createCommentPayload(comment));
         showToast("コメントを追加しました。");
       } catch (error) {
         console.error(error);
@@ -2435,7 +2728,7 @@
       reader.readAsDataURL(file);
     }
 
-    function handlePostSubmit(event) {
+    async function handlePostSubmit(event) {
       event.preventDefault();
       if (!state.isAdmin) return;
 
@@ -2453,25 +2746,34 @@
 
       const previous = id ? findPost(id) : null;
       const postData = {
-        id: id || uniqueId("post"),
+        id: id || "",
         title,
         body,
         date,
         category,
         classTarget,
-        comments: previous ? previous.comments || [] : [],
         createdAt: previous ? previous.createdAt : new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
 
-      state.selectedDate = date;
-      state.currentDate = date;
-      upsertPost(postData);
-      closeModal("postModal");
-      showToast(id ? "投稿を更新しました。" : "投稿を追加しました。");
+      const submitButton = event.target.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+
+      try {
+        state.selectedDate = date;
+        state.currentDate = date;
+        await savePostToFirestore(postData);
+        closeModal("postModal");
+        showToast(id ? "投稿を更新しました。" : "投稿を追加しました。");
+      } catch (error) {
+        console.error(error);
+        showToast("投稿の保存に失敗しました。");
+      } finally {
+        submitButton.disabled = false;
+      }
     }
 
-    function handleCommentEditSubmit(event) {
+    async function handleCommentEditSubmit(event) {
       event.preventDefault();
 
       const postId = document.getElementById("editCommentPostId").value;
@@ -2489,18 +2791,21 @@
       const comment = findComment(post, commentId);
       if (!comment) return;
 
-      comment.text = text;
-      if (removeImage) {
-        comment.image = "";
+      try {
+        await updateDoc(doc(db, FIRESTORE_COLLECTIONS.comments, commentId), {
+          text,
+          image: removeImage ? "" : (comment.image || ""),
+          updatedAt: new Date().toISOString()
+        });
+        closeModal("commentEditModal");
+        showToast("コメントを更新しました。");
+      } catch (error) {
+        console.error(error);
+        showToast("コメントの更新に失敗しました。");
       }
-      comment.updatedAt = new Date().toISOString();
-      savePosts();
-      render();
-      closeModal("commentEditModal");
-      showToast("コメントを更新しました。");
     }
 
-    function handleReportSubmit(event) {
+    async function handleReportSubmit(event) {
       event.preventDefault();
 
       if (!state.userName) {
@@ -2524,17 +2829,24 @@
         return;
       }
 
-      comment.reports.push({
+      const nextReports = comment.reports.concat({
         reporter: state.userName,
         reason: reason || "理由未入力",
         createdAt: new Date().toISOString()
       });
-      comment.flagged = true;
-      comment.reportCount = comment.reports.length;
-      savePosts();
-      render();
-      closeModal("reportModal");
-      showToast("通報を受け付けました。");
+
+      try {
+        await updateDoc(doc(db, FIRESTORE_COLLECTIONS.comments, commentId), {
+          flagged: true,
+          reportCount: nextReports.length,
+          reports: nextReports
+        });
+        closeModal("reportModal");
+        showToast("通報を受け付けました。");
+      } catch (error) {
+        console.error(error);
+        showToast("通報の保存に失敗しました。");
+      }
     }
 
     function handleAdminSubmit(event) {
@@ -2565,8 +2877,11 @@
         return;
       }
 
+      // 利用者が変わる可能性があるので、名前更新時は管理者状態を解除する。
       state.userName = name;
+      state.isAdmin = false;
       saveUserName();
+      saveAdmin();
       render();
       closeModal("nameModal");
       showToast("名前を保存しました。");
@@ -2595,7 +2910,7 @@
       }
     }
 
-    function handleDynamicClick(event) {
+    async function handleDynamicClick(event) {
       const button = event.target.closest("button, .comment-image");
       if (!button) return;
 
@@ -2620,8 +2935,13 @@
 
       if (button.dataset.deletePost) {
         if (confirm("この投稿を削除しますか？コメントもすべて削除されます。")) {
-          deletePost(button.dataset.deletePost);
-          showToast("投稿を削除しました。");
+          try {
+            await deletePostFromFirestore(button.dataset.deletePost);
+            showToast("投稿を削除しました。");
+          } catch (error) {
+            console.error(error);
+            showToast("投稿の削除に失敗しました。");
+          }
         }
         return;
       }
@@ -2635,7 +2955,12 @@
       if (button.dataset.deleteComment) {
         const [postId, commentId] = button.dataset.deleteComment.split("|");
         if (confirm("このコメントを削除しますか？")) {
-          removeComment(postId, commentId);
+          try {
+            await removeComment(postId, commentId);
+          } catch (error) {
+            console.error(error);
+            showToast("コメントの削除に失敗しました。");
+          }
         }
         return;
       }
@@ -2648,7 +2973,12 @@
 
       if (button.dataset.clearReport) {
         const [postId, commentId] = button.dataset.clearReport.split("|");
-        clearReport(postId, commentId);
+        try {
+          await clearReport(postId, commentId);
+        } catch (error) {
+          console.error(error);
+          showToast("通報解除に失敗しました。");
+        }
         return;
       }
 
@@ -2706,19 +3036,36 @@
       refs.adminLoginButton.addEventListener("click", () => openModal("adminModal"));
       refs.adminLogoutButton.addEventListener("click", resetAdminMode);
       refs.createPostButton.addEventListener("click", () => openPostModal());
+
+      window.addEventListener("storage", (event) => {
+        if (event.key === STORAGE_KEYS.userName) {
+          state.userName = event.newValue ? event.newValue.trim() : "";
+          if (!state.userName) {
+            state.isAdmin = false;
+            saveAdmin();
+          }
+          render();
+        }
+      });
     }
 
-    function init() {
+    async function init() {
       loadState();
       bindEvents();
       render();
+      await initializeSharedData();
 
       if (!state.userName) {
         openNameModal();
       }
     }
 
-    init();
+    init().catch((error) => {
+      console.error("初期化に失敗しました", error);
+      state.isLoadingRemote = false;
+      render();
+      showToast("初期化に失敗しました。");
+    });
   </script>
 </body>
 </html>
