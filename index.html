@@ -82,6 +82,15 @@
       margin-bottom: 18px;
     }
 
+    .site-header > *,
+    .main-grid > *,
+    .toolbar-row > *,
+    .panel-head > *,
+    .post-meta > *,
+    .comment-head > * {
+      min-width: 0;
+    }
+
     .card,
     .frosted,
     .panel {
@@ -809,6 +818,7 @@
       color: var(--muted);
       font-size: 0.82rem;
       line-height: 1.6;
+      overflow-wrap: anywhere;
     }
 
     .modal {
@@ -966,7 +976,7 @@
       .shell {
         width: min(calc(100vw - 18px), var(--max-width));
         padding-top: 14px;
-        padding-bottom: calc(168px + env(safe-area-inset-bottom));
+        padding-bottom: calc(132px + env(safe-area-inset-bottom));
       }
 
       .hero-card,
@@ -991,23 +1001,35 @@
       }
 
       .toolbar {
-        position: sticky;
-        top: 10px;
-        z-index: 24;
+        position: static;
         gap: 14px;
       }
 
       .toolbar-row {
         gap: 12px;
+        align-items: stretch;
       }
 
       .date-nav {
         width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
       }
 
       .date-nav .ghost-button {
-        flex: 1 1 calc(33.333% - 8px);
+        width: 100%;
+      }
+
+      .range-label {
+        grid-column: 1 / -1;
+        order: -1;
         min-width: 0;
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 18px;
+        background: rgba(248, 250, 252, 0.88);
+        border: 1px solid rgba(148, 163, 184, 0.14);
       }
 
       .calendar-grid {
@@ -1033,19 +1055,11 @@
         font-size: 0.68rem;
       }
 
-      .range-label {
-        min-width: 0;
-        width: 100%;
-        padding: 12px 14px;
-        border-radius: 18px;
-        background: rgba(248, 250, 252, 0.88);
-        border: 1px solid rgba(148, 163, 184, 0.14);
-      }
-
       .post-card {
         padding: 18px;
       }
 
+      .panel-head,
       .post-meta,
       .comment-head,
       .toolbar-row,
@@ -1098,6 +1112,17 @@
 
       .comment-image {
         width: 100%;
+      }
+
+      .modal {
+        align-items: flex-end;
+        padding: 12px;
+      }
+
+      .modal-panel {
+        width: 100%;
+        max-height: min(88dvh, 100%);
+        padding-bottom: calc(20px + env(safe-area-inset-bottom));
       }
 
       .fab {
@@ -1153,6 +1178,14 @@
 
       .week-grid {
         grid-template-columns: 1fr;
+      }
+
+      .date-nav {
+        gap: 8px;
+      }
+
+      .range-label {
+        font-size: 1rem;
       }
 
       .date-nav .ghost-button,
@@ -1506,6 +1539,7 @@
       remotePosts: [],
       remoteComments: [],
       isLoadingRemote: true,
+      syncMode: "loading",
       view: "day",
       classFilter: "all",
       categoryFilter: "all",
@@ -1636,6 +1670,89 @@
       return JSON.parse(JSON.stringify(posts));
     }
 
+    function normalizeLocalPosts(posts) {
+      return sortPostsByDate(
+        posts.map((post) => ({
+          ...post,
+          comments: sortCommentsByDate(Array.isArray(post.comments) ? post.comments : [])
+        }))
+      );
+    }
+
+    function persistLocalPosts(posts) {
+      const normalizedPosts = normalizeLocalPosts(posts);
+      state.posts = normalizedPosts;
+      state.legacyPosts = clonePosts(normalizedPosts);
+      localStorage.setItem(STORAGE_KEYS.posts, JSON.stringify(normalizedPosts));
+      return normalizedPosts;
+    }
+
+    function rawErrorMessage(error) {
+      return String(
+        error?.message ||
+        error?.code ||
+        ""
+      );
+    }
+
+    function isFirestoreApiDisabled(error) {
+      const message = rawErrorMessage(error);
+      return (
+        message.includes("Cloud Firestore API has not been used") ||
+        message.includes("SERVICE_DISABLED") ||
+        message.includes("firestore.googleapis.com")
+      );
+    }
+
+    function isFirestorePermissionError(error) {
+      const message = rawErrorMessage(error);
+      return (
+        message.includes("Missing or insufficient permissions") ||
+        message.includes("permission-denied")
+      );
+    }
+
+    function getLocalFallbackMessage(error) {
+      if (isFirestoreApiDisabled(error)) {
+        return "Cloud Firestore API が有効になっていないため、この端末だけに保存しています。";
+      }
+
+      if (isFirestorePermissionError(error)) {
+        return "Firestore の権限設定で共有保存できないため、この端末だけに保存しています。";
+      }
+
+      return "Firebase に接続できないため、この端末だけに保存しています。";
+    }
+
+    function getActionErrorMessage(error, actionLabel) {
+      if (isFirestoreApiDisabled(error)) {
+        return "Cloud Firestore API が有効になっていません。Google Cloud コンソールで Firestore API を有効化してください。";
+      }
+
+      if (isFirestorePermissionError(error)) {
+        return "Firestore の権限設定で" + actionLabel + "できません。";
+      }
+
+      return actionLabel + "に失敗しました。";
+    }
+
+    function switchToLocalMode(error, toastMessage = "") {
+      state.syncMode = "local";
+      state.isLoadingRemote = false;
+
+      if (!state.posts.length && state.legacyPosts.length) {
+        state.posts = normalizeLocalPosts(state.legacyPosts);
+      }
+
+      render();
+
+      if (toastMessage) {
+        showToast(toastMessage);
+      } else if (error) {
+        showToast(getLocalFallbackMessage(error));
+      }
+    }
+
     function loadState() {
       const savedName = localStorage.getItem(STORAGE_KEYS.userName);
       const savedPosts = localStorage.getItem(STORAGE_KEYS.posts);
@@ -1647,6 +1764,7 @@
       state.remoteComments = [];
       state.legacyPosts = [];
       state.isLoadingRemote = true;
+      state.syncMode = "loading";
 
       try {
         const parsedPosts = savedPosts ? JSON.parse(savedPosts) : [];
@@ -1746,6 +1864,7 @@
         }))
       );
 
+      state.syncMode = "remote";
       state.isLoadingRemote = !(hasLoadedPostSnapshot && hasLoadedCommentSnapshot);
       render();
     }
@@ -1802,9 +1921,7 @@
         rebuildPostsFromRemote();
       }, (error) => {
         console.error("投稿データの同期に失敗しました", error);
-        state.isLoadingRemote = false;
-        render();
-        showToast("投稿データの同期に失敗しました。");
+        switchToLocalMode(error, getLocalFallbackMessage(error));
       });
 
       unsubscribeComments = onSnapshot(commentsCollectionRef, (snapshot) => {
@@ -1813,9 +1930,7 @@
         rebuildPostsFromRemote();
       }, (error) => {
         console.error("コメントデータの同期に失敗しました", error);
-        state.isLoadingRemote = false;
-        render();
-        showToast("コメントデータの同期に失敗しました。");
+        switchToLocalMode(error, getLocalFallbackMessage(error));
       });
     }
 
@@ -1831,15 +1946,7 @@
         subscribeToFirestoreData();
       } catch (error) {
         console.error("Firestore の初期化に失敗しました", error);
-        state.isLoadingRemote = false;
-        state.posts = sortPostsByDate(
-          state.legacyPosts.map((post) => ({
-            ...post,
-            comments: sortCommentsByDate(post.comments || [])
-          }))
-        );
-        render();
-        showToast("Firebase に接続できなかったため、この端末の保存データを表示しています。");
+        switchToLocalMode(error, getLocalFallbackMessage(error));
       }
     }
 
@@ -1933,10 +2040,18 @@
     }
 
     function renderIdentity() {
+      let roleText = "名前を設定するとコメントできます。";
+
+      if (state.userName) {
+        roleText = state.isAdmin ? "管理者" : "コメント投稿者として利用中";
+      }
+
+      if (state.syncMode === "local") {
+        roleText += " / 端末保存モード";
+      }
+
       refs.currentUserName.textContent = state.userName || "名前未設定";
-      refs.currentUserRole.textContent = state.isAdmin
-        ? "管理者"
-        : "コメント投稿者として利用中";
+      refs.currentUserRole.textContent = roleText;
       refs.avatarBadge.textContent = state.userName ? state.userName.trim().charAt(0) : "七";
       refs.adminLoginButton.hidden = state.isAdmin;
       refs.adminLogoutButton.hidden = !(state.isAdmin && state.userName);
@@ -2001,13 +2116,17 @@
     }
 
     function getSubtitle() {
+      const localSuffix = state.syncMode === "local"
+        ? " 現在はこの端末だけに保存しています。"
+        : "";
+
       if (state.view === "day") {
-        return "選択した1日の投稿を、コメント付きでまとめて表示します。";
+        return "選択した1日の投稿を、コメント付きでまとめて表示します。" + localSuffix;
       }
       if (state.view === "week") {
-        return "1週間の流れを日ごとに一覧で確認できます。";
+        return "1週間の流れを日ごとに一覧で確認できます。" + localSuffix;
       }
-      return "カレンダーから日付を選ぶと、その日の詳細を右側に表示します。";
+      return "カレンダーから日付を選ぶと、その日の詳細を右側に表示します。" + localSuffix;
     }
 
     function renderView() {
@@ -2458,19 +2577,141 @@
       };
     }
 
-    async function savePostToFirestore(postData) {
-      if (postData.id) {
-        await updateDoc(doc(db, FIRESTORE_COLLECTIONS.posts, postData.id), createPostPayload(postData));
-        return postData.id;
+    function savePostLocally(postData) {
+      const nextId = postData.id || uniqueId("post");
+      const nextPosts = clonePosts(state.posts);
+      const existingIndex = nextPosts.findIndex((post) => post.id === nextId);
+
+      if (existingIndex >= 0) {
+        const existingComments = Array.isArray(nextPosts[existingIndex].comments)
+          ? nextPosts[existingIndex].comments
+          : [];
+        nextPosts[existingIndex] = {
+          ...nextPosts[existingIndex],
+          ...postData,
+          id: nextId,
+          comments: existingComments
+        };
+      } else {
+        nextPosts.push({
+          ...postData,
+          id: nextId,
+          comments: []
+        });
       }
 
-      const createdRef = await addDoc(postsCollectionRef, createPostPayload(postData));
-      return createdRef.id;
+      persistLocalPosts(nextPosts);
+      return nextId;
+    }
+
+    function saveCommentLocally(commentData) {
+      const nextPosts = clonePosts(state.posts);
+      const post = nextPosts.find((entry) => entry.id === commentData.postId);
+      if (!post) {
+        throw new Error("投稿が見つかりません。");
+      }
+
+      post.comments = Array.isArray(post.comments) ? post.comments : [];
+      post.comments.push({
+        ...commentData,
+        id: uniqueId("comment")
+      });
+
+      persistLocalPosts(nextPosts);
+    }
+
+    function updateCommentLocally(postId, commentId, patch) {
+      const nextPosts = clonePosts(state.posts);
+      const post = nextPosts.find((entry) => entry.id === postId);
+      if (!post) {
+        throw new Error("投稿が見つかりません。");
+      }
+
+      const comment = (post.comments || []).find((entry) => entry.id === commentId);
+      if (!comment) {
+        throw new Error("コメントが見つかりません。");
+      }
+
+      Object.assign(comment, patch);
+      persistLocalPosts(nextPosts);
+    }
+
+    function deletePostLocally(postId) {
+      persistLocalPosts(
+        clonePosts(state.posts).filter((post) => post.id !== postId)
+      );
+    }
+
+    function deleteCommentLocally(postId, commentId) {
+      const nextPosts = clonePosts(state.posts);
+      const post = nextPosts.find((entry) => entry.id === postId);
+      if (!post) {
+        throw new Error("投稿が見つかりません。");
+      }
+
+      post.comments = (post.comments || []).filter((comment) => comment.id !== commentId);
+      persistLocalPosts(nextPosts);
+    }
+
+    function clearReportLocally(postId, commentId) {
+      updateCommentLocally(postId, commentId, {
+        flagged: false,
+        reportCount: 0,
+        reports: []
+      });
+    }
+
+    async function savePostToFirestore(postData) {
+      if (state.syncMode === "local") {
+        return {
+          id: savePostLocally(postData),
+          storage: "local"
+        };
+      }
+
+      if (postData.id) {
+        try {
+          await updateDoc(doc(db, FIRESTORE_COLLECTIONS.posts, postData.id), createPostPayload(postData));
+          return {
+            id: postData.id,
+            storage: "remote"
+          };
+        } catch (error) {
+          console.error(error);
+          const id = savePostLocally(postData);
+          switchToLocalMode(error);
+          return {
+            id,
+            storage: "local"
+          };
+        }
+      }
+
+      try {
+        const createdRef = await addDoc(postsCollectionRef, createPostPayload(postData));
+        return {
+          id: createdRef.id,
+          storage: "remote"
+        };
+      } catch (error) {
+        console.error(error);
+        const id = savePostLocally(postData);
+        switchToLocalMode(error);
+        return {
+          id,
+          storage: "local"
+        };
+      }
     }
 
     async function deletePostFromFirestore(postId) {
       const post = findPost(postId);
       if (!post) return;
+
+      if (state.syncMode === "local") {
+        deletePostLocally(postId);
+        return;
+      }
 
       let relatedComments = post.comments || [];
       if (!relatedComments.length) {
@@ -2485,7 +2726,13 @@
         deletions.push(deleteDoc(doc(db, FIRESTORE_COLLECTIONS.comments, comment.id)));
       });
 
-      await Promise.all(deletions);
+      try {
+        await Promise.all(deletions);
+      } catch (error) {
+        console.error(error);
+        deletePostLocally(postId);
+        switchToLocalMode(error);
+      }
     }
 
     async function clearReport(postId, commentId) {
@@ -2494,11 +2741,23 @@
       const comment = findComment(post, commentId);
       if (!comment) return;
 
-      await updateDoc(doc(db, FIRESTORE_COLLECTIONS.comments, commentId), {
-        flagged: false,
-        reportCount: 0,
-        reports: []
-      });
+      if (state.syncMode === "local") {
+        clearReportLocally(postId, commentId);
+        showToast("通報フラグを解除しました。");
+        return;
+      }
+
+      try {
+        await updateDoc(doc(db, FIRESTORE_COLLECTIONS.comments, commentId), {
+          flagged: false,
+          reportCount: 0,
+          reports: []
+        });
+      } catch (error) {
+        console.error(error);
+        clearReportLocally(postId, commentId);
+        switchToLocalMode(error);
+      }
       showToast("通報フラグを解除しました。");
     }
 
@@ -2506,7 +2765,19 @@
       const post = findPost(postId);
       if (!post) return;
 
-      await deleteDoc(doc(db, FIRESTORE_COLLECTIONS.comments, commentId));
+      if (state.syncMode === "local") {
+        deleteCommentLocally(postId, commentId);
+        showToast("コメントを削除しました。");
+        return;
+      }
+
+      try {
+        await deleteDoc(doc(db, FIRESTORE_COLLECTIONS.comments, commentId));
+      } catch (error) {
+        console.error(error);
+        deleteCommentLocally(postId, commentId);
+        switchToLocalMode(error);
+      }
       showToast("コメントを削除しました。");
     }
 
@@ -2693,11 +2964,35 @@
           reports: []
         };
 
-        await addDoc(commentsCollectionRef, createCommentPayload(comment));
-        showToast("コメントを追加しました。");
+        let storage = "remote";
+        if (state.syncMode === "local") {
+          saveCommentLocally(comment);
+          storage = "local";
+        } else {
+          try {
+            await addDoc(commentsCollectionRef, createCommentPayload(comment));
+          } catch (error) {
+            console.error(error);
+            saveCommentLocally(comment);
+            switchToLocalMode(error);
+            storage = "local";
+          }
+        }
+
+        form.reset();
+        const preview = document.getElementById("file-preview-" + postId);
+        const meta = document.getElementById("file-meta-" + postId);
+        if (preview) {
+          preview.classList.remove("active");
+          preview.removeAttribute("src");
+        }
+        if (meta) {
+          meta.textContent = "任意 / 小さめの画像推奨";
+        }
+        showToast(storage === "local" ? "コメントを保存しました。この端末だけに反映しています。" : "コメントを追加しました。");
       } catch (error) {
         console.error(error);
-        showToast(error.message || "コメントの送信に失敗しました。");
+        showToast(error.message || getActionErrorMessage(error, "コメントの送信"));
       } finally {
         form.querySelector('button[type="submit"]').disabled = false;
       }
@@ -2762,12 +3057,16 @@
       try {
         state.selectedDate = date;
         state.currentDate = date;
-        await savePostToFirestore(postData);
+        const result = await savePostToFirestore(postData);
         closeModal("postModal");
-        showToast(id ? "投稿を更新しました。" : "投稿を追加しました。");
+        showToast(
+          result.storage === "local"
+            ? "投稿を保存しました。この端末だけに反映しています。"
+            : (id ? "投稿を更新しました。" : "投稿を追加しました。")
+        );
       } catch (error) {
         console.error(error);
-        showToast("投稿の保存に失敗しました。");
+        showToast(getActionErrorMessage(error, "投稿の保存"));
       } finally {
         submitButton.disabled = false;
       }
@@ -2792,16 +3091,29 @@
       if (!comment) return;
 
       try {
-        await updateDoc(doc(db, FIRESTORE_COLLECTIONS.comments, commentId), {
+        const patch = {
           text,
           image: removeImage ? "" : (comment.image || ""),
           updatedAt: new Date().toISOString()
-        });
+        };
+
+        if (state.syncMode === "local") {
+          updateCommentLocally(postId, commentId, patch);
+        } else {
+          try {
+            await updateDoc(doc(db, FIRESTORE_COLLECTIONS.comments, commentId), patch);
+          } catch (error) {
+            console.error(error);
+            updateCommentLocally(postId, commentId, patch);
+            switchToLocalMode(error);
+          }
+        }
+
         closeModal("commentEditModal");
-        showToast("コメントを更新しました。");
+        showToast(state.syncMode === "local" ? "コメントを更新しました。この端末だけに反映しています。" : "コメントを更新しました。");
       } catch (error) {
         console.error(error);
-        showToast("コメントの更新に失敗しました。");
+        showToast(getActionErrorMessage(error, "コメントの更新"));
       }
     }
 
@@ -2836,16 +3148,29 @@
       });
 
       try {
-        await updateDoc(doc(db, FIRESTORE_COLLECTIONS.comments, commentId), {
+        const patch = {
           flagged: true,
           reportCount: nextReports.length,
           reports: nextReports
-        });
+        };
+
+        if (state.syncMode === "local") {
+          updateCommentLocally(postId, commentId, patch);
+        } else {
+          try {
+            await updateDoc(doc(db, FIRESTORE_COLLECTIONS.comments, commentId), patch);
+          } catch (error) {
+            console.error(error);
+            updateCommentLocally(postId, commentId, patch);
+            switchToLocalMode(error);
+          }
+        }
+
         closeModal("reportModal");
-        showToast("通報を受け付けました。");
+        showToast(state.syncMode === "local" ? "通報を保存しました。この端末だけに反映しています。" : "通報を受け付けました。");
       } catch (error) {
         console.error(error);
-        showToast("通報の保存に失敗しました。");
+        showToast(getActionErrorMessage(error, "通報の保存"));
       }
     }
 
