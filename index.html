@@ -419,22 +419,6 @@
           コメントや画像付きのやり取りにも対応し、ブラウザだけでそのまま使えます。
         </p>
       </article>
-
-      <aside class="identity-card frosted">
-        <div class="identity-top">
-          <div class="avatar-badge" id="avatarBadge">七</div>
-          <div>
-            <p class="identity-label">現在の利用者</p>
-            <h2 class="identity-name" id="currentUserName">名前未設定</h2>
-            <p class="identity-role" id="currentUserRole">名前を設定するとコメントできます。</p>
-          </div>
-        </div>
-        <div class="identity-actions">
-          <button class="ghost-button" id="changeNameButton" type="button">名前を変更</button>
-          <button class="button" id="adminLoginButton" type="button">管理者ログイン</button>
-          <button class="danger-button" id="adminLogoutButton" type="button" hidden>管理者ログアウト</button>
-        </div>
-      </aside>
     </section>
 
     <section class="toolbar frosted">
@@ -483,6 +467,11 @@
       </aside>
     </section>
   </main>
+
+  <footer style="position: fixed; bottom: 0; right: 16px; padding: 12px; z-index: 100;">
+    <button class="button" id="adminLoginButton" type="button" style="padding: 8px 14px; font-size: 0.9rem; min-height: 40px;">管理者</button>
+    <button class="danger-button" id="adminLogoutButton" type="button" hidden style="padding: 8px 14px; font-size: 0.9rem; min-height: 40px;">ログアウト</button>
+  </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -779,10 +768,41 @@
       });
     }
 
+    function setupAdminButtons() {
+      refs.adminLoginButton.addEventListener("click", () => {
+        const email = prompt("メールアドレスを入力してください:");
+        if (!email) return;
+        
+        const password = prompt("パスワードを入力してください:");
+        if (!password) return;
+
+        signInWithEmailAndPassword(auth, email, password)
+          .then(() => {
+            showToast("管理者モードを有効にしました。");
+          })
+          .catch((error) => {
+            showToast("ログインに失敗しました。");
+            console.error(error);
+          });
+      });
+
+      refs.adminLogoutButton.addEventListener("click", () => {
+        signOut(auth)
+          .then(() => {
+            showToast("管理者モードを終了しました。");
+          })
+          .catch((error) => {
+            showToast("ログアウトに失敗しました。");
+            console.error(error);
+          });
+      });
+    }
+
     async function init() {
       loadState();
       setupMobileMenu();
       setupCategoryFilter();
+      setupAdminButtons();
       render();
       subscribeToFirestoreData();
 
@@ -790,9 +810,13 @@
         if (user) {
           state.authUser = user;
           state.isAdmin = true;
+          refs.adminLoginButton.hidden = true;
+          refs.adminLogoutButton.hidden = false;
         } else {
           state.authUser = null;
           state.isAdmin = false;
+          refs.adminLoginButton.hidden = false;
+          refs.adminLogoutButton.hidden = true;
         }
       });
     }
