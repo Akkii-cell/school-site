@@ -584,16 +584,6 @@
           </div>
           <div id="selectedDayPanel"></div>
         </section>
-
-        <section class="panel frosted">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">今後の予定</h2>
-              <p class="panel-subtitle">近い日付の投稿</p>
-            </div>
-          </div>
-          <div id="upcomingPanel"></div>
-        </section>
       </aside>
     </section>
   </main>
@@ -730,11 +720,6 @@
       refs.selectedDayPanel.innerHTML = todayPosts.length > 0 
         ? todayPosts.map(p => `<div style="padding: 12px; background: rgba(248, 250, 252, 0.9); border-radius: 12px;"><strong>${p.title}</strong></div>`).join("")
         : `<div class="empty-state">この日の投稿はありません。</div>`;
-
-      const upcomingPosts = posts.filter(p => new Date(p.date) >= new Date()).slice(0, 3);
-      refs.upcomingPanel.innerHTML = upcomingPosts.length > 0
-        ? upcomingPosts.map(p => `<div style="padding: 12px; background: rgba(248, 250, 252, 0.9); border-radius: 12px;"><strong>${p.title}</strong><br><small style="color: var(--muted);">${p.date}</small></div>`).join("")
-        : `<div class="empty-state">今後の投稿はありません。</div>`;
     }
 
     function loadPosts() {
