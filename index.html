@@ -643,10 +643,7 @@
       mobileMenuOverlay: document.getElementById("mobileMenuOverlay"),
       adminLoginButton: document.getElementById("adminLoginButton"),
       adminLogoutButton: document.getElementById("adminLogoutButton"),
-      viewContainer: document.getElementById("viewContainer"),
-      rangeLabel: document.getElementById("rangeLabel"),
       selectedDayPanel: document.getElementById("selectedDayPanel"),
-      upcomingPanel: document.getElementById("upcomingPanel"),
       toast: document.getElementById("toast")
     };
 
@@ -678,26 +675,7 @@
     }
 
     function render() {
-      refs.rangeLabel.textContent = new Date(state.currentDate).toLocaleDateString("ja-JP", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        weekday: "short"
-      });
-
       const posts = state.posts.filter(p => state.categoryFilter === "all" || p.category === state.categoryFilter);
-
-      refs.viewContainer.innerHTML = posts.length > 0
-        ? posts.map(post => `
-        <div class="post-card">
-          <div class="post-badges">
-            <span class="badge" style="background: rgba(0, 113, 227, 0.1); color: #0071e3;">${post.category}</span>
-          </div>
-          <h3 class="post-title">${post.title}</h3>
-          <p class="post-body">${post.body}</p>
-        </div>
-      `).join("")
-        : "";
 
       const todayPosts = posts.filter(p => p.date === state.currentDate);
       refs.selectedDayPanel.innerHTML = todayPosts.length > 0 
