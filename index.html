@@ -562,18 +562,6 @@
     </section>
 
     <section class="main-grid">
-      <div class="primary-column">
-        <section class="panel frosted">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title" id="viewTitle">投稿一覧</h2>
-              <p class="panel-subtitle" id="viewSubtitle">読み込み中...</p>
-            </div>
-          </div>
-          <div id="viewContainer"></div>
-        </section>
-      </div>
-
       <aside class="secondary-column">
         <section class="panel frosted">
           <div class="panel-head">
@@ -699,14 +687,8 @@
 
       const posts = state.posts.filter(p => state.categoryFilter === "all" || p.category === state.categoryFilter);
 
-      if (posts.length === 0) {
-        refs.viewContainer.innerHTML = `<div class="empty-state">投稿がありません。</div>`;
-        refs.selectedDayPanel.innerHTML = `<div class="empty-state">この日の投稿はありません。</div>`;
-        refs.upcomingPanel.innerHTML = `<div class="empty-state">今後の投稿はありません。</div>`;
-        return;
-      }
-
-      refs.viewContainer.innerHTML = posts.map(post => `
+      refs.viewContainer.innerHTML = posts.length > 0
+        ? posts.map(post => `
         <div class="post-card">
           <div class="post-badges">
             <span class="badge" style="background: rgba(0, 113, 227, 0.1); color: #0071e3;">${post.category}</span>
@@ -714,7 +696,8 @@
           <h3 class="post-title">${post.title}</h3>
           <p class="post-body">${post.body}</p>
         </div>
-      `).join("");
+      `).join("")
+        : "";
 
       const todayPosts = posts.filter(p => p.date === state.currentDate);
       refs.selectedDayPanel.innerHTML = todayPosts.length > 0 
