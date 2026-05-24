@@ -523,18 +523,6 @@
       </form>
     </div>
   </div>
-    <div class="pending-screen">
-      <div class="pending-panel">
-        <h2 class="pending-title">🔒 承認待ちです</h2>
-        <p class="pending-text">
-          ご申請ありがとうございました。<br>
-          管理者の確認後、このサイトをご利用いただけるようになります。<br>
-          <strong id="pendingUserInfo"></strong>
-        </p>
-        <button class="danger-button" id="logoutPendingButton" style="width: 100%;">ログアウト</button>
-      </div>
-    </div>
-  </div>
 
   <!-- メインサイト（ログイン＆承認済みのみ表示） -->
   <div id="mainContent" style="display: none;">
@@ -934,10 +922,6 @@
     });
 
     // === ログアウト ===
-    document.getElementById("logoutPendingButton").addEventListener("click", async () => {
-      await signOut(auth);
-      showToast("ログアウトしました");
-    });
 
     // === セットアップフォーム ===
     document.getElementById("setupForm").addEventListener("submit", (e) => {
