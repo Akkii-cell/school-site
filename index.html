@@ -824,7 +824,6 @@
       if (!user) {
         // ログインしていない
         document.getElementById("loginModal").classList.remove("hidden");
-        document.getElementById("pendingScreen").style.display = "none";
         document.getElementById("mainContent").style.display = "none";
         return;
       }
@@ -846,7 +845,6 @@
         if (!savedSetup) {
           // 初回利用 → セットアップモーダル表示
           document.getElementById("loginModal").classList.add("hidden");
-          document.getElementById("pendingScreen").style.display = "none";
           document.getElementById("mainContent").style.display = "none";
           document.getElementById("setupModal").classList.remove("hidden");
           return;
@@ -858,7 +856,6 @@
         state.userClass = setup.class;
         
         document.getElementById("loginModal").classList.add("hidden");
-        document.getElementById("pendingScreen").style.display = "none";
         document.getElementById("mainContent").style.display = "block";
         document.getElementById("setupModal").classList.add("hidden");
         
@@ -894,9 +891,8 @@
         }
 
         document.getElementById("loginModal").classList.add("hidden");
-        document.getElementById("pendingScreen").style.display = "block";
         document.getElementById("mainContent").style.display = "none";
-        document.getElementById("pendingUserInfo").textContent = `メール: ${user.email}`;
+        document.getElementById("setupModal").classList.add("hidden");
       }
     });
 
