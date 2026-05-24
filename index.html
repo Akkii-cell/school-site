@@ -41,13 +41,6 @@
       padding: 28px 0 calc(80px + env(safe-area-inset-bottom));
     }
 
-    .site-header {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 18px;
-      margin-bottom: 18px;
-    }
-
     .card, .frosted, .panel {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -80,7 +73,6 @@
       line-height: 1.08;
       letter-spacing: -0.04em;
       margin-bottom: 14px;
-      max-width: 12ch;
     }
 
     .hero-lead {
@@ -118,33 +110,27 @@
       color: var(--accent);
     }
 
-    .main-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 18px;
+    .date-nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .date-display {
+      font-size: 1.1rem;
+      font-weight: 700;
+      min-width: 220px;
     }
 
     .panel {
       padding: 24px;
     }
 
-    .panel-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
     .panel-title {
       font-size: 1.2rem;
       letter-spacing: -0.03em;
-    }
-
-    .panel-subtitle {
-      color: var(--muted);
-      font-size: 0.92rem;
-      margin-top: 4px;
+      margin-bottom: 16px;
     }
 
     .post-card {
@@ -156,11 +142,19 @@
       margin-bottom: 16px;
     }
 
+    .post-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
     .post-title {
       font-size: 1.3rem;
       line-height: 1.25;
       letter-spacing: -0.03em;
-      margin-bottom: 12px;
+      flex: 1;
     }
 
     .post-body {
@@ -190,14 +184,6 @@
     .badge.schedule { background: rgba(0, 113, 227, 0.1); color: #0071e3; }
     .badge.homework { background: rgba(15, 159, 110, 0.12); color: #0f9f6e; }
     .badge.notice { background: rgba(217, 119, 6, 0.12); color: #d97706; }
-
-    .comment-form {
-      background: rgba(248, 250, 252, 0.9);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 16px;
-      margin-top: 16px;
-    }
 
     .comment-item {
       background: rgba(248, 250, 252, 0.9);
@@ -230,7 +216,7 @@
       text-align: center;
     }
 
-    .button, .ghost-button, .tonal-button, .danger-button {
+    .button, .ghost-button, .danger-button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -252,11 +238,6 @@
       background: rgba(255, 255, 255, 0.88);
       color: #1f2937;
       border: 1px solid var(--border);
-    }
-
-    .tonal-button {
-      background: rgba(0, 113, 227, 0.1);
-      color: var(--accent);
     }
 
     .danger-button {
@@ -295,14 +276,10 @@
       box-shadow: 0 30px 70px rgba(15, 23, 42, 0.22);
     }
 
-    .modal-panel.narrow {
-      width: min(520px, 100%);
-    }
-
     .modal-title {
       font-size: 1.55rem;
       letter-spacing: -0.04em;
-      margin-bottom: 6px;
+      margin-bottom: 16px;
     }
 
     .modal-actions {
@@ -311,15 +288,6 @@
       gap: 10px;
       flex-wrap: wrap;
       margin-top: 18px;
-    }
-
-    .close-button {
-      width: 42px;
-      height: 42px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.06);
-      color: #334155;
-      flex-shrink: 0;
     }
 
     .toast {
@@ -331,10 +299,9 @@
       border-radius: 999px;
       background: rgba(17, 24, 39, 0.92);
       color: #fff;
-      box-shadow: var(--shadow);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.22s ease, transform 0.22s ease;
+      transition: opacity 0.22s ease;
       z-index: 120;
     }
 
@@ -343,7 +310,6 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* スマホ用ハンバーガーメニュー */
     .mobile-menu-button {
       display: none;
       position: fixed;
@@ -396,15 +362,12 @@
     .mobile-menu-item {
       padding: 12px 16px;
       border-radius: 12px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
       background: rgba(0, 113, 227, 0.1);
       color: var(--accent);
+      font-weight: 600;
       font-size: 0.95rem;
     }
 
-    /* フッター管理者ボタン */
     .admin-footer {
       position: fixed;
       bottom: 16px;
@@ -416,6 +379,38 @@
       min-height: 40px;
       padding: 0 12px;
       font-size: 0.85rem;
+    }
+
+    .pending-screen {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .pending-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 40px;
+      max-width: 600px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .pending-title {
+      font-size: 2rem;
+      letter-spacing: -0.04em;
+      margin-bottom: 16px;
+    }
+
+    .pending-text {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.8;
+      margin-bottom: 24px;
     }
 
     @media (max-width: 768px) {
@@ -437,48 +432,97 @@
   </style>
 </head>
 <body>
-  <!-- スマホ用ハンバーガーメニュー -->
-  <button class="mobile-menu-button" id="mobileMenuButton" type="button">≡</button>
-  <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
-  <div class="mobile-menu-panel" id="mobileMenuPanel">
-    <button class="mobile-menu-item" data-filter="all">すべて</button>
-    <button class="mobile-menu-item" data-filter="予定">予定</button>
-    <button class="mobile-menu-item" data-filter="宿題">宿題</button>
-    <button class="mobile-menu-item" data-filter="連絡事項">連絡事項</button>
-  </div>
+  <!-- ログイン画面 -->
+  <div class="modal" id="loginModal">
+    <div class="modal-panel" style="width: min(520px, 100%);">
+      <h2 class="modal-title">ログイン</h2>
+      <p style="color: var(--muted); margin-bottom: 24px;">Google または メールアドレスでログインしてください。</p>
+      
+      <div style="display: grid; gap: 12px;">
+        <button class="button" id="googleLoginButton" type="button" style="width: 100%;">
+          Google でログイン
+        </button>
+        
+        <div style="display: flex; align-items: center; gap: 12px; margin: 20px 0;">
+          <div style="flex: 1; height: 1px; background: var(--border);"></div>
+          <span style="color: var(--muted); font-size: 0.9rem;">または</span>
+          <div style="flex: 1; height: 1px; background: var(--border);"></div>
+        </div>
 
-  <!-- フッター管理者ボタン -->
-  <div class="admin-footer">
-    <button class="button admin-button-small" id="adminLoginButton" type="button">管理者</button>
-    <button class="danger-button admin-button-small" id="adminLogoutButton" type="button" hidden>ログアウト</button>
-  </div>
+        <form id="emailLoginForm" style="display: grid; gap: 12px;">
+          <input id="emailInput" type="email" placeholder="メールアドレス" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+          <input id="passwordInput" type="password" placeholder="パスワード" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+          <button type="submit" class="button" style="width: 100%;">メールでログイン</button>
+        </form>
 
-  <main class="shell">
-    <section class="site-header">
-      <article class="hero-card frosted">
-        <h1 class="hero-title">予定・宿題・連絡を、毎日見やすく。</h1>
-        <p class="hero-lead">
-          1組・2組向けに、授業予定、宿題、連絡事項をひとつにまとめた共有サイトです。
-        </p>
-      </article>
-    </section>
-
-    <section class="toolbar frosted">
-      <div class="toolbar-row">
-        <div class="chip-row" id="categoryFilterRow">
-          <button class="chip active" data-category-filter="all">すべて</button>
-          <button class="chip" data-category-filter="予定">予定</button>
-          <button class="chip" data-category-filter="宿題">宿題</button>
-          <button class="chip" data-category-filter="連絡事項">連絡事項</button>
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+          <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 12px;">アカウントがない場合</p>
+          <button type="button" id="signupToggleButton" class="ghost-button" style="width: 100%;">アカウント作成</button>
         </div>
       </div>
-    </section>
+    </div>
+  </div>
 
-    <section class="main-grid">
-      <!-- 管理者投稿フォーム -->
-      <div id="adminPostForm" style="display: none;">
+  <!-- 承認待ち画面 -->
+  <div id="pendingScreen" style="display: none;">
+    <div class="pending-screen">
+      <div class="pending-panel">
+        <h2 class="pending-title">🔒 承認待ちです</h2>
+        <p class="pending-text">
+          ご申請ありがとうございました。<br>
+          管理者の確認後、このサイトをご利用いただけるようになります。<br>
+          <strong id="pendingUserInfo"></strong>
+        </p>
+        <button class="danger-button" id="logoutPendingButton" style="width: 100%;">ログアウト</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- メインサイト（ログイン＆承認済みのみ表示） -->
+  <div id="mainContent" style="display: none;">
+    <button class="mobile-menu-button" id="mobileMenuButton" type="button">≡</button>
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    <div class="mobile-menu-panel" id="mobileMenuPanel">
+      <button class="mobile-menu-item" data-filter="all">すべて</button>
+      <button class="mobile-menu-item" data-filter="予定">予定</button>
+      <button class="mobile-menu-item" data-filter="宿題">宿題</button>
+      <button class="mobile-menu-item" data-filter="連絡事項">連絡事項</button>
+    </div>
+
+    <div class="admin-footer">
+      <button class="button admin-button-small" id="adminLoginButton" type="button">管理者</button>
+      <button class="danger-button admin-button-small" id="logoutButton" type="button" hidden>ログアウト</button>
+    </div>
+
+    <main class="shell">
+      <section class="site-header">
+        <article class="hero-card frosted">
+          <h1 class="hero-title">予定・宿題・連絡を、毎日見やすく。</h1>
+          <p class="hero-lead">1組・2組向けに、授業予定、宿題、連絡事項をひとつにまとめた共有サイトです。</p>
+        </article>
+      </section>
+
+      <section class="toolbar frosted">
+        <div class="toolbar-row">
+          <div class="date-nav">
+            <button class="ghost-button" id="prevDateButton" type="button">← 前日</button>
+            <div class="date-display" id="dateDisplay">読み込み中...</div>
+            <button class="ghost-button" id="nextDateButton" type="button">次日 →</button>
+          </div>
+        </div>
+        <div class="toolbar-row">
+          <div class="chip-row" id="categoryFilterRow">
+            <button class="chip active" data-category-filter="all">すべて</button>
+            <button class="chip" data-category-filter="予定">予定</button>
+            <button class="chip" data-category-filter="宿題">宿題</button>
+            <button class="chip" data-category-filter="連絡事項">連絡事項</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="adminPostForm" style="display: none;">
         <div class="panel frosted">
-          <h3 class="panel-title" style="margin-bottom: 16px;">新しい投稿</h3>
+          <h3 class="panel-title">新しい投稿</h3>
           <form id="postForm" style="display: grid; gap: 16px;">
             <div style="display: grid; gap: 8px;">
               <label for="postTitle" style="font-weight: 700;">タイトル</label>
@@ -513,73 +557,10 @@
             </div>
           </form>
         </div>
-      </div>
+      </section>
 
-      <div id="postsContainer"></div>
-    </section>
-  </main>
-
-  <!-- 初回利用モーダル -->
-  <div class="modal" id="setupModal">
-    <div class="modal-panel narrow">
-      <h2 class="modal-title">はじめてのご利用</h2>
-      <p style="color: var(--muted); margin: 12px 0 20px;">お名前と学年を入力してください。</p>
-      <form id="setupForm" style="display: grid; gap: 16px;">
-        <div style="display: grid; gap: 8px;">
-          <label for="userName" style="font-weight: 700;">お名前</label>
-          <input id="userName" type="text" maxlength="20" placeholder="例：白金 太郎" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
-        </div>
-        <div style="display: grid; gap: 8px;">
-          <label for="userGrade" style="font-weight: 700;">学年</label>
-          <select id="userGrade" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
-            <option value="">選択してください</option>
-            <option value="7-1">7-1組</option>
-            <option value="7-2">7-2組</option>
-          </select>
-        </div>
-        <div style="margin-top: 12px; padding: 16px; background: rgba(248, 250, 252, 0.9); border-radius: 12px; max-height: 200px; overflow-y: auto; font-size: 0.85rem; line-height: 1.6; color: #555;">
-          <strong style="display: block; margin-bottom: 12px;">利用規約とプライバシーポリシーに同意いただく必要があります。</strong>
-          <p><strong>利用規約</strong></p>
-          <p><strong>第1条（目的）</strong><br>本サイトは、学校内における予定・宿題・連絡事項の共有およびコミュニケーションを目的とします。</p>
-          <p><strong>第2条（利用対象）</strong><br>本サイトは、関係する生徒および管理者のみが利用するものとします。</p>
-          <p><strong>第3条（禁止事項）</strong><br>利用者は、以下の行為を行ってはなりません。他人を傷つける発言、誹謗中傷、不適切な内容や画像の投稿、なりすまし行為、個人情報（住所・電話番号など）の投稿、サイトの運営を妨害する行為。</p>
-          <p><strong>第4条（投稿・コメント）</strong><br>投稿・コメントの内容については、利用者が責任を負います。不適切と判断された場合、管理者により削除されることがあります。通報機能により内容が確認される場合があります。</p>
-          <p><strong>第5条（管理者権限）</strong><br>管理者は、投稿およびコメントの編集・削除、不適切な利用への対応、サイトの内容変更または停止を行うことができます。</p>
-          <p><strong>第6条（データの取り扱い）</strong><br>投稿・コメントなどのデータはシステム上に保存されます。必要に応じて削除される場合があります。</p>
-          <p><strong>第7条（免責事項）</strong><br>本サイトの利用により生じたトラブルについて、管理者は責任を負いません。システムの不具合や停止が発生する場合があります。</p>
-          <p style="margin-top: 12px;"><strong>プライバシーポリシー</strong></p>
-          <p>本サイトでは、名前、投稿内容・コメント内容、画像データ（任意）を取得する場合があります。取得した情報は、サイトの運営および機能提供、利用状況の把握、不適切な利用への対応に利用します。取得した情報を第三者に提供することはありません。取得した情報は適切に管理し、不正アクセスや漏洩防止に努めます。</p>
-        </div>
-        <label style="display: flex; align-items: center; gap: 8px; margin-top: 12px;">
-          <input id="agreeCheckbox" type="checkbox" required>
-          <span style="font-size: 0.9rem;">利用規約とプライバシーポリシーに同意します</span>
-        </label>
-        <div class="modal-actions">
-          <button class="button" type="submit">始める</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- 管理者ログインモーダル -->
-  <div class="modal hidden" id="adminModal">
-    <div class="modal-panel narrow">
-      <h2 class="modal-title">管理者ログイン</h2>
-      <form id="adminForm" style="display: grid; gap: 16px; margin-top: 16px;">
-        <div style="display: grid; gap: 8px;">
-          <label for="adminEmail" style="font-weight: 700;">メールアドレス</label>
-          <input id="adminEmail" type="email" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
-        </div>
-        <div style="display: grid; gap: 8px;">
-          <label for="adminPassword" style="font-weight: 700;">パスワード</label>
-          <input id="adminPassword" type="password" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
-        </div>
-        <div class="modal-actions">
-          <button class="ghost-button" type="button" onclick="closeModal('adminModal')">キャンセル</button>
-          <button class="button" type="submit">ログイン</button>
-        </div>
-      </form>
-    </div>
+      <section id="postsContainer"></section>
+    </main>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -589,6 +570,9 @@
     import {
       getAuth,
       signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      signInWithPopup,
+      GoogleAuthProvider,
       signOut,
       onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
@@ -598,7 +582,9 @@
       onSnapshot,
       addDoc,
       deleteDoc,
-      doc
+      doc,
+      getDoc,
+      setDoc
     } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -607,22 +593,23 @@
       projectId: "school-site-475fc",
       storageBucket: "school-site-475fc.firebasestorage.app",
       messagingSenderId: "69139986081",
-      appId: "1:69139986081:web:11c1b1b8277e503e9ee2e0",
-      measurementId: "G-SCENXEX3ZH"
-    };
-
-    const state = {
-      isAdmin: false,
-      userName: "",
-      userGrade: "",
-      categoryFilter: "all",
-      posts: [],
-      comments: {}
+      appId: "1:69139986081:web:11c1b1b8277e503e9ee2e0"
     };
 
     const firebaseApp = initializeApp(firebaseConfig);
     const auth = getAuth(firebaseApp);
     const db = getFirestore(firebaseApp);
+    const googleProvider = new GoogleAuthProvider();
+
+    const state = {
+      user: null,
+      isAdmin: false,
+      isAllowed: false,
+      categoryFilter: "all",
+      currentDate: new Date(),
+      posts: [],
+      comments: {}
+    };
 
     function showToast(message) {
       const toast = document.getElementById("toast");
@@ -631,62 +618,55 @@
       setTimeout(() => toast.classList.remove("show"), 2400);
     }
 
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.add("hidden");
+    function updateDateDisplay() {
+      const options = { year: "numeric", month: "long", day: "numeric", weekday: "short" };
+      document.getElementById("dateDisplay").textContent = state.currentDate.toLocaleDateString("ja-JP", options);
     }
 
-    function loadUserData() {
-      const saved = localStorage.getItem("user_setup");
-      if (saved) {
-        const data = JSON.parse(saved);
-        state.userName = data.name;
-        state.userGrade = data.grade;
-        document.getElementById("setupModal").classList.add("hidden");
-      }
-    }
-
-    function filterPosts(posts) {
-      return posts.filter(post => {
+    function filterPosts() {
+      const dateStr = state.currentDate.toISOString().split('T')[0];
+      return state.posts.filter(post => {
         const matchesCategory = state.categoryFilter === "all" || post.category === state.categoryFilter;
-        const matchesGrade = post.classTarget === "両方" || post.classTarget === state.userGrade;
-        return matchesCategory && matchesGrade;
+        const matchesDate = post.date === dateStr;
+        return matchesCategory && matchesDate;
       });
     }
 
     function renderPosts() {
       const container = document.getElementById("postsContainer");
-      const filtered = filterPosts(state.posts);
+      const filtered = filterPosts();
 
       if (filtered.length === 0) {
-        container.innerHTML = `<div class="empty-state">投稿がありません。</div>`;
+        container.innerHTML = `<div class="empty-state">この日の投稿がありません。</div>`;
         return;
       }
 
       container.innerHTML = filtered.map(post => `
         <div class="post-card">
+          <div class="post-header">
+            <h3 class="post-title">${post.title}</h3>
+            ${state.isAdmin ? `
+              <button onclick="deletePost('${post.id}')" class="danger-button" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>
+            ` : ""}
+          </div>
           <div style="margin-bottom: 12px;">
             <span class="badge ${getCategoryClass(post.category)}">${post.category}</span>
             <span class="badge" style="background: rgba(15, 23, 42, 0.06); color: #334155;">${post.classTarget === "両方" ? "全体向け" : post.classTarget + "向け"}</span>
           </div>
-          <h3 class="post-title">${post.title}</h3>
           <p class="post-body">${post.body}</p>
-          <div class="post-meta">投稿日: ${post.date || new Date().toLocaleDateString("ja-JP")}</div>
           
           <div style="margin-top: 16px; border-top: 1px solid rgba(148, 163, 184, 0.16); padding-top: 16px;">
             <strong style="display: block; margin-bottom: 12px; font-size: 0.95rem;">コメント</strong>
             <div id="comments-${post.id}" style="display: grid; gap: 12px; margin-bottom: 12px;"></div>
             
-            ${state.userName ? `
-              <form onsubmit="addComment(event, '${post.id}')" style="display: grid; gap: 10px;">
-                <textarea name="commentText" placeholder="コメントを入力..." required style="padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; min-height: 80px; font-family: inherit;"></textarea>
-                <button type="submit" class="button" style="align-self: flex-start;">送信</button>
-              </form>
-            ` : `<p style="color: var(--muted); font-size: 0.9rem;">コメントするには初回設定で名前を入力してください。</p>`}
+            <form onsubmit="addComment(event, '${post.id}')" style="display: grid; gap: 10px;">
+              <textarea name="commentText" placeholder="コメントを入力..." required style="padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; min-height: 80px; font-family: inherit;"></textarea>
+              <button type="submit" class="button" style="align-self: flex-start;">送信</button>
+            </form>
           </div>
         </div>
       `).join("");
 
-      // コメントを描画
       state.posts.forEach(post => {
         const commentsContainer = document.getElementById(`comments-${post.id}`);
         if (commentsContainer) {
@@ -696,8 +676,7 @@
               <div class="comment-item">
                 <div class="comment-author">${comment.author}</div>
                 <div class="comment-text">${comment.text}</div>
-                <div class="post-meta">${new Date(comment.createdAt).toLocaleString("ja-JP")}</div>
-                ${state.isAdmin || state.userName === comment.author ? `
+                ${state.isAdmin ? `
                   <button onclick="deleteComment('${post.id}', '${comment.id}')" class="danger-button" style="margin-top: 8px; min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>
                 ` : ""}
               </div>
@@ -716,17 +695,26 @@
       return classes[category] || "schedule";
     }
 
+    window.deletePost = async function(postId) {
+      if (!confirm("投稿を削除しますか？")) return;
+      try {
+        await deleteDoc(doc(db, "posts", postId));
+        showToast("投稿を削除しました");
+      } catch (error) {
+        showToast("削除に失敗しました");
+      }
+    };
+
     window.addComment = async function(event, postId) {
       event.preventDefault();
       const textarea = event.target.querySelector("textarea");
       const text = textarea.value.trim();
-
       if (!text) return;
 
       try {
         const commentsRef = collection(db, "posts", postId, "comments");
         await addDoc(commentsRef, {
-          author: state.userName,
+          author: state.user.displayName || state.user.email,
           text: text,
           createdAt: new Date().toISOString()
         });
@@ -747,41 +735,118 @@
       }
     };
 
-    // 初回設定
-    document.getElementById("setupForm").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const name = document.getElementById("userName").value;
-      const grade = document.getElementById("userGrade").value;
-      const agree = document.getElementById("agreeCheckbox").checked;
-
-      if (!agree) {
-        showToast("利用規約に同意してください");
+    // === 認証フロー ===
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        // ログインしていない
+        document.getElementById("loginModal").classList.remove("hidden");
+        document.getElementById("pendingScreen").style.display = "none";
+        document.getElementById("mainContent").style.display = "none";
         return;
       }
 
-      state.userName = name;
-      state.userGrade = grade;
-      localStorage.setItem("user_setup", JSON.stringify({ name, grade }));
-      document.getElementById("setupModal").classList.add("hidden");
-      showToast("設定しました");
+      state.user = user;
+
+      // Firestore で許可を確認
+      const allowedRef = doc(db, "allowedUsers", user.uid);
+      const allowedSnap = await getDoc(allowedRef);
+
+      if (allowedSnap.exists()) {
+        // 許可済み
+        state.isAllowed = true;
+        state.isAdmin = allowedSnap.data().isAdmin || false;
+        
+        document.getElementById("loginModal").classList.add("hidden");
+        document.getElementById("pendingScreen").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+        
+        document.getElementById("adminPostForm").style.display = state.isAdmin ? "block" : "none";
+        document.getElementById("adminLoginButton").hidden = state.isAdmin;
+        document.getElementById("logoutButton").hidden = !state.isAdmin;
+
+        // 投稿とコメントを読み込み
+        const postsRef = collection(db, "posts");
+        onSnapshot(postsRef, (snapshot) => {
+          state.posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          
+          state.posts.forEach(post => {
+            const commentsRef = collection(db, "posts", post.id, "comments");
+            onSnapshot(commentsRef, (commentSnapshot) => {
+              state.comments[post.id] = commentSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+              renderPosts();
+            });
+          });
+          renderPosts();
+        });
+      } else {
+        // 未承認 → pendingUsers へ申請書を作成
+        const pendingRef = doc(db, "pendingUsers", user.uid);
+        const pendingSnap = await getDoc(pendingRef);
+
+        if (!pendingSnap.exists()) {
+          // 初回申請
+          await setDoc(pendingRef, {
+            email: user.email,
+            name: user.displayName || "未設定",
+            appliedAt: new Date().toISOString()
+          });
+        }
+
+        document.getElementById("loginModal").classList.add("hidden");
+        document.getElementById("pendingScreen").style.display = "block";
+        document.getElementById("mainContent").style.display = "none";
+        document.getElementById("pendingUserInfo").textContent = `メール: ${user.email}`;
+      }
     });
 
-    // 管理者ログイン
-    document.getElementById("adminForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("adminEmail").value;
-      const password = document.getElementById("adminPassword").value;
-
+    // === Google ログイン ===
+    document.getElementById("googleLoginButton").addEventListener("click", async () => {
       try {
-        await signInWithEmailAndPassword(auth, email, password);
-        closeModal("adminModal");
-        showToast("ログインしました");
+        await signInWithPopup(auth, googleProvider);
       } catch (error) {
         showToast("ログインに失敗しました");
       }
     });
 
-    // 投稿フォーム送信
+    // === メール登録 ===
+    let isSignupMode = false;
+    document.getElementById("signupToggleButton").addEventListener("click", () => {
+      isSignupMode = !isSignupMode;
+      document.getElementById("signupToggleButton").textContent = isSignupMode ? "ログイン画面に戻る" : "アカウント作成";
+      document.getElementById("emailLoginForm").querySelector("button").textContent = isSignupMode ? "アカウント作成" : "メールでログイン";
+    });
+
+    document.getElementById("emailLoginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("emailInput").value;
+      const password = document.getElementById("passwordInput").value;
+
+      try {
+        if (isSignupMode) {
+          await createUserWithEmailAndPassword(auth, email, password);
+          showToast("アカウントを作成しました");
+          isSignupMode = false;
+        } else {
+          await signInWithEmailAndPassword(auth, email, password);
+          showToast("ログインしました");
+        }
+      } catch (error) {
+        showToast(isSignupMode ? "アカウント作成に失敗しました" : "ログインに失敗しました");
+      }
+    });
+
+    // === ログアウト ===
+    document.getElementById("logoutButton").addEventListener("click", async () => {
+      await signOut(auth);
+      showToast("ログアウトしました");
+    });
+
+    document.getElementById("logoutPendingButton").addEventListener("click", async () => {
+      await signOut(auth);
+      showToast("ログアウトしました");
+    });
+
+    // === 投稿フォーム ===
     document.getElementById("postForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const title = document.getElementById("postTitle").value;
@@ -805,25 +870,28 @@
       }
     });
 
-    // 管理者ボタン
-    document.getElementById("adminLoginButton").addEventListener("click", () => {
-      document.getElementById("adminModal").classList.remove("hidden");
+    // === 日付ナビゲーション ===
+    document.getElementById("prevDateButton").addEventListener("click", () => {
+      state.currentDate.setDate(state.currentDate.getDate() - 1);
+      updateDateDisplay();
+      renderPosts();
     });
 
-    document.getElementById("adminLogoutButton").addEventListener("click", async () => {
-      await signOut(auth);
-      showToast("ログアウトしました");
+    document.getElementById("nextDateButton").addEventListener("click", () => {
+      state.currentDate.setDate(state.currentDate.getDate() + 1);
+      updateDateDisplay();
+      renderPosts();
     });
 
-    // ハンバーガーメニュー
-    document.getElementById("mobileMenuButton").addEventListener("click", () => {
-      document.getElementById("mobileMenuPanel").classList.toggle("active");
-      document.getElementById("mobileMenuOverlay").classList.toggle("active");
-    });
-
-    document.getElementById("mobileMenuOverlay").addEventListener("click", () => {
-      document.getElementById("mobileMenuPanel").classList.remove("active");
-      document.getElementById("mobileMenuOverlay").classList.remove("active");
+    // === カテゴリフィルター ===
+    document.querySelectorAll("[data-category-filter]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        state.categoryFilter = btn.dataset.categoryFilter;
+        document.querySelectorAll("[data-category-filter]").forEach(b => {
+          b.classList.toggle("active", b.dataset.categoryFilter === state.categoryFilter);
+        });
+        renderPosts();
+      });
     });
 
     document.querySelectorAll(".mobile-menu-item").forEach(item => {
@@ -838,41 +906,17 @@
       });
     });
 
-    // PCフィルター
-    document.querySelectorAll("[data-category-filter]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        state.categoryFilter = btn.dataset.categoryFilter;
-        document.querySelectorAll("[data-category-filter]").forEach(b => {
-          b.classList.toggle("active", b.dataset.categoryFilter === state.categoryFilter);
-        });
-        renderPosts();
-      });
+    document.getElementById("mobileMenuButton").addEventListener("click", () => {
+      document.getElementById("mobileMenuPanel").classList.toggle("active");
+      document.getElementById("mobileMenuOverlay").classList.toggle("active");
     });
 
-    // Firebase
-    const postsRef = collection(db, "posts");
-    onSnapshot(postsRef, (snapshot) => {
-      state.posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      
-      // コメントを読み込み
-      state.posts.forEach(post => {
-        const commentsRef = collection(db, "posts", post.id, "comments");
-        onSnapshot(commentsRef, (commentSnapshot) => {
-          state.comments[post.id] = commentSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          renderPosts();
-        });
-      });
-      renderPosts();
+    document.getElementById("mobileMenuOverlay").addEventListener("click", () => {
+      document.getElementById("mobileMenuPanel").classList.remove("active");
+      document.getElementById("mobileMenuOverlay").classList.remove("active");
     });
 
-    onAuthStateChanged(auth, (user) => {
-      state.isAdmin = !!user;
-      document.getElementById("adminLoginButton").hidden = state.isAdmin;
-      document.getElementById("adminLogoutButton").hidden = !state.isAdmin;
-      document.getElementById("adminPostForm").style.display = state.isAdmin ? "block" : "none";
-    });
-
-    loadUserData();
+    updateDateDisplay();
   </script>
 </body>
 </html>
