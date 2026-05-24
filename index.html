@@ -807,8 +807,46 @@
       }
     };
 
-    // === 認証フロー ===
+    // === ユーザーオンライン状態の管理 ===
+    async function setUserOnline(isOnline) {
+      if (!state.user) return;
+      try {
+        const userRef = doc(db, "allowedUsers", state.user.uid);
+        await setDoc(userRef, {
+          lastActive: new Date().toISOString(),
+          isOnline: isOnline
+        }, { merge: true });
+      } catch (error) {
+        console.error("オンライン状態の更新に失敗:", error);
+      }
+    }
+
+    // ログイン時
     onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        await setUserOnline(true);
+      }
+    });
+
+    // ページ離脱時
+    window.addEventListener("beforeunload", async () => {
+      if (state.user) {
+        await setUserOnline(false);
+      }
+    });
+
+    // ページが非アクティブになったら
+    document.addEventListener("visibilitychange", async () => {
+      if (document.hidden) {
+        if (state.user) {
+          await setUserOnline(false);
+        }
+      } else {
+        if (state.user) {
+          await setUserOnline(true);
+        }
+      }
+    });
       if (!user) {
         // ログインしていない
         document.getElementById("loginModal").classList.remove("hidden");
@@ -1141,15 +1179,20 @@
         if (allowed.length === 0) {
           allowedList.innerHTML = `<p style="color: var(--muted); text-align: center; padding: 20px;">承認済みユーザーはいません</p>`;
         } else {
-          allowedList.innerHTML = allowed.map(user => `
+          allowedList.innerHTML = allowed.map(user => {
+            const isOnline = user.isOnline;
+            const onlineStatus = isOnline ? "🟢 オンライン" : "⚪ オフライン";
+            return `
             <div style="background: rgba(248, 250, 252, 0.9); border: 1px solid var(--border); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
               <div>
                 <strong style="display: block; margin-bottom: 4px;">${user.email}</strong>
+                <small style="color: var(--muted); display: block; margin-bottom: 4px;">${onlineStatus}</small>
                 <small style="color: var(--muted);">承認日: ${new Date(user.approvedAt).toLocaleDateString("ja-JP")} ${user.isAdmin ? "👑 管理者" : ""}</small>
               </div>
               <button onclick="removeUser('${user.uid}', '${user.email}')" class="danger-button" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>
             </div>
-          `).join("");
+            `;
+          }).join("");
         }
       });
     }
