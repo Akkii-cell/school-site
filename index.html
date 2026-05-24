@@ -1082,6 +1082,10 @@
 
     // === ダッシュボードボタン ===
     document.getElementById("adminDashboardButton").addEventListener("click", () => {
+      if (!state.isAdmin) {
+        showToast("管理者のみアクセス可能です");
+        return;
+      }
       document.getElementById("adminDashboardModal").classList.remove("hidden");
       loadAdminData();
     });
