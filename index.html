@@ -482,8 +482,28 @@
     </div>
   </div>
 
-  <!-- 承認待ち画面 -->
-  <div id="pendingScreen" style="display: none;">
+  <!-- 初回セットアップモーダル -->
+  <div class="modal" id="setupModal">
+    <div class="modal-panel" style="width: min(520px, 100%);">
+      <h2 class="modal-title">はじめてのご利用</h2>
+      <p style="color: var(--muted); margin-bottom: 20px;">お名前とクラスを入力してください。</p>
+      <form id="setupForm" style="display: grid; gap: 16px;">
+        <div style="display: grid; gap: 8px;">
+          <label for="setupName" style="font-weight: 700;">お名前</label>
+          <input id="setupName" type="text" maxlength="30" placeholder="例：白金 太郎" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+        </div>
+        <div style="display: grid; gap: 8px;">
+          <label for="setupClass" style="font-weight: 700;">クラス</label>
+          <select id="setupClass" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+            <option value="">選択してください</option>
+            <option value="7-1">7-1組</option>
+            <option value="7-2">7-2組</option>
+          </select>
+        </div>
+        <button type="submit" class="button" style="width: 100%;">始める</button>
+      </form>
+    </div>
+  </div>
     <div class="pending-screen">
       <div class="pending-panel">
         <h2 class="pending-title">🔒 承認待ちです</h2>
@@ -647,6 +667,8 @@
       user: null,
       isAdmin: false,
       isAllowed: false,
+      userName: "",
+      userClass: "",
       categoryFilter: "all",
       currentDate: new Date(),
       posts: [],
@@ -670,7 +692,8 @@
       return state.posts.filter(post => {
         const matchesCategory = state.categoryFilter === "all" || post.category === state.categoryFilter;
         const matchesDate = post.date === dateStr;
-        return matchesCategory && matchesDate;
+        const matchesClass = post.classTarget === "両方" || post.classTarget === state.userClass;
+        return matchesCategory && matchesDate && matchesClass;
       });
     }
 
@@ -798,9 +821,27 @@
         state.isAllowed = true;
         state.isAdmin = allowedSnap.data().isAdmin || false;
         
+        // localStorage から名前とクラスを確認
+        const savedSetup = localStorage.getItem(`user_setup_${user.uid}`);
+        
+        if (!savedSetup) {
+          // 初回利用 → セットアップモーダル表示
+          document.getElementById("loginModal").classList.add("hidden");
+          document.getElementById("pendingScreen").style.display = "none";
+          document.getElementById("mainContent").style.display = "none";
+          document.getElementById("setupModal").classList.remove("hidden");
+          return;
+        }
+        
+        // セットアップ済み
+        const setup = JSON.parse(savedSetup);
+        state.userName = setup.name;
+        state.userClass = setup.class;
+        
         document.getElementById("loginModal").classList.add("hidden");
         document.getElementById("pendingScreen").style.display = "none";
         document.getElementById("mainContent").style.display = "block";
+        document.getElementById("setupModal").classList.add("hidden");
         
         document.getElementById("adminPostForm").style.display = state.isAdmin ? "block" : "none";
         document.getElementById("adminFooter").style.display = state.isAdmin ? "block" : "none";
@@ -881,6 +922,42 @@
     document.getElementById("logoutPendingButton").addEventListener("click", async () => {
       await signOut(auth);
       showToast("ログアウトしました");
+    });
+
+    // === セットアップフォーム ===
+    document.getElementById("setupForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("setupName").value;
+      const userClass = document.getElementById("setupClass").value;
+
+      if (!name || !userClass) {
+        showToast("名前とクラスを入力してください");
+        return;
+      }
+
+      state.userName = name;
+      state.userClass = userClass;
+      localStorage.setItem(`user_setup_${state.user.uid}`, JSON.stringify({ name, class: userClass }));
+
+      document.getElementById("setupModal").classList.add("hidden");
+      document.getElementById("mainContent").style.display = "block";
+
+      // 投稿とコメントを読み込み
+      const postsRef = collection(db, "posts");
+      onSnapshot(postsRef, (snapshot) => {
+        state.posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        state.posts.forEach(post => {
+          const commentsRef = collection(db, "posts", post.id, "comments");
+          onSnapshot(commentsRef, (commentSnapshot) => {
+            state.comments[post.id] = commentSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderPosts();
+          });
+        });
+        renderPosts();
+      });
+
+      showToast(`${name} で始めます（${userClass}組）`);
     });
 
     // === タブ切り替え ===
