@@ -465,8 +465,6 @@
           </form>
 
           <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
-            <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 12px;">アカウントがない場合</p>
-            <button type="button" id="signupToggleButton" class="ghost-button" style="width: 100%;">アカウント作成</button>
           </div>
         </div>
       </div>
@@ -847,7 +845,9 @@
     // === Google ログイン ===
     document.getElementById("googleLoginButton").addEventListener("click", async () => {
       try {
-        await signInWithPopup(auth, googleProvider);
+        const result = await signInWithPopup(auth, googleProvider);
+        // Google ログインは自動的に onAuthStateChanged で処理される
+        showToast("ログインしました");
       } catch (error) {
         showToast("ログインに失敗しました");
       }
@@ -867,16 +867,21 @@
       const password = document.getElementById("passwordInput").value;
 
       try {
-        if (isSignupMode) {
-          await createUserWithEmailAndPassword(auth, email, password);
-          showToast("アカウントを作成しました");
-          isSignupMode = false;
-        } else {
+        // まずログインを試す
+        try {
           await signInWithEmailAndPassword(auth, email, password);
           showToast("ログインしました");
+        } catch (loginError) {
+          // ログイン失敗 → 新規作成として扱う
+          if (loginError.code === "auth/user-not-found" || loginError.code === "auth/invalid-credential") {
+            await createUserWithEmailAndPassword(auth, email, password);
+            showToast("アカウントを作成しました");
+          } else {
+            throw loginError;
+          }
         }
       } catch (error) {
-        showToast(isSignupMode ? "アカウント作成に失敗しました" : "ログインに失敗しました");
+        showToast("ログインに失敗しました");
       }
     });
 
