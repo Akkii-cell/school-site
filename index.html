@@ -491,6 +491,7 @@
 
     <div class="admin-footer">
       <button class="button admin-button-small" id="adminLoginButton" type="button">管理者</button>
+      <button class="ghost-button admin-button-small" id="adminDashboardButton" type="button" hidden>ダッシュボード</button>
       <button class="danger-button admin-button-small" id="logoutButton" type="button" hidden>ログアウト</button>
     </div>
 
@@ -564,6 +565,30 @@
   </div>
 
   <div class="toast" id="toast"></div>
+
+  <!-- 管理者ダッシュボード -->
+  <div class="modal hidden" id="adminDashboardModal">
+    <div class="modal-panel" style="width: min(800px, 100%); max-height: 90vh; overflow: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 class="modal-title">管理者ダッシュボード</h2>
+        <button type="button" onclick="closeAdminDashboard()" class="ghost-button" style="min-height: 40px;">閉じる</button>
+      </div>
+
+      <div style="display: grid; gap: 24px;">
+        <!-- 申請者一覧 -->
+        <div>
+          <h3 style="font-size: 1.2rem; margin-bottom: 16px;">🔔 申請中のユーザー</h3>
+          <div id="pendingUsersList" style="display: grid; gap: 12px;"></div>
+        </div>
+
+        <!-- 承認済みユーザー一覧 -->
+        <div>
+          <h3 style="font-size: 1.2rem; margin-bottom: 16px;">✅ 承認済みユーザー</h3>
+          <div id="allowedUsersList" style="display: grid; gap: 12px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
@@ -762,6 +787,7 @@
         
         document.getElementById("adminPostForm").style.display = state.isAdmin ? "block" : "none";
         document.getElementById("adminLoginButton").hidden = state.isAdmin;
+        document.getElementById("adminDashboardButton").hidden = !state.isAdmin;
         document.getElementById("logoutButton").hidden = !state.isAdmin;
 
         // 投稿とコメントを読み込み
@@ -914,6 +940,103 @@
     document.getElementById("mobileMenuOverlay").addEventListener("click", () => {
       document.getElementById("mobileMenuPanel").classList.remove("active");
       document.getElementById("mobileMenuOverlay").classList.remove("active");
+    });
+
+    // === グローバル関数（管理者ダッシュボード用） ===
+    window.approveUser = async function(uid, email) {
+      if (!confirm(`${email} を承認しますか？`)) return;
+      try {
+        await setDoc(doc(db, "allowedUsers", uid), {
+          email: email,
+          isAdmin: false,
+          approvedAt: new Date().toISOString()
+        });
+        await deleteDoc(doc(db, "pendingUsers", uid));
+        showToast("ユーザーを承認しました");
+        loadAdminData();
+      } catch (error) {
+        showToast("承認に失敗しました");
+      }
+    };
+
+    window.rejectUser = async function(uid) {
+      if (!confirm("申請を拒否しますか？")) return;
+      try {
+        await deleteDoc(doc(db, "pendingUsers", uid));
+        showToast("申請を拒否しました");
+        loadAdminData();
+      } catch (error) {
+        showToast("拒否に失敗しました");
+      }
+    };
+
+    window.removeUser = async function(uid, email) {
+      if (!confirm(`${email} のアクセスを取り消しますか？`)) return;
+      try {
+        await deleteDoc(doc(db, "allowedUsers", uid));
+        showToast("ユーザーを削除しました");
+        loadAdminData();
+      } catch (error) {
+        showToast("削除に失敗しました");
+      }
+    };
+
+    window.closeAdminDashboard = function() {
+      document.getElementById("adminDashboardModal").classList.add("hidden");
+    };
+
+    async function loadAdminData() {
+      const pendingList = document.getElementById("pendingUsersList");
+      const allowedList = document.getElementById("allowedUsersList");
+
+      // 申請者を読み込み
+      const pendingRef = collection(db, "pendingUsers");
+      onSnapshot(pendingRef, (snapshot) => {
+        const pending = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
+        
+        if (pending.length === 0) {
+          pendingList.innerHTML = `<p style="color: var(--muted); text-align: center; padding: 20px;">申請者はいません</p>`;
+        } else {
+          pendingList.innerHTML = pending.map(user => `
+            <div style="background: rgba(248, 250, 252, 0.9); border: 1px solid var(--border); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+              <div>
+                <strong style="display: block; margin-bottom: 4px;">${user.email}</strong>
+                <small style="color: var(--muted);">申請日: ${new Date(user.appliedAt).toLocaleDateString("ja-JP")}</small>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button onclick="approveUser('${user.uid}', '${user.email}')" class="button" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">承認</button>
+                <button onclick="rejectUser('${user.uid}')" class="danger-button" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">拒否</button>
+              </div>
+            </div>
+          `).join("");
+        }
+      });
+
+      // 承認済みユーザーを読み込み
+      const allowedRef = collection(db, "allowedUsers");
+      onSnapshot(allowedRef, (snapshot) => {
+        const allowed = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
+        
+        if (allowed.length === 0) {
+          allowedList.innerHTML = `<p style="color: var(--muted); text-align: center; padding: 20px;">承認済みユーザーはいません</p>`;
+        } else {
+          allowedList.innerHTML = allowed.map(user => `
+            <div style="background: rgba(248, 250, 252, 0.9); border: 1px solid var(--border); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+              <div>
+                <strong style="display: block; margin-bottom: 4px;">${user.email}</strong>
+                <small style="color: var(--muted);">承認日: ${new Date(user.approvedAt).toLocaleDateString("ja-JP")} ${user.isAdmin ? "👑 管理者" : ""}</small>
+              </div>
+              <button onclick="removeUser('${user.uid}', '${user.email}')" class="danger-button" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>
+            </div>
+          `).join("");
+        }
+      });
+    }
+
+    // === ダッシュボードボタン ===
+    document.getElementById("adminDashboardButton").addEventListener("click", () => {
+      document.getElementById("adminDashboardModal").classList.remove("hidden");
+      loadAdminData();
     });
 
     updateDateDisplay();
