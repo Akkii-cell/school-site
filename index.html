@@ -9,23 +9,13 @@
       color-scheme: light;
       --bg: #f5f5f7;
       --surface: rgba(255, 255, 255, 0.92);
-      --surface-strong: #ffffff;
-      --surface-soft: #fafafc;
       --border: rgba(15, 23, 42, 0.08);
       --text: #111827;
       --muted: #6b7280;
-      --muted-soft: #94a3b8;
       --accent: #0071e3;
-      --accent-soft: rgba(0, 113, 227, 0.1);
-      --success: #0f9f6e;
-      --warning: #d97706;
-      --danger: #d92d20;
       --shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
-      --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.06);
       --radius-xl: 28px;
       --radius-lg: 22px;
-      --radius-md: 18px;
-      --radius-sm: 14px;
       --max-width: 1220px;
     }
 
@@ -39,7 +29,6 @@
       background: radial-gradient(circle at top left, rgba(0, 113, 227, 0.08), transparent 32%), radial-gradient(circle at top right, rgba(15, 169, 107, 0.08), transparent 28%), var(--bg);
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
-      overflow-x: hidden;
     }
 
     button, input, select, textarea { font: inherit; }
@@ -56,7 +45,6 @@
       display: grid;
       grid-template-columns: 1fr;
       gap: 18px;
-      align-items: stretch;
       margin-bottom: 18px;
     }
 
@@ -112,29 +100,8 @@
     .toolbar-row {
       display: flex;
       flex-wrap: wrap;
-      justify-content: space-between;
       gap: 14px;
       align-items: center;
-    }
-
-    .date-nav {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .range-label {
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      min-width: 220px;
-    }
-
-    .chip-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
     }
 
     .chip {
@@ -153,13 +120,7 @@
 
     .main-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.9fr);
-      gap: 18px;
-      align-items: start;
-    }
-
-    .primary-column, .secondary-column {
-      display: grid;
+      grid-template-columns: 1fr;
       gap: 18px;
     }
 
@@ -191,47 +152,12 @@
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.92));
       border-radius: var(--radius-lg);
       padding: 22px;
-      box-shadow: var(--shadow-soft);
-    }
-
-    .post-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .post-badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 11px;
-      border-radius: 999px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .badge.schedule { background: rgba(0, 113, 227, 0.1); color: var(--accent); }
-    .badge.homework { background: rgba(15, 159, 110, 0.12); color: var(--success); }
-    .badge.notice { background: rgba(217, 119, 6, 0.12); color: var(--warning); }
-    .badge.class-badge { background: rgba(15, 23, 42, 0.06); color: #334155; }
-
-    .post-date {
-      color: var(--muted);
-      font-size: 0.92rem;
-      white-space: nowrap;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+      margin-bottom: 16px;
     }
 
     .post-title {
-      font-size: clamp(1.25rem, 2vw, 1.45rem);
+      font-size: 1.3rem;
       line-height: 1.25;
       letter-spacing: -0.03em;
       margin-bottom: 12px;
@@ -242,15 +168,66 @@
       line-height: 1.8;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
+      margin-bottom: 16px;
+    }
+
+    .post-meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+
+    .badge.schedule { background: rgba(0, 113, 227, 0.1); color: #0071e3; }
+    .badge.homework { background: rgba(15, 159, 110, 0.12); color: #0f9f6e; }
+    .badge.notice { background: rgba(217, 119, 6, 0.12); color: #d97706; }
+
+    .comment-form {
+      background: rgba(248, 250, 252, 0.9);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .comment-item {
+      background: rgba(248, 250, 252, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+
+    .comment-author {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+
+    .comment-text {
+      color: #374151;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
 
     .empty-state {
       padding: 28px 22px;
       border-radius: 20px;
       background: rgba(248, 250, 252, 0.9);
-      border: 1px dashed rgba(148, 163, 184, 0.22);
+      border: 1px dashed var(--border);
       color: var(--muted);
       line-height: 1.8;
+      text-align: center;
     }
 
     .button, .ghost-button, .tonal-button, .danger-button {
@@ -262,7 +239,7 @@
       padding: 0 16px;
       border-radius: 999px;
       font-weight: 700;
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      transition: transform 0.18s ease;
     }
 
     .button {
@@ -274,7 +251,7 @@
     .ghost-button {
       background: rgba(255, 255, 255, 0.88);
       color: #1f2937;
-      border: 1px solid rgba(148, 163, 184, 0.18);
+      border: 1px solid var(--border);
     }
 
     .tonal-button {
@@ -284,7 +261,7 @@
 
     .danger-button {
       background: rgba(217, 45, 32, 0.12);
-      color: var(--danger);
+      color: #d92d20;
     }
 
     .modal {
@@ -299,22 +276,22 @@
       z-index: 100;
       opacity: 1;
       pointer-events: auto;
-      transition: opacity 0.2s ease;
     }
 
     .modal.hidden {
       opacity: 0;
       pointer-events: none;
+      display: none;
     }
 
     .modal-panel {
       width: min(720px, 100%);
-      max-height: min(90vh, 960px);
+      max-height: 90vh;
       overflow: auto;
       padding: 28px;
       border-radius: 28px;
       background: rgba(255, 255, 255, 0.98);
-      border: 1px solid rgba(148, 163, 184, 0.16);
+      border: 1px solid var(--border);
       box-shadow: 0 30px 70px rgba(15, 23, 42, 0.22);
     }
 
@@ -322,18 +299,18 @@
       width: min(520px, 100%);
     }
 
-    .modal-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 14px;
-      margin-bottom: 20px;
-    }
-
     .modal-title {
       font-size: 1.55rem;
       letter-spacing: -0.04em;
       margin-bottom: 6px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
     }
 
     .close-button {
@@ -345,18 +322,10 @@
       flex-shrink: 0;
     }
 
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 18px;
-    }
-
     .toast {
       position: fixed;
       left: 50%;
-      bottom: calc(24px + env(safe-area-inset-bottom));
+      bottom: 24px;
       transform: translateX(-50%) translateY(18px);
       padding: 14px 18px;
       border-radius: 999px;
@@ -367,8 +336,6 @@
       pointer-events: none;
       transition: opacity 0.22s ease, transform 0.22s ease;
       z-index: 120;
-      max-width: calc(100vw - 32px);
-      text-align: center;
     }
 
     .toast.show {
@@ -376,7 +343,7 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* スマホ用ハンバーガーメニュー - スマホのみ表示 */
+    /* スマホ用ハンバーガーメニュー */
     .mobile-menu-button {
       display: none;
       position: fixed;
@@ -434,12 +401,7 @@
       font-weight: 600;
       background: rgba(0, 113, 227, 0.1);
       color: var(--accent);
-      transition: background 0.18s ease;
       font-size: 0.95rem;
-    }
-
-    .mobile-menu-item:hover {
-      background: rgba(0, 113, 227, 0.2);
     }
 
     /* フッター管理者ボタン */
@@ -460,55 +422,16 @@
       .shell {
         width: min(calc(100vw - 18px), var(--max-width));
         padding-top: 14px;
-        padding-bottom: calc(100px + env(safe-area-inset-bottom));
       }
 
-      /* スマホ版はハンバーガーメニュー表示 */
       .mobile-menu-button {
         display: flex;
         align-items: center;
         justify-content: center;
       }
 
-      .main-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-      }
-
-      .post-card {
-        padding: 18px;
-      }
-
-      .panel {
-        padding: 20px;
-      }
-
-      .hero-card, .panel {
-        border-radius: 24px;
-      }
-
       .chip-row {
         display: none;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .shell {
-        width: min(calc(100vw - 12px), var(--max-width));
-      }
-
-      .hero-card, .panel, .post-card {
-        border-radius: 20px;
-        padding-left: 16px;
-        padding-right: 16px;
-      }
-
-      .range-label {
-        font-size: 1rem;
-      }
-
-      .hero-title {
-        max-width: 100%;
       }
     }
   </style>
@@ -536,21 +459,11 @@
         <h1 class="hero-title">予定・宿題・連絡を、毎日見やすく。</h1>
         <p class="hero-lead">
           1組・2組向けに、授業予定、宿題、連絡事項をひとつにまとめた共有サイトです。
-          コメントや画像付きのやり取りにも対応し、ブラウザだけでそのまま使えます。
         </p>
       </article>
     </section>
 
     <section class="toolbar frosted">
-      <div class="toolbar-row">
-        <div class="date-nav">
-          <button class="ghost-button" type="button" data-nav="prev">前へ</button>
-          <button class="ghost-button" type="button" data-nav="today">今日</button>
-          <button class="ghost-button" type="button" data-nav="next">次へ</button>
-          <div class="range-label" id="rangeLabel">読み込み中...</div>
-        </div>
-      </div>
-
       <div class="toolbar-row">
         <div class="chip-row" id="categoryFilterRow">
           <button class="chip active" data-category-filter="all">すべて</button>
@@ -562,42 +475,107 @@
     </section>
 
     <section class="main-grid">
-      <aside class="secondary-column">
-        <section class="panel frosted">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">選択した日</h2>
-              <p class="panel-subtitle" id="selectedDayLabel">読み込み中...</p>
+      <!-- 管理者投稿フォーム -->
+      <div id="adminPostForm" style="display: none;">
+        <div class="panel frosted">
+          <h3 class="panel-title" style="margin-bottom: 16px;">新しい投稿</h3>
+          <form id="postForm" style="display: grid; gap: 16px;">
+            <div style="display: grid; gap: 8px;">
+              <label for="postTitle" style="font-weight: 700;">タイトル</label>
+              <input id="postTitle" type="text" maxlength="100" placeholder="投稿タイトル" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
             </div>
-          </div>
-          <div id="selectedDayPanel"></div>
-        </section>
-      </aside>
+            <div style="display: grid; gap: 8px;">
+              <label for="postBody" style="font-weight: 700;">内容</label>
+              <textarea id="postBody" placeholder="投稿内容" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; min-height: 120px;"></textarea>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div style="display: grid; gap: 8px;">
+                <label for="postCategory" style="font-weight: 700;">カテゴリ</label>
+                <select id="postCategory" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+                  <option value="">選択</option>
+                  <option value="予定">予定</option>
+                  <option value="宿題">宿題</option>
+                  <option value="連絡事項">連絡事項</option>
+                </select>
+              </div>
+              <div style="display: grid; gap: 8px;">
+                <label for="postTarget" style="font-weight: 700;">対象クラス</label>
+                <select id="postTarget" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+                  <option value="">選択</option>
+                  <option value="7-1">7-1組</option>
+                  <option value="7-2">7-2組</option>
+                  <option value="両方">全体向け</option>
+                </select>
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button type="submit" class="button">投稿</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div id="postsContainer"></div>
     </section>
   </main>
 
-  <div class="modal hidden" id="adminModal" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
+  <!-- 初回利用モーダル -->
+  <div class="modal" id="setupModal">
     <div class="modal-panel narrow">
-      <div class="modal-head">
-        <div>
-          <h2 class="modal-title" id="adminModalTitle">管理者ログイン</h2>
-          <p style="color: var(--muted); font-size: 0.9rem; margin-top: 4px;">
-            メールアドレスとパスワードを入力してください。
-          </p>
-        </div>
-        <button class="close-button" type="button" data-close-modal="adminModal">×</button>
-      </div>
-      <form id="adminForm" class="form-grid">
+      <h2 class="modal-title">はじめてのご利用</h2>
+      <p style="color: var(--muted); margin: 12px 0 20px;">お名前と学年を入力してください。</p>
+      <form id="setupForm" style="display: grid; gap: 16px;">
         <div style="display: grid; gap: 8px;">
-          <label for="adminEmail" style="font-size: 0.92rem; font-weight: 700;">メールアドレス</label>
-          <input id="adminEmail" type="email" placeholder="daishi_a@icloud.com" required style="width: 100%; padding: 12px 14px; border: 1px solid rgba(148, 163, 184, 0.22); border-radius: 12px; font-size: 0.95rem;">
+          <label for="userName" style="font-weight: 700;">お名前</label>
+          <input id="userName" type="text" maxlength="20" placeholder="例：白金 太郎" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
         </div>
         <div style="display: grid; gap: 8px;">
-          <label for="adminPassword" style="font-size: 0.92rem; font-weight: 700;">パスワード</label>
-          <input id="adminPassword" type="password" placeholder="パスワード" required style="width: 100%; padding: 12px 14px; border: 1px solid rgba(148, 163, 184, 0.22); border-radius: 12px; font-size: 0.95rem;">
+          <label for="userGrade" style="font-weight: 700;">学年</label>
+          <select id="userGrade" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+            <option value="">選択してください</option>
+            <option value="7-1">7-1組</option>
+            <option value="7-2">7-2組</option>
+          </select>
+        </div>
+        <div style="margin-top: 12px; padding: 16px; background: rgba(248, 250, 252, 0.9); border-radius: 12px; max-height: 200px; overflow-y: auto; font-size: 0.85rem; line-height: 1.6; color: #555;">
+          <strong style="display: block; margin-bottom: 12px;">利用規約とプライバシーポリシーに同意いただく必要があります。</strong>
+          <p><strong>利用規約</strong></p>
+          <p><strong>第1条（目的）</strong><br>本サイトは、学校内における予定・宿題・連絡事項の共有およびコミュニケーションを目的とします。</p>
+          <p><strong>第2条（利用対象）</strong><br>本サイトは、関係する生徒および管理者のみが利用するものとします。</p>
+          <p><strong>第3条（禁止事項）</strong><br>利用者は、以下の行為を行ってはなりません。他人を傷つける発言、誹謗中傷、不適切な内容や画像の投稿、なりすまし行為、個人情報（住所・電話番号など）の投稿、サイトの運営を妨害する行為。</p>
+          <p><strong>第4条（投稿・コメント）</strong><br>投稿・コメントの内容については、利用者が責任を負います。不適切と判断された場合、管理者により削除されることがあります。通報機能により内容が確認される場合があります。</p>
+          <p><strong>第5条（管理者権限）</strong><br>管理者は、投稿およびコメントの編集・削除、不適切な利用への対応、サイトの内容変更または停止を行うことができます。</p>
+          <p><strong>第6条（データの取り扱い）</strong><br>投稿・コメントなどのデータはシステム上に保存されます。必要に応じて削除される場合があります。</p>
+          <p><strong>第7条（免責事項）</strong><br>本サイトの利用により生じたトラブルについて、管理者は責任を負いません。システムの不具合や停止が発生する場合があります。</p>
+          <p style="margin-top: 12px;"><strong>プライバシーポリシー</strong></p>
+          <p>本サイトでは、名前、投稿内容・コメント内容、画像データ（任意）を取得する場合があります。取得した情報は、サイトの運営および機能提供、利用状況の把握、不適切な利用への対応に利用します。取得した情報を第三者に提供することはありません。取得した情報は適切に管理し、不正アクセスや漏洩防止に努めます。</p>
+        </div>
+        <label style="display: flex; align-items: center; gap: 8px; margin-top: 12px;">
+          <input id="agreeCheckbox" type="checkbox" required>
+          <span style="font-size: 0.9rem;">利用規約とプライバシーポリシーに同意します</span>
+        </label>
+        <div class="modal-actions">
+          <button class="button" type="submit">始める</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 管理者ログインモーダル -->
+  <div class="modal hidden" id="adminModal">
+    <div class="modal-panel narrow">
+      <h2 class="modal-title">管理者ログイン</h2>
+      <form id="adminForm" style="display: grid; gap: 16px; margin-top: 16px;">
+        <div style="display: grid; gap: 8px;">
+          <label for="adminEmail" style="font-weight: 700;">メールアドレス</label>
+          <input id="adminEmail" type="email" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+        </div>
+        <div style="display: grid; gap: 8px;">
+          <label for="adminPassword" style="font-weight: 700;">パスワード</label>
+          <input id="adminPassword" type="password" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
         </div>
         <div class="modal-actions">
-          <button class="ghost-button" type="button" data-close-modal="adminModal">キャンセル</button>
+          <button class="ghost-button" type="button" onclick="closeModal('adminModal')">キャンセル</button>
           <button class="button" type="submit">ログイン</button>
         </div>
       </form>
@@ -617,7 +595,10 @@
     import {
       getFirestore,
       collection,
-      onSnapshot
+      onSnapshot,
+      addDoc,
+      deleteDoc,
+      doc
     } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -632,120 +613,160 @@
 
     const state = {
       isAdmin: false,
+      userName: "",
+      userGrade: "",
       categoryFilter: "all",
       posts: [],
-      currentDate: new Date().toISOString().split('T')[0]
+      comments: {}
     };
-
-    const refs = {
-      mobileMenuButton: document.getElementById("mobileMenuButton"),
-      mobileMenuPanel: document.getElementById("mobileMenuPanel"),
-      mobileMenuOverlay: document.getElementById("mobileMenuOverlay"),
-      adminLoginButton: document.getElementById("adminLoginButton"),
-      adminLogoutButton: document.getElementById("adminLogoutButton"),
-      selectedDayPanel: document.getElementById("selectedDayPanel"),
-      toast: document.getElementById("toast")
-    };
-
-    let toastTimer = null;
 
     const firebaseApp = initializeApp(firebaseConfig);
     const auth = getAuth(firebaseApp);
     const db = getFirestore(firebaseApp);
 
     function showToast(message) {
-      refs.toast.textContent = message;
-      refs.toast.classList.add("show");
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        refs.toast.classList.remove("show");
-      }, 2400);
-    }
-
-    function openModal(modalId) {
-      document.getElementById(modalId).classList.remove("hidden");
-      document.body.style.overflow = "hidden";
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2400);
     }
 
     function closeModal(modalId) {
       document.getElementById(modalId).classList.add("hidden");
-      if (document.querySelectorAll(".modal:not(.hidden)").length === 0) {
-        document.body.style.overflow = "";
+    }
+
+    function loadUserData() {
+      const saved = localStorage.getItem("user_setup");
+      if (saved) {
+        const data = JSON.parse(saved);
+        state.userName = data.name;
+        state.userGrade = data.grade;
+        document.getElementById("setupModal").classList.add("hidden");
       }
     }
 
-    function render() {
-      const posts = state.posts.filter(p => state.categoryFilter === "all" || p.category === state.categoryFilter);
-
-      const todayPosts = posts.filter(p => p.date === state.currentDate);
-      refs.selectedDayPanel.innerHTML = todayPosts.length > 0 
-        ? todayPosts.map(p => `<div style="padding: 12px; background: rgba(248, 250, 252, 0.9); border-radius: 12px;"><strong>${p.title}</strong></div>`).join("")
-        : `<div class="empty-state">この日の投稿はありません。</div>`;
-    }
-
-    function loadPosts() {
-      const postsRef = collection(db, "posts");
-      onSnapshot(postsRef, (snapshot) => {
-        state.posts = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        render();
-      }, (error) => {
-        console.error("投稿の読み込みに失敗しました", error);
-        showToast("データを読み込めません");
+    function filterPosts(posts) {
+      return posts.filter(post => {
+        const matchesCategory = state.categoryFilter === "all" || post.category === state.categoryFilter;
+        const matchesGrade = post.classTarget === "両方" || post.classTarget === state.userGrade;
+        return matchesCategory && matchesGrade;
       });
     }
 
-    // ハンバーガーメニュー
-    refs.mobileMenuButton.addEventListener("click", () => {
-      refs.mobileMenuPanel.classList.toggle("active");
-      refs.mobileMenuOverlay.classList.toggle("active");
-    });
+    function renderPosts() {
+      const container = document.getElementById("postsContainer");
+      const filtered = filterPosts(state.posts);
 
-    refs.mobileMenuOverlay.addEventListener("click", () => {
-      refs.mobileMenuPanel.classList.remove("active");
-      refs.mobileMenuOverlay.classList.remove("active");
-    });
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="empty-state">投稿がありません。</div>`;
+        return;
+      }
 
-    document.querySelectorAll(".mobile-menu-item").forEach(item => {
-      item.addEventListener("click", () => {
-        state.categoryFilter = item.dataset.filter;
-        document.querySelectorAll("[data-category-filter]").forEach(btn => {
-          btn.classList.toggle("active", btn.dataset.categoryFilter === state.categoryFilter);
-        });
-        render();
-        refs.mobileMenuPanel.classList.remove("active");
-        refs.mobileMenuOverlay.classList.remove("active");
+      container.innerHTML = filtered.map(post => `
+        <div class="post-card">
+          <div style="margin-bottom: 12px;">
+            <span class="badge ${getCategoryClass(post.category)}">${post.category}</span>
+            <span class="badge" style="background: rgba(15, 23, 42, 0.06); color: #334155;">${post.classTarget === "両方" ? "全体向け" : post.classTarget + "向け"}</span>
+          </div>
+          <h3 class="post-title">${post.title}</h3>
+          <p class="post-body">${post.body}</p>
+          <div class="post-meta">投稿日: ${post.date || new Date().toLocaleDateString("ja-JP")}</div>
+          
+          <div style="margin-top: 16px; border-top: 1px solid rgba(148, 163, 184, 0.16); padding-top: 16px;">
+            <strong style="display: block; margin-bottom: 12px; font-size: 0.95rem;">コメント</strong>
+            <div id="comments-${post.id}" style="display: grid; gap: 12px; margin-bottom: 12px;"></div>
+            
+            ${state.userName ? `
+              <form onsubmit="addComment(event, '${post.id}')" style="display: grid; gap: 10px;">
+                <textarea name="commentText" placeholder="コメントを入力..." required style="padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; min-height: 80px; font-family: inherit;"></textarea>
+                <button type="submit" class="button" style="align-self: flex-start;">送信</button>
+              </form>
+            ` : `<p style="color: var(--muted); font-size: 0.9rem;">コメントするには初回設定で名前を入力してください。</p>`}
+          </div>
+        </div>
+      `).join("");
+
+      // コメントを描画
+      state.posts.forEach(post => {
+        const commentsContainer = document.getElementById(`comments-${post.id}`);
+        if (commentsContainer) {
+          const postComments = state.comments[post.id] || [];
+          commentsContainer.innerHTML = postComments.length > 0
+            ? postComments.map(comment => `
+              <div class="comment-item">
+                <div class="comment-author">${comment.author}</div>
+                <div class="comment-text">${comment.text}</div>
+                <div class="post-meta">${new Date(comment.createdAt).toLocaleString("ja-JP")}</div>
+                ${state.isAdmin || state.userName === comment.author ? `
+                  <button onclick="deleteComment('${post.id}', '${comment.id}')" class="danger-button" style="margin-top: 8px; min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>
+                ` : ""}
+              </div>
+            `).join("")
+            : `<p style="color: var(--muted); font-size: 0.9rem;">コメントはまだありません</p>`;
+        }
       });
-    });
+    }
 
-    // PC版フィルター
-    document.querySelectorAll("[data-category-filter]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        state.categoryFilter = btn.dataset.categoryFilter;
-        document.querySelectorAll("[data-category-filter]").forEach(b => {
-          b.classList.toggle("active", b.dataset.categoryFilter === state.categoryFilter);
+    function getCategoryClass(category) {
+      const classes = {
+        "予定": "schedule",
+        "宿題": "homework",
+        "連絡事項": "notice"
+      };
+      return classes[category] || "schedule";
+    }
+
+    window.addComment = async function(event, postId) {
+      event.preventDefault();
+      const textarea = event.target.querySelector("textarea");
+      const text = textarea.value.trim();
+
+      if (!text) return;
+
+      try {
+        const commentsRef = collection(db, "posts", postId, "comments");
+        await addDoc(commentsRef, {
+          author: state.userName,
+          text: text,
+          createdAt: new Date().toISOString()
         });
-        render();
-      });
+        textarea.value = "";
+        showToast("コメントを追加しました");
+      } catch (error) {
+        showToast("コメント追加に失敗しました");
+      }
+    };
+
+    window.deleteComment = async function(postId, commentId) {
+      if (!confirm("削除しますか？")) return;
+      try {
+        await deleteDoc(doc(db, "posts", postId, "comments", commentId));
+        showToast("コメントを削除しました");
+      } catch (error) {
+        showToast("削除に失敗しました");
+      }
+    };
+
+    // 初回設定
+    document.getElementById("setupForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("userName").value;
+      const grade = document.getElementById("userGrade").value;
+      const agree = document.getElementById("agreeCheckbox").checked;
+
+      if (!agree) {
+        showToast("利用規約に同意してください");
+        return;
+      }
+
+      state.userName = name;
+      state.userGrade = grade;
+      localStorage.setItem("user_setup", JSON.stringify({ name, grade }));
+      document.getElementById("setupModal").classList.add("hidden");
+      showToast("設定しました");
     });
 
     // 管理者ログイン
-    refs.adminLoginButton.addEventListener("click", () => {
-      openModal("adminModal");
-    });
-
-    refs.adminLogoutButton.addEventListener("click", async () => {
-      try {
-        await signOut(auth);
-        state.isAdmin = false;
-        showToast("ログアウトしました");
-      } catch (error) {
-        showToast("ログアウトに失敗しました");
-      }
-    });
-
     document.getElementById("adminForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("adminEmail").value;
@@ -760,22 +781,98 @@
       }
     });
 
-    document.addEventListener("click", (e) => {
-      if (e.target.closest("[data-close-modal]")) {
-        closeModal(e.target.closest("[data-close-modal]").dataset.closeModal);
+    // 投稿フォーム送信
+    document.getElementById("postForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const title = document.getElementById("postTitle").value;
+      const body = document.getElementById("postBody").value;
+      const category = document.getElementById("postCategory").value;
+      const target = document.getElementById("postTarget").value;
+
+      try {
+        await addDoc(collection(db, "posts"), {
+          title,
+          body,
+          category,
+          classTarget: target,
+          date: new Date().toISOString().split('T')[0],
+          createdAt: new Date().toISOString()
+        });
+        document.getElementById("postForm").reset();
+        showToast("投稿しました");
+      } catch (error) {
+        showToast("投稿に失敗しました");
       }
-      if (e.target.classList.contains("modal")) {
-        closeModal(e.target.id);
-      }
+    });
+
+    // 管理者ボタン
+    document.getElementById("adminLoginButton").addEventListener("click", () => {
+      document.getElementById("adminModal").classList.remove("hidden");
+    });
+
+    document.getElementById("adminLogoutButton").addEventListener("click", async () => {
+      await signOut(auth);
+      showToast("ログアウトしました");
+    });
+
+    // ハンバーガーメニュー
+    document.getElementById("mobileMenuButton").addEventListener("click", () => {
+      document.getElementById("mobileMenuPanel").classList.toggle("active");
+      document.getElementById("mobileMenuOverlay").classList.toggle("active");
+    });
+
+    document.getElementById("mobileMenuOverlay").addEventListener("click", () => {
+      document.getElementById("mobileMenuPanel").classList.remove("active");
+      document.getElementById("mobileMenuOverlay").classList.remove("active");
+    });
+
+    document.querySelectorAll(".mobile-menu-item").forEach(item => {
+      item.addEventListener("click", () => {
+        state.categoryFilter = item.dataset.filter;
+        document.querySelectorAll("[data-category-filter]").forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.categoryFilter === state.categoryFilter);
+        });
+        renderPosts();
+        document.getElementById("mobileMenuPanel").classList.remove("active");
+        document.getElementById("mobileMenuOverlay").classList.remove("active");
+      });
+    });
+
+    // PCフィルター
+    document.querySelectorAll("[data-category-filter]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        state.categoryFilter = btn.dataset.categoryFilter;
+        document.querySelectorAll("[data-category-filter]").forEach(b => {
+          b.classList.toggle("active", b.dataset.categoryFilter === state.categoryFilter);
+        });
+        renderPosts();
+      });
+    });
+
+    // Firebase
+    const postsRef = collection(db, "posts");
+    onSnapshot(postsRef, (snapshot) => {
+      state.posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      // コメントを読み込み
+      state.posts.forEach(post => {
+        const commentsRef = collection(db, "posts", post.id, "comments");
+        onSnapshot(commentsRef, (commentSnapshot) => {
+          state.comments[post.id] = commentSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          renderPosts();
+        });
+      });
+      renderPosts();
     });
 
     onAuthStateChanged(auth, (user) => {
       state.isAdmin = !!user;
-      refs.adminLoginButton.hidden = state.isAdmin;
-      refs.adminLogoutButton.hidden = !state.isAdmin;
+      document.getElementById("adminLoginButton").hidden = state.isAdmin;
+      document.getElementById("adminLogoutButton").hidden = !state.isAdmin;
+      document.getElementById("adminPostForm").style.display = state.isAdmin ? "block" : "none";
     });
 
-    loadPosts();
+    loadUserData();
   </script>
 </body>
 </html>
