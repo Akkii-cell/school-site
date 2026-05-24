@@ -513,7 +513,6 @@
     <div class="admin-footer">
       <button class="button admin-button-small" id="adminLoginButton" type="button">管理者</button>
       <button class="ghost-button admin-button-small" id="adminDashboardButton" type="button" hidden>ダッシュボード</button>
-      <button class="danger-button admin-button-small" id="logoutButton" type="button" hidden>ログアウト</button>
     </div>
 
     <main class="shell">
@@ -809,7 +808,6 @@
         document.getElementById("adminPostForm").style.display = state.isAdmin ? "block" : "none";
         document.getElementById("adminLoginButton").hidden = state.isAdmin;
         document.getElementById("adminDashboardButton").hidden = !state.isAdmin;
-        document.getElementById("logoutButton").hidden = !state.isAdmin;
 
         // 投稿とコメントを読み込み
         const postsRef = collection(db, "posts");
@@ -883,11 +881,6 @@
     });
 
     // === ログアウト ===
-    document.getElementById("logoutButton").addEventListener("click", async () => {
-      await signOut(auth);
-      showToast("ログアウトしました");
-    });
-
     document.getElementById("logoutPendingButton").addEventListener("click", async () => {
       await signOut(auth);
       showToast("ログアウトしました");
