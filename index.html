@@ -510,9 +510,8 @@
       <button class="mobile-menu-item" data-filter="連絡事項">連絡事項</button>
     </div>
 
-    <div class="admin-footer">
-      <button class="button admin-button-small" id="adminLoginButton" type="button">管理者</button>
-      <button class="ghost-button admin-button-small" id="adminDashboardButton" type="button" hidden>ダッシュボード</button>
+    <div class="admin-footer" id="adminFooter" style="display: none;">
+      <button class="ghost-button admin-button-small" id="adminDashboardButton" type="button">ダッシュボード</button>
     </div>
 
     <main class="shell">
@@ -808,6 +807,7 @@
         document.getElementById("adminPostForm").style.display = state.isAdmin ? "block" : "none";
         document.getElementById("adminLoginButton").hidden = state.isAdmin;
         document.getElementById("adminDashboardButton").hidden = !state.isAdmin;
+        document.getElementById("adminFooter").style.display = state.isAdmin ? "block" : "none";
 
         // 投稿とコメントを読み込み
         const postsRef = collection(db, "posts");
