@@ -851,13 +851,7 @@
       }
     });
 
-    // === メール登録 ===
-    let isSignupMode = false;
-    document.getElementById("signupToggleButton").addEventListener("click", () => {
-      isSignupMode = !isSignupMode;
-      document.getElementById("signupToggleButton").textContent = isSignupMode ? "ログイン画面に戻る" : "アカウント作成";
-      document.getElementById("emailLoginForm").querySelector("button").textContent = isSignupMode ? "アカウント作成" : "メールでログイン";
-    });
+    // === メール登録（自動アカウント作成に変更） ===
 
     document.getElementById("emailLoginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
