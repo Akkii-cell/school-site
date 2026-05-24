@@ -786,7 +786,7 @@
       try {
         const commentsRef = collection(db, "posts", postId, "comments");
         await addDoc(commentsRef, {
-          author: state.user.displayName || state.user.email,
+          author: state.userName,
           text: text,
           createdAt: new Date().toISOString()
         });
@@ -1120,7 +1120,8 @@
           pendingList.innerHTML = pending.map(user => `
             <div style="background: rgba(248, 250, 252, 0.9); border: 1px solid var(--border); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
               <div>
-                <strong style="display: block; margin-bottom: 4px;">${user.email}</strong>
+                <strong style="display: block; margin-bottom: 4px;">${user.name || "未設定"}</strong>
+                <small style="color: var(--muted); display: block; margin-bottom: 4px;">${user.email}</small>
                 <small style="color: var(--muted);">申請日: ${new Date(user.appliedAt).toLocaleDateString("ja-JP")}</small>
               </div>
               <div style="display: flex; gap: 8px;">
