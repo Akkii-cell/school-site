@@ -483,8 +483,8 @@
   </div>
 
   <!-- 初回セットアップモーダル -->
-  <div class="modal" id="setupModal">
-    <div class="modal-panel" style="width: min(520px, 100%);">
+  <div class="modal hidden" id="setupModal">
+    <div class="modal-panel" style="width: min(520px, 100%); max-height: 90vh; overflow-y: auto;">
       <h2 class="modal-title">はじめてのご利用</h2>
       <p style="color: var(--muted); margin-bottom: 20px;">お名前とクラスを入力してください。</p>
       <form id="setupForm" style="display: grid; gap: 16px;">
@@ -500,6 +500,25 @@
             <option value="7-2">7-2組</option>
           </select>
         </div>
+
+        <div style="margin-top: 12px; padding: 16px; background: rgba(248, 250, 252, 0.9); border-radius: 12px; max-height: 200px; overflow-y: auto; font-size: 0.85rem; line-height: 1.6; color: #555;">
+          <strong style="display: block; margin-bottom: 12px;">利用規約とプライバシーポリシーに同意いただく必要があります。</strong>
+          <p><strong>利用規約</strong></p>
+          <p><strong>第1条（目的）</strong><br>本サイトは、学校内における予定・宿題・連絡事項の共有およびコミュニケーションを目的とします。</p>
+          <p><strong>第2条（利用対象）</strong><br>本サイトは、関係する生徒および管理者のみが利用するものとします。</p>
+          <p><strong>第3条（禁止事項）</strong><br>利用者は、以下の行為を行ってはなりません。他人を傷つける発言、誹謗中傷、不適切な内容や画像の投稿、なりすまし行為、個人情報（住所・電話番号など）の投稿、サイトの運営を妨害する行為。</p>
+          <p><strong>第4条（投稿・コメント）</strong><br>投稿・コメントの内容については、利用者が責任を負います。不適切と判断された場合、管理者により削除されることがあります。</p>
+          <p><strong>第5条（管理者権限）</strong><br>管理者は、投稿およびコメントの編集・削除、不適切な利用への対応を行うことができます。</p>
+          <p><strong>第6条（データの取り扱い）</strong><br>投稿・コメントなどのデータはシステム上に保存されます。</p>
+          <p style="margin-top: 12px;"><strong>プライバシーポリシー</strong></p>
+          <p>本サイトでは、名前、クラス、投稿内容・コメント内容を取得する場合があります。取得した情報は、サイトの運営および機能提供、利用状況の把握、不適切な利用への対応に利用します。取得した情報を第三者に提供することはありません。</p>
+        </div>
+
+        <label style="display: flex; align-items: center; gap: 8px;">
+          <input id="agreeCheckbox" type="checkbox" required>
+          <span style="font-size: 0.9rem;">利用規約とプライバシーポリシーに同意します</span>
+        </label>
+
         <button type="submit" class="button" style="width: 100%;">始める</button>
       </form>
     </div>
