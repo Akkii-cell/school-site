@@ -435,30 +435,51 @@
   <!-- ログイン画面 -->
   <div class="modal" id="loginModal">
     <div class="modal-panel" style="width: min(520px, 100%);">
-      <h2 class="modal-title">ログイン</h2>
-      <p style="color: var(--muted); margin-bottom: 24px;">Google または メールアドレスでログインしてください。</p>
-      
-      <div style="display: grid; gap: 12px;">
-        <button class="button" id="googleLoginButton" type="button" style="width: 100%;">
-          Google でログイン
-        </button>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 class="modal-title">ログイン</h2>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" id="userTabButton" class="ghost-button" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem; font-weight: 700;">ユーザー</button>
+          <button type="button" id="adminTabButton" class="ghost-button" style="min-height: 36px; padding: 0 12px; font-size: 0.75rem;">管理者</button>
+        </div>
+      </div>
+
+      <!-- ユーザーログイン -->
+      <div id="userLoginTab">
+        <p style="color: var(--muted); margin-bottom: 24px;">Google または メールアドレスでログインしてください。</p>
         
-        <div style="display: flex; align-items: center; gap: 12px; margin: 20px 0;">
-          <div style="flex: 1; height: 1px; background: var(--border);"></div>
-          <span style="color: var(--muted); font-size: 0.9rem;">または</span>
-          <div style="flex: 1; height: 1px; background: var(--border);"></div>
-        </div>
+        <div style="display: grid; gap: 12px;">
+          <button class="button" id="googleLoginButton" type="button" style="width: 100%;">
+            Google でログイン
+          </button>
+          
+          <div style="display: flex; align-items: center; gap: 12px; margin: 20px 0;">
+            <div style="flex: 1; height: 1px; background: var(--border);"></div>
+            <span style="color: var(--muted); font-size: 0.9rem;">または</span>
+            <div style="flex: 1; height: 1px; background: var(--border);"></div>
+          </div>
 
-        <form id="emailLoginForm" style="display: grid; gap: 12px;">
-          <input id="emailInput" type="email" placeholder="メールアドレス" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
-          <input id="passwordInput" type="password" placeholder="パスワード" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
-          <button type="submit" class="button" style="width: 100%;">メールでログイン</button>
+          <form id="emailLoginForm" style="display: grid; gap: 12px;">
+            <input id="emailInput" type="email" placeholder="メールアドレス" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+            <input id="passwordInput" type="password" placeholder="パスワード" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+            <button type="submit" class="button" style="width: 100%;">メールでログイン</button>
+          </form>
+
+          <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+            <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 12px;">アカウントがない場合</p>
+            <button type="button" id="signupToggleButton" class="ghost-button" style="width: 100%;">アカウント作成</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 管理者ログイン -->
+      <div id="adminLoginTab" style="display: none;">
+        <p style="color: var(--muted); margin-bottom: 24px; font-size: 0.9rem;">管理者用ログインページ</p>
+        
+        <form id="adminLoginForm" style="display: grid; gap: 12px;">
+          <input id="adminEmailInput" type="email" placeholder="メールアドレス" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+          <input id="adminPasswordInput" type="password" placeholder="パスワード" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+          <button type="submit" class="button" style="width: 100%;">ログイン</button>
         </form>
-
-        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
-          <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 12px;">アカウントがない場合</p>
-          <button type="button" id="signupToggleButton" class="ghost-button" style="width: 100%;">アカウント作成</button>
-        </div>
       </div>
     </div>
   </div>
@@ -870,6 +891,39 @@
     document.getElementById("logoutPendingButton").addEventListener("click", async () => {
       await signOut(auth);
       showToast("ログアウトしました");
+    });
+
+    // === タブ切り替え ===
+    document.getElementById("userTabButton").addEventListener("click", () => {
+      document.getElementById("userLoginTab").style.display = "block";
+      document.getElementById("adminLoginTab").style.display = "none";
+      document.getElementById("userTabButton").classList.remove("ghost-button");
+      document.getElementById("userTabButton").classList.add("button");
+      document.getElementById("adminTabButton").classList.remove("button");
+      document.getElementById("adminTabButton").classList.add("ghost-button");
+    });
+
+    document.getElementById("adminTabButton").addEventListener("click", () => {
+      document.getElementById("userLoginTab").style.display = "none";
+      document.getElementById("adminLoginTab").style.display = "block";
+      document.getElementById("userTabButton").classList.remove("button");
+      document.getElementById("userTabButton").classList.add("ghost-button");
+      document.getElementById("adminTabButton").classList.remove("ghost-button");
+      document.getElementById("adminTabButton").classList.add("button");
+    });
+
+    // === 管理者ログイン ===
+    document.getElementById("adminLoginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("adminEmailInput").value;
+      const password = document.getElementById("adminPasswordInput").value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        showToast("ログインしました");
+      } catch (error) {
+        showToast("ログインに失敗しました");
+      }
     });
 
     // === 投稿フォーム ===
