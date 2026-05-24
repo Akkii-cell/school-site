@@ -803,8 +803,6 @@
         document.getElementById("mainContent").style.display = "block";
         
         document.getElementById("adminPostForm").style.display = state.isAdmin ? "block" : "none";
-        document.getElementById("adminLoginButton").hidden = state.isAdmin;
-        document.getElementById("adminDashboardButton").hidden = !state.isAdmin;
         document.getElementById("adminFooter").style.display = state.isAdmin ? "block" : "none";
 
         // 投稿とコメントを読み込み
