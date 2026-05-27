@@ -354,6 +354,26 @@
       transform: translateX(-50%) translateY(0);
     }
 
+    .pending-screen {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: var(--bg);
+    }
+
+    .pending-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 40px;
+      max-width: 600px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
     .file-input-wrapper {
       position: relative;
       overflow: hidden;
@@ -382,6 +402,11 @@
       margin-top: 8px;
       border-radius: 8px;
       border: 1px solid var(--border);
+    }
+
+    .admin-footer {
+      display: flex;
+      gap: 8px;
     }
 
     @media (max-width: 768px) {
@@ -443,9 +468,25 @@
     </div>
   </div>
 
+  <!-- 認証待機画面 -->
+  <div id="pendingScreen" style="display: none;">
+    <div class="pending-screen">
+      <div class="pending-panel">
+        <h2 style="font-size: 2rem; letter-spacing: -0.04em; margin-bottom: 16px;">🔒 承認待ちです</h2>
+        <p style="color: var(--muted); font-size: 1.05rem; line-height: 1.8; margin-bottom: 24px;">
+          ご申請ありがとうございました。<br>
+          管理者の確認後、このサイトをご利用いただけるようになります。<br>
+          <strong id="pendingUserInfo"></strong>
+        </p>
+        <button class="danger-button" id="logoutPendingButton" style="width: 100%;">ログアウト</button>
+      </div>
+    </div>
+  </div>
+
   <!-- メインサイト -->
   <div id="mainContent" style="display: none;">
-    <div class="admin-footer" id="adminFooter" style="display: none; position: fixed; bottom: 16px; right: 16px; z-index: 100;">
+    <div style="position: fixed; bottom: 16px; right: 16px; z-index: 100; display: flex; gap: 8px;">
+      <button class="ghost-button" id="adminDashboardButton" type="button" style="display: none; min-height: 40px; padding: 0 12px; font-size: 0.85rem;">ダッシュボード</button>
       <button class="ghost-button" id="logoutButton" type="button" style="min-height: 40px; padding: 0 12px; font-size: 0.85rem;">ログアウト</button>
     </div>
 
@@ -649,6 +690,30 @@
     </div>
   </div>
 
+  <!-- 管理者ダッシュボード -->
+  <div class="modal hidden" id="adminDashboardModal">
+    <div class="modal-panel" style="width: min(800px, 100%); max-height: 90vh; overflow: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 class="modal-title">管理者ダッシュボード</h2>
+        <button type="button" id="closeAdminDashboard" class="ghost-button" style="min-height: 40px;">閉じる</button>
+      </div>
+      <div style="display: grid; gap: 24px;">
+        <div>
+          <h3 style="font-size: 1.2rem; margin-bottom: 16px;">📊 申請中のユーザー</h3>
+          <div id="pendingUsersListAdmin" style="display: grid; gap: 12px;"></div>
+        </div>
+        <div>
+          <h3 style="font-size: 1.2rem; margin-bottom: 16px;">✅ 承認済みユーザー</h3>
+          <div id="allowedUsersListAdmin" style="display: grid; gap: 12px;"></div>
+        </div>
+        <div>
+          <h3 style="font-size: 1.2rem; margin-bottom: 16px;">📢 通報</h3>
+          <div id="reportsListAdmin" style="display: grid; gap: 12px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script type="module">
@@ -696,7 +761,10 @@
     const auth = getAuth(firebaseApp);
     const db = getFirestore(firebaseApp);
     const storage = getStorage(firebaseApp);
+    
+    // 【修正】Google認証プロバイダーの設定
     const googleProvider = new GoogleAuthProvider();
+    googleProvider.setCustomParameters({ 'prompt': 'select_account' });
 
     const ADMIN_EMAIL = "daishi_a@icloud.com";
     const NG_WORDS = ["死ね", "うざい", "きもい", "バカ", "アホ", "クズ"];
@@ -719,6 +787,11 @@
       commentMuteEnd: {},
       reportingTarget: null,
       postUnsubscribe: null,
+      adminUnsubscribes: {
+        pendingUsers: null,
+        allowedUsers: null,
+        reports: null
+      },
       dateButtonListenersAttached: false
     };
 
@@ -780,7 +853,6 @@
         }
 
         try {
-          // 【修正2】フィールド名を uid に統一
           await addDoc(collection(db, "posts", postId, "comments"), {
             author: state.userName,
             text: text,
@@ -921,7 +993,6 @@
           commentsContainer.innerHTML = postComments.length > 0
             ? postComments.map(comment => {
                 const isHidden = comment.hidden || false;
-                // 【修正5】uid で判定（同姓同名の人と混同しない）
                 const canDelete = state.isAdmin || state.user.uid === comment.uid;
                 
                 return `
@@ -965,6 +1036,19 @@
       state.comments = {};
     }
 
+    function clearAdminListeners() {
+      Object.values(state.adminUnsubscribes).forEach(unsub => {
+        if (typeof unsub === "function") {
+          unsub();
+        }
+      });
+      state.adminUnsubscribes = {
+        pendingUsers: null,
+        allowedUsers: null,
+        reports: null
+      };
+    }
+
     document.addEventListener("click", async (e) => {
       if (e.target.classList.contains("deletePost-btn")) {
         const postId = e.target.dataset.postId;
@@ -997,7 +1081,6 @@
         try {
           const commentRef = doc(db, "posts", postId, "comments", commentId);
           const commentSnap = await getDoc(commentRef);
-          // 【修正1】updateDoc のインポート追加（既にimportに含まれている）
           await updateDoc(commentRef, { likes: (commentSnap.data().likes || 0) + 1 });
         } catch (error) {
           console.error("いいね更新エラー:", error);
@@ -1011,7 +1094,6 @@
         try {
           const commentRef = doc(db, "posts", postId, "comments", commentId);
           const commentSnap = await getDoc(commentRef);
-          // 【修正1】updateDoc のインポート追加（既にimportに含まれている）
           await updateDoc(commentRef, { dislikes: (commentSnap.data().dislikes || 0) + 1 });
         } catch (error) {
           console.error("低評価更新エラー:", error);
@@ -1063,7 +1145,6 @@
         }
 
         try {
-          // 【修正2】フィールド名を uid に統一
           await addDoc(collection(db, "posts"), {
             title,
             body,
@@ -1177,7 +1258,6 @@
 
     document.getElementById("googleLoginButton")?.addEventListener("click", async () => {
       try {
-        // 【修正】Google認証追加
         await signInWithPopup(auth, googleProvider);
       } catch (error) {
         console.error("Google ログインエラー:", error);
@@ -1220,7 +1300,6 @@
       const { postId, commentId } = state.reportingTarget;
 
       try {
-        // 【修正2】フィールド名を uid に統一
         await addDoc(collection(db, "reports"), {
           postId,
           commentId: commentId || null,
@@ -1237,6 +1316,137 @@
       }
     });
 
+    document.getElementById("adminDashboardButton")?.addEventListener("click", () => {
+      document.getElementById("adminDashboardModal").classList.remove("hidden");
+      loadAdminData();
+    });
+
+    document.getElementById("closeAdminDashboard")?.addEventListener("click", () => {
+      document.getElementById("adminDashboardModal").classList.add("hidden");
+      clearAdminListeners();
+    });
+
+    async function loadAdminData() {
+      clearAdminListeners();
+
+      const pendingList = document.getElementById("pendingUsersListAdmin");
+      const allowedList = document.getElementById("allowedUsersListAdmin");
+      const reportsList = document.getElementById("reportsListAdmin");
+
+      pendingList.innerHTML = "";
+      allowedList.innerHTML = "";
+      reportsList.innerHTML = "";
+
+      state.adminUnsubscribes.pendingUsers = onSnapshot(collection(db, "pendingUsers"), (snapshot) => {
+        if (snapshot.empty) {
+          pendingList.innerHTML = `<p style="color: var(--muted);">申請者なし</p>`;
+          return;
+        }
+
+        pendingList.innerHTML = snapshot.docs.map(doc => {
+          const email = doc.id;
+          return `
+            <div style="background: rgba(248, 250, 252, 0.9); border: 1px solid var(--border); border-radius: 16px; padding: 16px;">
+              <p><strong>${email}</strong></p>
+              <button class="button" onclick="window.approveUser('${email}');" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem; margin-right: 8px;">承認</button>
+              <button class="danger-button" onclick="window.rejectUser('${email}');" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">拒否</button>
+            </div>
+          `;
+        }).join("");
+      });
+
+      state.adminUnsubscribes.allowedUsers = onSnapshot(collection(db, "allowedUsers"), (snapshot) => {
+        if (snapshot.empty) {
+          allowedList.innerHTML = `<p style="color: var(--muted);">承認済みユーザーなし</p>`;
+          return;
+        }
+
+        allowedList.innerHTML = snapshot.docs.map(doc => {
+          const email = doc.id;
+          return `
+            <div style="background: rgba(248, 250, 252, 0.9); border: 1px solid var(--border); border-radius: 16px; padding: 16px;">
+              <p><strong>${email}</strong></p>
+              <button class="danger-button" onclick="window.removeUser('${email}');" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>
+            </div>
+          `;
+        }).join("");
+      });
+
+      state.adminUnsubscribes.reports = onSnapshot(collection(db, "reports"), (snapshot) => {
+        if (snapshot.empty) {
+          reportsList.innerHTML = `<p style="color: var(--muted);">通報なし</p>`;
+          return;
+        }
+
+        reportsList.innerHTML = snapshot.docs.map(doc => {
+          const report = doc.data();
+          return `
+            <div style="background: rgba(248, 250, 252, 0.9); border: 1px solid var(--border); border-radius: 16px; padding: 16px;">
+              <p><strong>理由:</strong> ${report.reason}</p>
+              <p><strong>報告日時:</strong> ${new Date(report.createdAt).toLocaleDateString("ja-JP")}</p>
+              <button class="danger-button" onclick="window.deleteReport('${doc.id}');" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>
+            </div>
+          `;
+        }).join("");
+      });
+    }
+
+    window.approveUser = async function(email) {
+      if (!confirm(`${email} を承認しますか？`)) return;
+      try {
+        await setDoc(doc(db, "allowedUsers", email), {
+          email: email,
+          approvedAt: new Date().toISOString()
+        });
+        await deleteDoc(doc(db, "pendingUsers", email));
+        showToast("ユーザーを承認しました");
+        loadAdminData();
+      } catch (error) {
+        console.error("承認エラー:", error);
+        showToast("承認に失敗しました");
+      }
+    };
+
+    window.rejectUser = async function(email) {
+      if (!confirm("申請を拒否しますか？")) return;
+      try {
+        await deleteDoc(doc(db, "pendingUsers", email));
+        showToast("申請を拒否しました");
+        loadAdminData();
+      } catch (error) {
+        console.error("拒否エラー:", error);
+        showToast("拒否に失敗しました");
+      }
+    };
+
+    window.removeUser = async function(email) {
+      if (!confirm(`${email} のアクセスを取り消しますか？`)) return;
+      try {
+        await deleteDoc(doc(db, "allowedUsers", email));
+        showToast("ユーザーを削除しました");
+        loadAdminData();
+      } catch (error) {
+        console.error("削除エラー:", error);
+        showToast("削除に失敗しました");
+      }
+    };
+
+    window.deleteReport = async function(reportId) {
+      try {
+        await deleteDoc(doc(db, "reports", reportId));
+        showToast("通報を削除しました");
+        loadAdminData();
+      } catch (error) {
+        console.error("削除エラー:", error);
+        showToast("削除に失敗しました");
+      }
+    };
+
+    document.getElementById("logoutPendingButton")?.addEventListener("click", async () => {
+      await signOut(auth);
+      showToast("ログアウトしました");
+    });
+
     document.getElementById("logoutButton")?.addEventListener("click", async () => {
       await signOut(auth);
       showToast("ログアウトしました");
@@ -1247,6 +1457,7 @@
         clearCommentListeners();
         document.getElementById("loginModal").classList.remove("hidden");
         document.getElementById("mainContent").style.display = "none";
+        document.getElementById("pendingScreen").style.display = "none";
         return;
       }
 
@@ -1261,8 +1472,9 @@
         document.getElementById("loginModal").classList.add("hidden");
         document.getElementById("mainContent").style.display = "block";
         document.getElementById("setupModal").classList.add("hidden");
+        document.getElementById("pendingScreen").style.display = "none";
         
-        document.getElementById("adminFooter").style.display = "block";
+        document.getElementById("adminDashboardButton").style.display = "block";
         document.getElementById("adminPostForm").style.display = "block";
         document.getElementById("heroLead").textContent = "【管理者モード】すべてのクラスの投稿が表示されます。";
 
@@ -1295,7 +1507,6 @@
         return;
       }
 
-      // 【修正4】メールベースで承認管理（UIDベースではなく）
       const allowedRef = doc(db, "allowedUsers", user.email);
       const allowedSnap = await getDoc(allowedRef);
 
@@ -1308,6 +1519,7 @@
         if (!savedSetup) {
           document.getElementById("loginModal").classList.add("hidden");
           document.getElementById("mainContent").style.display = "none";
+          document.getElementById("pendingScreen").style.display = "none";
           document.getElementById("setupModal").classList.remove("hidden");
           return;
         }
@@ -1319,9 +1531,10 @@
         document.getElementById("loginModal").classList.add("hidden");
         document.getElementById("mainContent").style.display = "block";
         document.getElementById("setupModal").classList.add("hidden");
+        document.getElementById("pendingScreen").style.display = "none";
         
+        document.getElementById("adminDashboardButton").style.display = "none";
         document.getElementById("adminPostForm").style.display = "none";
-        document.getElementById("adminFooter").style.display = "block";
 
         clearCommentListeners();
         attachDateButtonListeners();
@@ -1353,7 +1566,9 @@
         clearCommentListeners();
         document.getElementById("loginModal").classList.add("hidden");
         document.getElementById("mainContent").style.display = "none";
-        showToast("このメールアドレスは承認されていません。管理者に連絡してください。");
+        document.getElementById("setupModal").classList.add("hidden");
+        document.getElementById("pendingScreen").style.display = "block";
+        document.getElementById("pendingUserInfo").textContent = `メール: ${user.email}`;
       }
     });
 
