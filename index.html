@@ -178,12 +178,6 @@
       word-break: break-all;
     }
 
-    .post-meta {
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-bottom: 16px;
-    }
-
     .badge {
       display: inline-block;
       padding: 6px 12px;
@@ -402,11 +396,6 @@
       margin-top: 8px;
       border-radius: 8px;
       border: 1px solid var(--border);
-    }
-
-    .admin-footer {
-      display: flex;
-      gap: 8px;
     }
 
     @media (max-width: 768px) {
@@ -717,7 +706,8 @@
   <div class="toast" id="toast"></div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+    // 【修正2】Firebase 10.x系を使用
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import {
       getAuth,
       signInWithEmailAndPassword,
@@ -726,7 +716,7 @@
       GoogleAuthProvider,
       signOut,
       onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import {
       getFirestore,
       collection,
@@ -739,14 +729,18 @@
       updateDoc,
       query,
       where,
-      getDocs
-    } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+      getDocs,
+      orderBy,
+      limit,
+      increment,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import {
       getStorage,
       ref,
       uploadBytes,
       getDownloadURL
-    } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-storage.js";
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAkMLCyIC0x9bT63LEih1x7BXe3XYVuknQ",
@@ -762,7 +756,6 @@
     const db = getFirestore(firebaseApp);
     const storage = getStorage(firebaseApp);
     
-    // 【修正】Google認証プロバイダーの設定
     const googleProvider = new GoogleAuthProvider();
     googleProvider.setCustomParameters({ 'prompt': 'select_account' });
 
@@ -792,7 +785,8 @@
         allowedUsers: null,
         reports: null
       },
-      dateButtonListenersAttached: false
+      dateButtonListenersAttached: false,
+      allowedUserWatcher: null
     };
 
     function showToast(message) {
@@ -856,7 +850,7 @@
           await addDoc(collection(db, "posts", postId, "comments"), {
             author: state.userName,
             text: text,
-            createdAt: new Date().toISOString(),
+            createdAt: serverTimestamp(),
             likes: 0,
             dislikes: 0,
             hidden: false,
@@ -954,7 +948,7 @@
         return `
           <div class="${postClass}">
             <div class="post-header">
-              <h3 class="post-title">${post.title}</h3>
+              <h3 class="post-title">${escapeHtml(post.title)}</h3>
               ${state.isAdmin ? `<button class="danger-button deletePost-btn" data-post-id="${post.id}" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>` : ""}
             </div>
             <div style="margin-bottom: 12px;">
@@ -962,9 +956,9 @@
               <span class="badge" style="background: rgba(15, 23, 42, 0.06); color: #334155;">${post.classTarget === "両方" ? "全体向け" : post.classTarget + "向け"}</span>
               <span class="badge" style="background: rgba(15, 23, 42, 0.06); color: #334155;">${post.startDate}～${post.endDate}</span>
             </div>
-            <p class="post-body">${post.body}</p>
+            <p class="post-body">${escapeHtml(post.body)}</p>
             ${post.imageUrl ? `<img src="${post.imageUrl}" class="post-image" alt="投稿画像">` : ""}
-            ${post.link ? `<a href="${post.link}" target="_blank" class="post-link">🔗 ${post.link}</a>` : ""}
+            ${post.link ? `<a href="${post.link}" target="_blank" class="post-link">🔗 ${escapeHtml(post.link)}</a>` : ""}
             
             <div style="margin-top: 16px; border-top: 1px solid rgba(148, 163, 184, 0.16); padding-top: 16px;">
               <div style="display: flex; gap: 8px;">
@@ -995,10 +989,13 @@
                 const isHidden = comment.hidden || false;
                 const canDelete = state.isAdmin || state.user.uid === comment.uid;
                 
+                // 【修正22】サーバータイムスタンプが確定していない場合のガード
+                const createdAt = comment.createdAt ? new Date(comment.createdAt.toDate?.() || comment.createdAt) : new Date();
+                
                 return `
                   <div class="comment-item" ${isHidden ? "style='opacity: 0.5; background: rgba(255, 0, 0, 0.05);'" : ""}>
-                    <div class="comment-author">${isHidden ? "【非表示】" : comment.author}</div>
-                    <div class="comment-text">${isHidden ? "このコメントは非表示です。" : comment.text}</div>
+                    <div class="comment-author">${isHidden ? "【非表示】" : escapeHtml(comment.author)}</div>
+                    <div class="comment-text">${isHidden ? "このコメントは非表示です。" : escapeHtml(comment.text)}</div>
                     <div class="comment-actions">
                       <div class="comment-rating">
                         <button class="rating-btn addLike-btn" data-post-id="${post.id}" data-comment-id="${comment.id}">👍 ${comment.likes || 0}</button>
@@ -1015,6 +1012,13 @@
             : `<p style="color: var(--muted); font-size: 0.9rem;">コメントはまだありません</p>`;
         }
       });
+    }
+
+    // 【修正10】XSS対策：ユーザー入力をエスケープ
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
     function getCategoryClass(category) {
@@ -1036,6 +1040,20 @@
       state.comments = {};
     }
 
+    // 【修正15】削除された投稿のリスナーをクリーンアップ
+    function cleanupDeletedPostListeners(currentPostIds) {
+      Object.keys(state.commentUnsubscribes).forEach(postId => {
+        if (!currentPostIds.includes(postId)) {
+          const unsub = state.commentUnsubscribes[postId];
+          if (typeof unsub === "function") {
+            unsub();
+          }
+          delete state.commentUnsubscribes[postId];
+          delete state.comments[postId];
+        }
+      });
+    }
+
     function clearAdminListeners() {
       Object.values(state.adminUnsubscribes).forEach(unsub => {
         if (typeof unsub === "function") {
@@ -1054,6 +1072,13 @@
         const postId = e.target.dataset.postId;
         if (!confirm("投稿を削除しますか？")) return;
         try {
+          // 【修正13】投稿削除時にコメントも一括削除
+          const commentsRef = collection(db, "posts", postId, "comments");
+          const commentDocs = await getDocs(commentsRef);
+          for (const commentDoc of commentDocs.docs) {
+            await deleteDoc(commentDoc.ref);
+          }
+          
           await deleteDoc(doc(db, "posts", postId));
           showToast("投稿を削除しました");
         } catch (error) {
@@ -1080,8 +1105,8 @@
         const commentId = e.target.dataset.commentId;
         try {
           const commentRef = doc(db, "posts", postId, "comments", commentId);
-          const commentSnap = await getDoc(commentRef);
-          await updateDoc(commentRef, { likes: (commentSnap.data().likes || 0) + 1 });
+          // 【修正4, 17】increment()で同時押しでも正確にカウント
+          await updateDoc(commentRef, { likes: increment(1) });
         } catch (error) {
           console.error("いいね更新エラー:", error);
           showToast("いいねに失敗しました");
@@ -1093,8 +1118,8 @@
         const commentId = e.target.dataset.commentId;
         try {
           const commentRef = doc(db, "posts", postId, "comments", commentId);
-          const commentSnap = await getDoc(commentRef);
-          await updateDoc(commentRef, { dislikes: (commentSnap.data().dislikes || 0) + 1 });
+          // 【修正4, 17】increment()で同時押しでも正確にカウント
+          await updateDoc(commentRef, { dislikes: increment(1) });
         } catch (error) {
           console.error("低評価更新エラー:", error);
           showToast("低評価に失敗しました");
@@ -1152,7 +1177,7 @@
             classTarget,
             startDate,
             endDate,
-            createdAt: new Date().toISOString(),
+            createdAt: serverTimestamp(),
             uid: state.user.uid,
             imageUrl: imageUrl || null,
             link: link || null,
@@ -1215,17 +1240,20 @@
           state.postUnsubscribe();
         }
 
-        const postsRef = collection(db, "posts");
+        // 【修正8, 14】最新の20件のみ取得、createdAtで新しい順に並び替え
+        const postsRef = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(20));
         state.postUnsubscribe = onSnapshot(postsRef, (snapshot) => {
           state.posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           
+          const currentPostIds = state.posts.map(p => p.id);
+          cleanupDeletedPostListeners(currentPostIds);
+          
           state.posts.forEach(post => {
             if (!state.commentUnsubscribes[post.id]) {
-              const commentsRef = collection(db, "posts", post.id, "comments");
+              const commentsRef = query(collection(db, "posts", post.id, "comments"), orderBy("createdAt", "asc"));
               state.commentUnsubscribes[post.id] = onSnapshot(commentsRef, (commentSnapshot) => {
                 state.comments[post.id] = commentSnapshot.docs
-                  .map(doc => ({ id: doc.id, ...doc.data() }))
-                  .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                  .map(doc => ({ id: doc.id, ...doc.data() }));
                 renderPosts();
               });
             }
@@ -1305,7 +1333,7 @@
           commentId: commentId || null,
           reason: reason.value,
           uid: state.user.uid,
-          createdAt: new Date().toISOString()
+          createdAt: serverTimestamp()
         });
 
         showToast("通報しました。ありがとうございます。");
@@ -1337,6 +1365,7 @@
       allowedList.innerHTML = "";
       reportsList.innerHTML = "";
 
+      // 【修正18】loadAdminData を承認後に呼び出さない（onSnapshot で自動更新される）
       state.adminUnsubscribes.pendingUsers = onSnapshot(collection(db, "pendingUsers"), (snapshot) => {
         if (snapshot.empty) {
           pendingList.innerHTML = `<p style="color: var(--muted);">申請者なし</p>`;
@@ -1347,7 +1376,7 @@
           const email = doc.id;
           return `
             <div style="background: rgba(248, 250, 252, 0.9); border: 1px solid var(--border); border-radius: 16px; padding: 16px;">
-              <p><strong>${email}</strong></p>
+              <p><strong>${escapeHtml(email)}</strong></p>
               <button class="button" onclick="window.approveUser('${email}');" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem; margin-right: 8px;">承認</button>
               <button class="danger-button" onclick="window.rejectUser('${email}');" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">拒否</button>
             </div>
@@ -1365,7 +1394,7 @@
           const email = doc.id;
           return `
             <div style="background: rgba(248, 250, 252, 0.9); border: 1px solid var(--border); border-radius: 16px; padding: 16px;">
-              <p><strong>${email}</strong></p>
+              <p><strong>${escapeHtml(email)}</strong></p>
               <button class="danger-button" onclick="window.removeUser('${email}');" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>
             </div>
           `;
@@ -1382,8 +1411,8 @@
           const report = doc.data();
           return `
             <div style="background: rgba(248, 250, 252, 0.9); border: 1px solid var(--border); border-radius: 16px; padding: 16px;">
-              <p><strong>理由:</strong> ${report.reason}</p>
-              <p><strong>報告日時:</strong> ${new Date(report.createdAt).toLocaleDateString("ja-JP")}</p>
+              <p><strong>理由:</strong> ${escapeHtml(report.reason)}</p>
+              <p><strong>報告日時:</strong> ${report.createdAt ? new Date(report.createdAt.toDate()).toLocaleDateString("ja-JP") : "不明"}</p>
               <button class="danger-button" onclick="window.deleteReport('${doc.id}');" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>
             </div>
           `;
@@ -1396,11 +1425,12 @@
       try {
         await setDoc(doc(db, "allowedUsers", email), {
           email: email,
-          approvedAt: new Date().toISOString()
+          class: "7-1",
+          approvedAt: serverTimestamp()
         });
         await deleteDoc(doc(db, "pendingUsers", email));
         showToast("ユーザーを承認しました");
-        loadAdminData();
+        // 【修正18】ここで loadAdminData() を呼び出さない（onSnapshot で自動更新される）
       } catch (error) {
         console.error("承認エラー:", error);
         showToast("承認に失敗しました");
@@ -1412,7 +1442,6 @@
       try {
         await deleteDoc(doc(db, "pendingUsers", email));
         showToast("申請を拒否しました");
-        loadAdminData();
       } catch (error) {
         console.error("拒否エラー:", error);
         showToast("拒否に失敗しました");
@@ -1424,7 +1453,6 @@
       try {
         await deleteDoc(doc(db, "allowedUsers", email));
         showToast("ユーザーを削除しました");
-        loadAdminData();
       } catch (error) {
         console.error("削除エラー:", error);
         showToast("削除に失敗しました");
@@ -1435,7 +1463,6 @@
       try {
         await deleteDoc(doc(db, "reports", reportId));
         showToast("通報を削除しました");
-        loadAdminData();
       } catch (error) {
         console.error("削除エラー:", error);
         showToast("削除に失敗しました");
@@ -1448,6 +1475,11 @@
     });
 
     document.getElementById("logoutButton")?.addEventListener("click", async () => {
+      if (state.allowedUserWatcher) {
+        state.allowedUserWatcher();
+      }
+      clearCommentListeners();
+      clearAdminListeners();
       await signOut(auth);
       showToast("ログアウトしました");
     });
@@ -1485,17 +1517,19 @@
           state.postUnsubscribe();
         }
 
-        const postsRef = collection(db, "posts");
+        const postsRef = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(20));
         state.postUnsubscribe = onSnapshot(postsRef, (snapshot) => {
           state.posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           
+          const currentPostIds = state.posts.map(p => p.id);
+          cleanupDeletedPostListeners(currentPostIds);
+          
           state.posts.forEach(post => {
             if (!state.commentUnsubscribes[post.id]) {
-              const commentsRef = collection(db, "posts", post.id, "comments");
+              const commentsRef = query(collection(db, "posts", post.id, "comments"), orderBy("createdAt", "asc"));
               state.commentUnsubscribes[post.id] = onSnapshot(commentsRef, (commentSnapshot) => {
                 state.comments[post.id] = commentSnapshot.docs
-                  .map(doc => ({ id: doc.id, ...doc.data() }))
-                  .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                  .map(doc => ({ id: doc.id, ...doc.data() }));
                 renderPosts();
               });
             }
@@ -1507,69 +1541,88 @@
         return;
       }
 
+      // 【修正7】承認状態を監視して自動で画面を切り替える
       const allowedRef = doc(db, "allowedUsers", user.email);
-      const allowedSnap = await getDoc(allowedRef);
+      state.allowedUserWatcher = onSnapshot(allowedRef, (snap) => {
+        if (snap.exists()) {
+          state.isAllowed = true;
+          state.isAdmin = false;
+          
+          const savedSetup = localStorage.getItem(`user_setup_${user.uid}`);
+          
+          if (!savedSetup) {
+            document.getElementById("loginModal").classList.add("hidden");
+            document.getElementById("mainContent").style.display = "none";
+            document.getElementById("pendingScreen").style.display = "none";
+            document.getElementById("setupModal").classList.remove("hidden");
+            return;
+          }
+          
+          const setup = JSON.parse(savedSetup);
+          state.userName = setup.name;
+          state.userClass = setup.class;
+          
+          document.getElementById("loginModal").classList.add("hidden");
+          document.getElementById("mainContent").style.display = "block";
+          document.getElementById("setupModal").classList.add("hidden");
+          document.getElementById("pendingScreen").style.display = "none";
+          
+          document.getElementById("adminDashboardButton").style.display = "none";
+          document.getElementById("adminPostForm").style.display = "none";
 
-      if (allowedSnap.exists()) {
-        state.isAllowed = true;
-        state.isAdmin = false;
-        
-        const savedSetup = localStorage.getItem(`user_setup_${user.uid}`);
-        
-        if (!savedSetup) {
+          clearCommentListeners();
+          attachDateButtonListeners();
+          setupCommentFormListener();
+
+          if (state.postUnsubscribe) {
+            state.postUnsubscribe();
+          }
+
+          const postsRef = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(20));
+          state.postUnsubscribe = onSnapshot(postsRef, (snapshot) => {
+            state.posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            const currentPostIds = state.posts.map(p => p.id);
+            cleanupDeletedPostListeners(currentPostIds);
+            
+            state.posts.forEach(post => {
+              if (!state.commentUnsubscribes[post.id]) {
+                const commentsRef = query(collection(db, "posts", post.id, "comments"), orderBy("createdAt", "asc"));
+                state.commentUnsubscribes[post.id] = onSnapshot(commentsRef, (commentSnapshot) => {
+                  state.comments[post.id] = commentSnapshot.docs
+                    .map(doc => ({ id: doc.id, ...doc.data() }));
+                  renderPosts();
+                });
+              }
+            });
+            
+            renderPosts();
+          });
+        } else {
+          // 承認されていない
+          clearCommentListeners();
           document.getElementById("loginModal").classList.add("hidden");
           document.getElementById("mainContent").style.display = "none";
-          document.getElementById("pendingScreen").style.display = "none";
-          document.getElementById("setupModal").classList.remove("hidden");
-          return;
+          document.getElementById("setupModal").classList.add("hidden");
+          document.getElementById("pendingScreen").style.display = "block";
+          document.getElementById("pendingUserInfo").textContent = `メール: ${escapeHtml(user.email)}`;
         }
-        
-        const setup = JSON.parse(savedSetup);
-        state.userName = setup.name;
-        state.userClass = setup.class;
-        
-        document.getElementById("loginModal").classList.add("hidden");
-        document.getElementById("mainContent").style.display = "block";
-        document.getElementById("setupModal").classList.add("hidden");
-        document.getElementById("pendingScreen").style.display = "none";
-        
-        document.getElementById("adminDashboardButton").style.display = "none";
-        document.getElementById("adminPostForm").style.display = "none";
-
-        clearCommentListeners();
-        attachDateButtonListeners();
-        setupCommentFormListener();
-
-        if (state.postUnsubscribe) {
-          state.postUnsubscribe();
-        }
-
-        const postsRef = collection(db, "posts");
-        state.postUnsubscribe = onSnapshot(postsRef, (snapshot) => {
-          state.posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          
-          state.posts.forEach(post => {
-            if (!state.commentUnsubscribes[post.id]) {
-              const commentsRef = collection(db, "posts", post.id, "comments");
-              state.commentUnsubscribes[post.id] = onSnapshot(commentsRef, (commentSnapshot) => {
-                state.comments[post.id] = commentSnapshot.docs
-                  .map(doc => ({ id: doc.id, ...doc.data() }))
-                  .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-                renderPosts();
-              });
-            }
-          });
-          
-          renderPosts();
+      }, (error) => {
+        // ドキュメントが存在しない = 未申請ユーザー
+        // 【修正1】pendingUsers にユーザーを登録
+        setDoc(doc(db, "pendingUsers", user.email), {
+          email: user.email,
+          name: user.displayName || "未設定",
+          appliedAt: serverTimestamp()
+        }).then(() => {
+          clearCommentListeners();
+          document.getElementById("loginModal").classList.add("hidden");
+          document.getElementById("mainContent").style.display = "none";
+          document.getElementById("setupModal").classList.add("hidden");
+          document.getElementById("pendingScreen").style.display = "block";
+          document.getElementById("pendingUserInfo").textContent = `メール: ${escapeHtml(user.email)}`;
         });
-      } else {
-        clearCommentListeners();
-        document.getElementById("loginModal").classList.add("hidden");
-        document.getElementById("mainContent").style.display = "none";
-        document.getElementById("setupModal").classList.add("hidden");
-        document.getElementById("pendingScreen").style.display = "block";
-        document.getElementById("pendingUserInfo").textContent = `メール: ${user.email}`;
-      }
+      });
     });
 
     updateDateDisplay();
