@@ -241,6 +241,153 @@
       color: #0071e3;
       margin-right: 6px;
     }
+
+    /* ハンバーガーメニュー */
+    .hamburger-menu {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100vh;
+      background: var(--surface);
+      z-index: 1000;
+      transition: left 0.3s ease;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .hamburger-menu.active {
+      left: 0;
+    }
+
+    .hamburger-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.44);
+      z-index: 999;
+    }
+
+    .hamburger-overlay.active {
+      display: block;
+    }
+
+    .hamburger-button {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 101;
+      width: 44px;
+      height: 44px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+
+    .hamburger-button.active {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      left: auto;
+    }
+
+    .menu-category {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .menu-category-btn {
+      padding: 16px;
+      background: linear-gradient(135deg, #0071e3, #2e90fa);
+      color: #fff;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .category-view {
+      display: none;
+    }
+
+    .category-view.active {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .hamburger-button {
+        display: flex;
+      }
+
+      .hamburger-menu {
+        display: block;
+      }
+
+      .hamburger-overlay {
+        display: none;
+      }
+
+      .toolbar {
+        display: none;
+      }
+
+      .shell {
+        padding: 20px 0 100px;
+      }
+
+      .hero-card {
+        padding: 20px;
+      }
+
+      .panel {
+        padding: 16px;
+      }
+
+      .post-card {
+        padding: 16px;
+      }
+
+      .admin-footer {
+        bottom: 8px;
+        right: 8px;
+      }
+
+      .hamburger-menu {
+        left: -100%;
+        width: 100%;
+      }
+
+      .hamburger-menu.active {
+        left: 0;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .hamburger-button {
+        display: none;
+      }
+
+      .hamburger-menu {
+        display: none;
+      }
+
+      .hamburger-overlay {
+        display: none;
+      }
+
+      .toolbar {
+        display: grid;
+      }
+    }
   </style>
 </head>
 <body>
@@ -272,6 +419,20 @@
     </div>
   </div>
 
+  <!-- ハンバーガーメニュー -->
+  <div class="hamburger-menu" id="hamburgerMenu">
+    <h2 style="margin-bottom: 24px; font-size: 1.2rem;">カテゴリを選択</h2>
+    <div class="menu-category">
+      <button class="menu-category-btn" onclick="window.selectCategory('all')">📋 すべて</button>
+      <button class="menu-category-btn" onclick="window.selectCategory('予定')" style="background: linear-gradient(135deg, #0f9f6e, #10b981);">📅 予定</button>
+      <button class="menu-category-btn" onclick="window.selectCategory('宿題')" style="background: linear-gradient(135deg, #d97706, #f59e0b);">✏️ 宿題</button>
+      <button class="menu-category-btn" onclick="window.selectCategory('連絡事項')" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">📢 連絡事項</button>
+    </div>
+  </div>
+
+  <div class="hamburger-overlay" id="hamburgerOverlay"></div>
+  <button class="hamburger-button" id="hamburgerButton">☰</button>
+
   <!-- メインコンテンツ -->
   <div id="mainContent" style="display: none;">
     <div class="admin-footer" id="adminFooter">
@@ -279,18 +440,27 @@
       <button class="ghost-button" id="logoutButton" style="min-height: 40px; padding: 0 14px; font-size: 0.85rem;">ログアウト</button>
     </div>
 
+    <!-- PC版 ツールバー -->
+    <section class="toolbar frosted" style="display: none;">
+      <div class="toolbar-row">
+        <button class="ghost-button" id="prevDateButton">← 前日</button>
+        <div class="date-display" id="dateDisplay">読み込み中...</div>
+        <button class="ghost-button" id="nextDateButton">次日 →</button>
+      </div>
+    </section>
+
     <main class="shell">
       <section class="hero-card frosted">
-        <h1 class="hero-title">予定・宿題・連絡</h1>
+        <h1 class="hero-title" id="categoryTitle">予定・宿題・連絡</h1>
         <p class="hero-lead" id="heroLead">共有サイト</p>
       </section>
 
-      <!-- 日付ナビゲーション -->
-      <section class="toolbar frosted">
+      <!-- スマホ版 日付ナビゲーション -->
+      <section class="toolbar frosted" id="mobileDateNav" style="display: none;">
         <div class="toolbar-row">
-          <button class="ghost-button" id="prevDateButton">← 前日</button>
-          <div class="date-display" id="dateDisplay">読み込み中...</div>
-          <button class="ghost-button" id="nextDateButton">次日 →</button>
+          <button class="ghost-button" id="prevDateButtonMobile">← 前日</button>
+          <div class="date-display" id="dateDisplayMobile">読み込み中...</div>
+          <button class="ghost-button" id="nextDateButtonMobile">次日 →</button>
         </div>
       </section>
 
@@ -384,7 +554,8 @@
       comments: {},
       commentUnsubscribes: {},
       postUnsubscribe: null,
-      adminUnsubscribes: { pendingUsers: null, allowedUsers: null, reports: null }
+      adminUnsubscribes: { pendingUsers: null, allowedUsers: null, reports: null },
+      categoryFilter: "all"
     };
 
     function showToast(msg) {
@@ -403,7 +574,19 @@
 
     function updateDateDisplay() {
       const options = { year: "numeric", month: "long", day: "numeric", weekday: "short" };
-      document.getElementById("dateDisplay").textContent = state.currentDate.toLocaleDateString("ja-JP", options);
+      const dateStr = state.currentDate.toLocaleDateString("ja-JP", options);
+      document.getElementById("dateDisplay").textContent = dateStr;
+      document.getElementById("dateDisplayMobile").textContent = dateStr;
+    }
+
+    function updateCategoryTitle() {
+      const titles = {
+        "all": "予定・宿題・連絡",
+        "予定": "📅 予定",
+        "宿題": "✏️ 宿題",
+        "連絡事項": "📢 連絡事項"
+      };
+      document.getElementById("categoryTitle").textContent = titles[state.categoryFilter] || "予定・宿題・連絡";
     }
 
     function renderPosts() {
@@ -413,7 +596,8 @@
       const filtered = state.posts.filter(post => {
         const matchesClass = state.isAdmin || post.classTarget === "両方" || post.classTarget === state.userClass;
         const isInRange = today >= post.startDate && today <= post.endDate;
-        return matchesClass && isInRange;
+        const matchesCategory = state.categoryFilter === "all" || post.category === state.categoryFilter;
+        return matchesClass && isInRange && matchesCategory;
       });
 
       container.innerHTML = filtered.length === 0 
@@ -456,6 +640,32 @@
             `).join("");
       });
     }
+
+    // ハンバーガーメニュー制御
+    window.selectCategory = function(category) {
+      state.categoryFilter = category;
+      updateCategoryTitle();
+      renderPosts();
+      document.getElementById("hamburgerMenu").classList.remove("active");
+      document.getElementById("hamburgerOverlay").classList.remove("active");
+      document.getElementById("hamburgerButton").classList.remove("active");
+    };
+
+    document.getElementById("hamburgerButton")?.addEventListener("click", () => {
+      const menu = document.getElementById("hamburgerMenu");
+      const overlay = document.getElementById("hamburgerOverlay");
+      const btn = document.getElementById("hamburgerButton");
+      
+      menu.classList.toggle("active");
+      overlay.classList.toggle("active");
+      btn.classList.toggle("active");
+    });
+
+    document.getElementById("hamburgerOverlay")?.addEventListener("click", () => {
+      document.getElementById("hamburgerMenu").classList.remove("active");
+      document.getElementById("hamburgerOverlay").classList.remove("active");
+      document.getElementById("hamburgerButton").classList.remove("active");
+    });
 
     document.addEventListener("click", async (e) => {
       if (e.target.classList.contains("deletePost-btn")) {
@@ -509,6 +719,18 @@
       renderPosts();
     });
 
+    document.getElementById("prevDateButtonMobile")?.addEventListener("click", () => {
+      state.currentDate.setDate(state.currentDate.getDate() - 1);
+      updateDateDisplay();
+      renderPosts();
+    });
+
+    document.getElementById("nextDateButtonMobile")?.addEventListener("click", () => {
+      state.currentDate.setDate(state.currentDate.getDate() + 1);
+      updateDateDisplay();
+      renderPosts();
+    });
+
     document.addEventListener("submit", async (e) => {
       if (e.target.id === "postForm") {
         e.preventDefault();
@@ -552,6 +774,12 @@
         localStorage.setItem(`user_setup_${state.user.uid}`, JSON.stringify({ name: state.userName, class: state.userClass }));
         document.getElementById("setupModal").classList.add("hidden");
         document.getElementById("mainContent").style.display = "block";
+        
+        // スマホ版なら日付ナビゲーションを表示
+        if (window.innerWidth <= 768) {
+          document.getElementById("mobileDateNav").style.display = "block";
+        }
+        
         initPosts();
         showToast(`${state.userName} でスタート`);
       }
@@ -749,8 +977,14 @@
         document.getElementById("setupModal").classList.add("hidden");
         document.getElementById("adminPostForm").style.display = "block";
         document.getElementById("adminDashboardButton").style.display = "block";
-        document.getElementById("heroLead").textContent = "【管理者モード】";
+        
+        // スマホ版なら日付ナビゲーションを表示
+        if (window.innerWidth <= 768) {
+          document.getElementById("mobileDateNav").style.display = "block";
+        }
+        
         updateDateDisplay();
+        updateCategoryTitle();
         initPosts();
         return;
       }
@@ -770,9 +1004,18 @@
       document.getElementById("mainContent").style.display = "block";
       document.getElementById("setupModal").classList.add("hidden");
       document.getElementById("adminPostForm").style.display = "none";
+      
+      // スマホ版なら日付ナビゲーションを表示
+      if (window.innerWidth <= 768) {
+        document.getElementById("mobileDateNav").style.display = "block";
+      }
+      
       updateDateDisplay();
+      updateCategoryTitle();
       initPosts();
     });
+
+    updateDateDisplay();
   </script>
 </body>
 </html>
