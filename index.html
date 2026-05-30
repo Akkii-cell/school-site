@@ -79,6 +79,12 @@
       align-items: center;
     }
 
+    .date-display {
+      font-size: 1.1rem;
+      font-weight: 700;
+      min-width: 220px;
+    }
+
     .panel {
       padding: 24px;
       margin-bottom: 16px;
@@ -225,10 +231,15 @@
       gap: 8px;
     }
 
-    @media (max-width: 768px) {
-      .shell {
-        width: calc(100vw - 18px);
-      }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: rgba(0, 113, 227, 0.1);
+      color: #0071e3;
+      margin-right: 6px;
     }
   </style>
 </head>
@@ -272,6 +283,15 @@
       <section class="hero-card frosted">
         <h1 class="hero-title">予定・宿題・連絡</h1>
         <p class="hero-lead" id="heroLead">共有サイト</p>
+      </section>
+
+      <!-- 日付ナビゲーション -->
+      <section class="toolbar frosted">
+        <div class="toolbar-row">
+          <button class="ghost-button" id="prevDateButton">← 前日</button>
+          <div class="date-display" id="dateDisplay">読み込み中...</div>
+          <button class="ghost-button" id="nextDateButton">次日 →</button>
+        </div>
       </section>
 
       <section id="adminPostForm" style="display: none;">
@@ -359,6 +379,7 @@
       isAdmin: false,
       userName: "",
       userClass: "",
+      currentDate: new Date(),
       posts: [],
       comments: {},
       commentUnsubscribes: {},
@@ -373,9 +394,21 @@
       setTimeout(() => toast.classList.remove("show"), 2000);
     }
 
+    function getLocalDateString(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function updateDateDisplay() {
+      const options = { year: "numeric", month: "long", day: "numeric", weekday: "short" };
+      document.getElementById("dateDisplay").textContent = state.currentDate.toLocaleDateString("ja-JP", options);
+    }
+
     function renderPosts() {
       const container = document.getElementById("postsContainer");
-      const today = new Date().toISOString().split('T')[0];
+      const today = getLocalDateString(state.currentDate);
 
       const filtered = state.posts.filter(post => {
         const matchesClass = state.isAdmin || post.classTarget === "両方" || post.classTarget === state.userClass;
@@ -390,6 +423,10 @@
               <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px; margin-bottom: 12px;">
                 <h3 style="font-size: 1.2rem; margin: 0;">${post.title}</h3>
                 ${state.isAdmin ? `<button class="danger-button deletePost-btn" data-post-id="${post.id}">削除</button>` : ""}
+              </div>
+              <div style="margin-bottom: 12px;">
+                <span class="badge">${post.category}</span>
+                <span class="badge">${post.startDate}～${post.endDate}</span>
               </div>
               <p class="post-body">${post.body}</p>
               <div id="comments-${post.id}" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);"></div>
@@ -426,10 +463,13 @@
         if (!confirm("削除しますか？")) return;
         try {
           const comments = await getDocs(collection(db, "posts", postId, "comments"));
-          comments.docs.forEach(doc => deleteDoc(doc.ref));
+          for (const commentDoc of comments.docs) {
+            await deleteDoc(commentDoc.ref);
+          }
           await deleteDoc(doc(db, "posts", postId));
           showToast("削除しました");
         } catch (error) {
+          console.error(error);
           showToast("削除失敗");
         }
       }
@@ -455,6 +495,18 @@
           showToast("いいね失敗");
         }
       }
+    });
+
+    document.getElementById("prevDateButton")?.addEventListener("click", () => {
+      state.currentDate.setDate(state.currentDate.getDate() - 1);
+      updateDateDisplay();
+      renderPosts();
+    });
+
+    document.getElementById("nextDateButton")?.addEventListener("click", () => {
+      state.currentDate.setDate(state.currentDate.getDate() + 1);
+      updateDateDisplay();
+      renderPosts();
     });
 
     document.addEventListener("submit", async (e) => {
@@ -501,7 +553,6 @@
         document.getElementById("setupModal").classList.add("hidden");
         document.getElementById("mainContent").style.display = "block";
         initPosts();
-        setupComments();
         showToast(`${state.userName} でスタート`);
       }
 
@@ -560,39 +611,6 @@
       });
     }
 
-    function setupComments() {
-      const container = document.getElementById("postsContainer");
-      container?.addEventListener("submit", async (e) => {
-        const form = e.target.closest(".addComment-form");
-        if (!form) return;
-        e.preventDefault();
-        const postId = form.dataset.postId;
-        const text = form.querySelector("textarea").value.trim();
-        if (!text) return;
-        
-        for (const word of NG_WORDS) {
-          if (text.includes(word)) {
-            showToast("不適切な言葉");
-            return;
-          }
-        }
-
-        try {
-          await addDoc(collection(db, "posts", postId, "comments"), {
-            author: state.userName,
-            text: text,
-            createdAt: serverTimestamp(),
-            likes: 0,
-            uid: state.user.uid
-          });
-          form.querySelector("textarea").value = "";
-          showToast("コメント追加");
-        } catch (error) {
-          showToast("コメント失敗");
-        }
-      });
-    }
-
     document.getElementById("adminDashboardButton")?.addEventListener("click", () => {
       document.getElementById("adminDashboardModal").classList.remove("hidden");
       loadAdminData();
@@ -610,35 +628,43 @@
       const allowedList = document.getElementById("allowedUsersListAdmin");
       const reportsList = document.getElementById("reportsListAdmin");
 
-      pendingList.innerHTML = allowedList.innerHTML = reportsList.innerHTML = "<p style='color: var(--muted);'>読み込み中...</p>";
+      pendingList.innerHTML = "<p style='color: var(--muted);'>読み込み中...</p>";
+      allowedList.innerHTML = "<p style='color: var(--muted);'>読み込み中...</p>";
+      reportsList.innerHTML = "<p style='color: var(--muted);'>読み込み中...</p>";
 
       state.adminUnsubscribes.pendingUsers = onSnapshot(collection(db, "pendingUsers"), (snapshot) => {
         pendingList.innerHTML = snapshot.empty 
           ? `<p style="color: var(--muted);">申請者なし</p>`
-          : snapshot.docs.map(doc => `
-              <div style="background: #f9fafb; border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
-                <p style="margin: 0 0 12px 0; font-weight: 700;">${doc.id}</p>
-                <button class="button" onclick="window.approveUser('${doc.id}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem; margin-right: 8px;">承認</button>
-                <button class="danger-button" onclick="window.rejectUser('${doc.id}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">拒否</button>
-              </div>
-            `).join("");
+          : snapshot.docs.map(doc => {
+              const email = doc.id;
+              return `
+                <div style="background: #f9fafb; border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
+                  <p style="margin: 0 0 12px 0; font-weight: 700; word-break: break-all;">${email}</p>
+                  <button class="button" onclick="window.approveUser('${email}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem; margin-right: 8px;">承認</button>
+                  <button class="danger-button" onclick="window.rejectUser('${email}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">拒否</button>
+                </div>
+              `;
+            }).join("");
       }, (error) => {
-        console.error(error);
-        pendingList.innerHTML = `<p style="color: red;">エラー</p>`;
+        console.error("pendingUsers エラー:", error);
+        pendingList.innerHTML = `<p style="color: var(--muted);">読み込み失敗</p>`;
       });
 
       state.adminUnsubscribes.allowedUsers = onSnapshot(collection(db, "allowedUsers"), (snapshot) => {
         allowedList.innerHTML = snapshot.empty
           ? `<p style="color: var(--muted);">承認済みなし</p>`
-          : snapshot.docs.map(doc => `
-              <div style="background: #f9fafb; border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
-                <p style="margin: 0 0 12px 0; font-weight: 700;">${doc.id}</p>
-                <button class="danger-button" onclick="window.removeUser('${doc.id}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>
-              </div>
-            `).join("");
+          : snapshot.docs.map(doc => {
+              const email = doc.id;
+              return `
+                <div style="background: #f9fafb; border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
+                  <p style="margin: 0 0 12px 0; font-weight: 700; word-break: break-all;">${email}</p>
+                  <button class="danger-button" onclick="window.removeUser('${email}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>
+                </div>
+              `;
+            }).join("");
       }, (error) => {
-        console.error(error);
-        allowedList.innerHTML = `<p style="color: red;">エラー</p>`;
+        console.error("allowedUsers エラー:", error);
+        allowedList.innerHTML = `<p style="color: var(--muted);">読み込み失敗</p>`;
       });
 
       state.adminUnsubscribes.reports = onSnapshot(collection(db, "reports"), (snapshot) => {
@@ -648,14 +674,14 @@
               const r = doc.data();
               return `
                 <div style="background: #f9fafb; border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
-                  <p style="margin: 0 0 8px 0;"><strong>理由:</strong> ${r.reason}</p>
+                  <p style="margin: 0 0 8px 0;"><strong>理由:</strong> ${r.reason || "なし"}</p>
                   <button class="danger-button" onclick="window.deleteReport('${doc.id}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>
                 </div>
               `;
             }).join("");
       }, (error) => {
-        console.error(error);
-        reportsList.innerHTML = `<p style="color: red;">エラー</p>`;
+        console.error("reports エラー:", error);
+        reportsList.innerHTML = `<p style="color: var(--muted);">読み込み失敗</p>`;
       });
     }
 
@@ -666,6 +692,7 @@
         await deleteDoc(doc(db, "pendingUsers", email));
         showToast("承認しました");
       } catch (error) {
+        console.error(error);
         showToast("承認失敗");
       }
     };
@@ -723,8 +750,8 @@
         document.getElementById("adminPostForm").style.display = "block";
         document.getElementById("adminDashboardButton").style.display = "block";
         document.getElementById("heroLead").textContent = "【管理者モード】";
+        updateDateDisplay();
         initPosts();
-        setupComments();
         return;
       }
 
@@ -743,8 +770,8 @@
       document.getElementById("mainContent").style.display = "block";
       document.getElementById("setupModal").classList.add("hidden");
       document.getElementById("adminPostForm").style.display = "none";
+      updateDateDisplay();
       initPosts();
-      setupComments();
     });
   </script>
 </body>
