@@ -963,6 +963,8 @@
       if (!user) {
         document.getElementById("loginModal").classList.remove("hidden");
         document.getElementById("mainContent").style.display = "none";
+        document.getElementById("hamburgerButton").style.display = "none";
+        document.getElementById("hamburgerMenu").style.display = "none";
         return;
       }
 
@@ -978,8 +980,10 @@
         document.getElementById("adminPostForm").style.display = "block";
         document.getElementById("adminDashboardButton").style.display = "block";
         
-        // スマホ版なら日付ナビゲーションを表示
+        // ハンバーガーメニュー表示
         if (window.innerWidth <= 768) {
+          document.getElementById("hamburgerButton").style.display = "flex";
+          document.getElementById("hamburgerMenu").style.display = "block";
           document.getElementById("mobileDateNav").style.display = "block";
         }
         
@@ -994,6 +998,7 @@
         document.getElementById("loginModal").classList.add("hidden");
         document.getElementById("setupModal").classList.remove("hidden");
         document.getElementById("mainContent").style.display = "none";
+        document.getElementById("hamburgerButton").style.display = "none";
         return;
       }
 
@@ -1005,8 +1010,10 @@
       document.getElementById("setupModal").classList.add("hidden");
       document.getElementById("adminPostForm").style.display = "none";
       
-      // スマホ版なら日付ナビゲーションを表示
+      // ハンバーガーメニュー表示
       if (window.innerWidth <= 768) {
+        document.getElementById("hamburgerButton").style.display = "flex";
+        document.getElementById("hamburgerMenu").style.display = "block";
         document.getElementById("mobileDateNav").style.display = "block";
       }
       
