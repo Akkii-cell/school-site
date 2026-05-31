@@ -336,8 +336,12 @@
         display: none;
       }
 
-      .toolbar {
+      #pcDateNav {
         display: none;
+      }
+
+      #mobileDateNav {
+        display: block !important;
       }
 
       .shell {
@@ -384,8 +388,12 @@
         display: none;
       }
 
-      .toolbar {
+      #pcDateNav {
         display: grid;
+      }
+
+      #mobileDateNav {
+        display: none !important;
       }
     }
   </style>
@@ -441,7 +449,7 @@
     </div>
 
     <!-- PC版 ツールバー -->
-    <section class="toolbar frosted" style="display: none;">
+    <section class="toolbar frosted" id="pcDateNav">
       <div class="toolbar-row">
         <button class="ghost-button" id="prevDateButton">← 前日</button>
         <div class="date-display" id="dateDisplay">読み込み中...</div>
@@ -860,53 +868,64 @@
       allowedList.innerHTML = "<p style='color: var(--muted);'>読み込み中...</p>";
       reportsList.innerHTML = "<p style='color: var(--muted);'>読み込み中...</p>";
 
+      // pendingUsers: メールアドレスをキーにしているため、doc.id がメールアドレス
       state.adminUnsubscribes.pendingUsers = onSnapshot(collection(db, "pendingUsers"), (snapshot) => {
-        pendingList.innerHTML = snapshot.empty 
-          ? `<p style="color: var(--muted);">申請者なし</p>`
-          : snapshot.docs.map(doc => {
-              const email = doc.id;
-              return `
-                <div style="background: #f9fafb; border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
-                  <p style="margin: 0 0 12px 0; font-weight: 700; word-break: break-all;">${email}</p>
-                  <button class="button" onclick="window.approveUser('${email}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem; margin-right: 8px;">承認</button>
-                  <button class="danger-button" onclick="window.rejectUser('${email}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">拒否</button>
-                </div>
-              `;
-            }).join("");
+        if (snapshot.empty) {
+          pendingList.innerHTML = `<p style="color: var(--muted);">申請者なし</p>`;
+          return;
+        }
+
+        pendingList.innerHTML = snapshot.docs.map(doc => {
+          const userEmail = doc.id; // メールアドレス
+          return `
+            <div style="background: #f9fafb; border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
+              <p style="margin: 0 0 12px 0; font-weight: 700; word-break: break-all; font-size: 0.95rem;">メール: <strong>${userEmail}</strong></p>
+              <button class="button" onclick="window.approveUser('${userEmail}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem; margin-right: 8px;">承認</button>
+              <button class="danger-button" onclick="window.rejectUser('${userEmail}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">拒否</button>
+            </div>
+          `;
+        }).join("");
       }, (error) => {
         console.error("pendingUsers エラー:", error);
         pendingList.innerHTML = `<p style="color: var(--muted);">読み込み失敗</p>`;
       });
 
+      // allowedUsers: メールアドレスをキーにしているため、doc.id がメールアドレス
       state.adminUnsubscribes.allowedUsers = onSnapshot(collection(db, "allowedUsers"), (snapshot) => {
-        allowedList.innerHTML = snapshot.empty
-          ? `<p style="color: var(--muted);">承認済みなし</p>`
-          : snapshot.docs.map(doc => {
-              const email = doc.id;
-              return `
-                <div style="background: #f9fafb; border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
-                  <p style="margin: 0 0 12px 0; font-weight: 700; word-break: break-all;">${email}</p>
-                  <button class="danger-button" onclick="window.removeUser('${email}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>
-                </div>
-              `;
-            }).join("");
+        if (snapshot.empty) {
+          allowedList.innerHTML = `<p style="color: var(--muted);">承認済みなし</p>`;
+          return;
+        }
+
+        allowedList.innerHTML = snapshot.docs.map(doc => {
+          const userEmail = doc.id; // メールアドレス
+          return `
+            <div style="background: #f9fafb; border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
+              <p style="margin: 0 0 12px 0; font-weight: 700; word-break: break-all; font-size: 0.95rem;">メール: <strong>${userEmail}</strong></p>
+              <button class="danger-button" onclick="window.removeUser('${userEmail}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>
+            </div>
+          `;
+        }).join("");
       }, (error) => {
         console.error("allowedUsers エラー:", error);
         allowedList.innerHTML = `<p style="color: var(--muted);">読み込み失敗</p>`;
       });
 
       state.adminUnsubscribes.reports = onSnapshot(collection(db, "reports"), (snapshot) => {
-        reportsList.innerHTML = snapshot.empty
-          ? `<p style="color: var(--muted);">通報なし</p>`
-          : snapshot.docs.map(doc => {
-              const r = doc.data();
-              return `
-                <div style="background: #f9fafb; border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
-                  <p style="margin: 0 0 8px 0;"><strong>理由:</strong> ${r.reason || "なし"}</p>
-                  <button class="danger-button" onclick="window.deleteReport('${doc.id}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>
-                </div>
-              `;
-            }).join("");
+        if (snapshot.empty) {
+          reportsList.innerHTML = `<p style="color: var(--muted);">通報なし</p>`;
+          return;
+        }
+
+        reportsList.innerHTML = snapshot.docs.map(doc => {
+          const r = doc.data();
+          return `
+            <div style="background: #f9fafb; border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
+              <p style="margin: 0 0 8px 0;"><strong>理由:</strong> ${r.reason || "なし"}</p>
+              <button class="danger-button" onclick="window.deleteReport('${doc.id}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">削除</button>
+            </div>
+          `;
+        }).join("");
       }, (error) => {
         console.error("reports エラー:", error);
         reportsList.innerHTML = `<p style="color: var(--muted);">読み込み失敗</p>`;
