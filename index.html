@@ -551,7 +551,8 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-const ADMIN_EMAIL = "daishi_a@icloud.com";
+// 管理者の正確なUIDを設定
+const ADMIN_UID = "Z4YHNqiKySV3KLkHIjtDaj36WUa2";
 const NG_WORDS = ["死ね", "うざい", "きもい", "バカ", "アホ", "クズ"];
 
 const state = {
@@ -594,7 +595,7 @@ function updateCategoryTitle() {
 const titles = {
 "all": "予定・宿題・連絡",
 "予定": "📅 予定",
-"宿題": "✏️ 宿題",
+"宿宿": "✏️ 宿題",
 "連絡事項": "📢 連絡事項"
 };
 document.getElementById("categoryTitle").textContent = titles[state.categoryFilter] || "予定・宿題・連絡";
@@ -648,7 +649,6 @@ ${state.isAdmin || state.user.uid === c.uid ? `<button class="danger-button dele
 });
 }
 
-// ハンバーガーメニュー制御
 window.selectCategory = function(category) {
 state.categoryFilter = category;
 updateCategoryTitle();
@@ -987,7 +987,6 @@ if (state.approvalUnsubscribe) state.approvalUnsubscribe();
 
 state.approvalUnsubscribe = onSnapshot(doc(db, "allowedUsers", user.email), (snapshot) => {
 if (snapshot.exists()) {
-// 承認されている場合
 document.getElementById("pendingApprovalModal").classList.add("hidden");
 document.getElementById("mainContent").style.display = "block";
 
@@ -1005,7 +1004,6 @@ state.approvalUnsubscribe();
 state.approvalUnsubscribe = null;
 }
 } else {
-// まだ承認されていない場合
 document.getElementById("pendingApprovalModal").classList.remove("hidden");
 document.getElementById("mainContent").style.display = "none";
 document.getElementById("hamburgerButton").style.display = "none";
@@ -1030,8 +1028,8 @@ return;
 
 state.user = user;
 
-// 管理者の処理
-if (user.email === ADMIN_EMAIL) {
+// 管理者の判定（UIDによる正確な一致）
+if (user.uid === ADMIN_UID) {
 state.isAdmin = true;
 state.userName = "管理者";
 state.userClass = "ALL";
@@ -1073,7 +1071,6 @@ state.userClass = setup.class;
 document.getElementById("setupModal").classList.add("hidden");
 document.getElementById("adminPostForm").style.display = "none";
 
-// Firestoreの承認状態を監視開始
 checkApprovalStatus(user);
 });
 
