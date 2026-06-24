@@ -456,7 +456,7 @@ const db = getFirestore(app);
 
 const ADMIN_UID = "Z4YHNqiKySV3KLkHIjtDaj36WUa2";
 
-// 選択できるアバターのリスト（大増量 50種類）
+// 選択できるアバターのリスト（全50種類）
 const AVATARS = [
   "👤", "🐱", "🐶", "🦊", "🦁", "🐼", "🐨", "🐻", "🐰", "🐸", "🐵", "🐧", "🐦", "🦖", "🦄",
   "✏️", "📐", "📚", "🎒", "🎓", "🧪", "🎨", "🎺", "🎸", "💻",
@@ -663,7 +663,7 @@ checkApprovalStatus(state.user);
 } catch (error) { showDebugError("setupDebugError", error); }
 }
 
-// プロフィール保存処理 (安全なsetDoc+マージモード版)
+// プロフィール保存処理
 if (e.target.id === "profileEditForm") {
 e.preventDefault();
 const newName = document.getElementById("profileNameInput").value;
@@ -778,10 +778,13 @@ if (state.approvalUnsubscribe) state.approvalUnsubscribe();
 state.approvalUnsubscribe = onSnapshot(doc(db, "allowedUsers", user.email), (snapshot) => {
 if (snapshot.exists()) {
 const data = snapshot.data();
-state.userName = data.name || state.userName;
-state.userClass = data.class || state.userClass;
-state.userAvatarUrl = data.avatarUrl || "👤";
 
+// 【🌟ここを修正】Firestoreの最新データを最優先で強制上書き
+state.userName = data.name ? data.name : state.userName;
+state.userClass = data.class ? data.class : state.userClass;
+state.userAvatarUrl = data.avatarUrl ? data.avatarUrl : "👤";
+
+// ローカルストレージの古い記憶を新しいデータで上書き！
 localStorage.setItem(`user_setup_${user.uid}`, JSON.stringify({ name: state.userName, class: state.userClass, avatarUrl: state.userAvatarUrl }));
 
 document.getElementById("pendingApprovalModal").classList.add("hidden");
