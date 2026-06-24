@@ -553,7 +553,6 @@ const storage = getStorage(app);
 
 // 管理者の正確なUIDを設定
 const ADMIN_UID = "Z4YHNqiKySV3KLkHIjtDaj36WUa2";
-const NG_WORDS = ["死ね", "うざい", "きもい", "バカ", "アホ", "クズ"];
 
 const state = {
 user: null,
@@ -595,7 +594,7 @@ function updateCategoryTitle() {
 const titles = {
 "all": "予定・宿題・連絡",
 "予定": "📅 予定",
-"宿宿": "✏️ 宿題",
+"宿題": "✏️ 宿題",
 "連絡事項": "📢 連絡事項"
 };
 document.getElementById("categoryTitle").textContent = titles[state.categoryFilter] || "予定・宿題・連絡";
@@ -1028,14 +1027,14 @@ return;
 
 state.user = user;
 
-// 管理者の判定（UIDによる正確な一致）
+// 🟢 【超重要】管理者がログインした場合は一般ユーザー向けモーダルを強制的にすべて非表示にする
 if (user.uid === ADMIN_UID) {
 state.isAdmin = true;
 state.userName = "管理者";
 state.userClass = "ALL";
 document.getElementById("loginModal").classList.add("hidden");
 document.getElementById("setupModal").classList.add("hidden");
-document.getElementById("pendingApprovalModal").classList.add("hidden");
+document.getElementById("pendingApprovalModal").classList.add("hidden"); // ここを強制非表示！
 document.getElementById("mainContent").style.display = "block";
 document.getElementById("adminPostForm").style.display = "block";
 document.getElementById("adminDashboardButton").style.display = "block";
