@@ -525,7 +525,7 @@ display: none !important;
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, query, orderBy, limit, increment, serverTimestamp, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, query, orderBy, limit, increment, arrayUnion, arrayRemove, serverTimestamp, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 const firebaseConfig = {
@@ -713,12 +713,12 @@ const likedBy = targetComment.likedBy || [];
 if (likedBy.includes(user.uid)) {
 await updateDoc(commentRef, {
 likes: increment(-1),
-likedBy: firebase.firestore ? firebase.firestore.FieldValue.arrayRemove(user.uid) : (await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js")).arrayRemove(user.uid)
+likedBy: arrayRemove(user.uid)
 });
 } else {
 await updateDoc(commentRef, {
 likes: increment(1),
-likedBy: firebase.firestore ? firebase.firestore.FieldValue.arrayUnion(user.uid) : (await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js")).arrayUnion(user.uid)
+likedBy: arrayUnion(user.uid)
 });
 }
 }
@@ -883,7 +883,6 @@ pendingList.innerHTML = "<p style='color: var(--muted);'>読み込み中...</p>"
 allowedList.innerHTML = "<p style='color: var(--muted);'>読み込み中...</p>";
 reportsList.innerHTML = "<p style='color: var(--muted);'>読み込み中...</p>";
 
-// pendingUsers: メールアドレスをキーにしているため、doc.id がメールアドレス
 state.adminUnsubscribes.pendingUsers = onSnapshot(collection(db, "pendingUsers"), (snapshot) => {
 if (snapshot.empty) {
 pendingList.innerHTML = `<p style="color: var(--muted);">申請者なし</p>`;
@@ -891,7 +890,7 @@ return;
 }
 
 pendingList.innerHTML = snapshot.docs.map(doc => {
-const userEmail = doc.id; // メールアドレス
+const userEmail = doc.id;
 return `
 <div style="background: #f9fafb; border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
 <p style="margin: 0 0 12px 0; font-weight: 700; word-break: break-all; font-size: 0.95rem;">メール: <strong>${userEmail}</strong></p>
@@ -905,7 +904,6 @@ console.error("pendingUsers エラー:", error);
 pendingList.innerHTML = `<p style="color: var(--muted);">読み込み失敗</p>`;
 });
 
-// allowedUsers: メールアドレスをキーにしているため、doc.id がメールアドレス
 state.adminUnsubscribes.allowedUsers = onSnapshot(collection(db, "allowedUsers"), (snapshot) => {
 if (snapshot.empty) {
 allowedList.innerHTML = `<p style="color: var(--muted);">承認済みなし</p>`;
@@ -913,7 +911,7 @@ return;
 }
 
 allowedList.innerHTML = snapshot.docs.map(doc => {
-const userEmail = doc.id; // メールアドレス
+const userEmail = doc.id;
 return `
 <div style="background: #f9fafb; border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
 <p style="margin: 0 0 12px 0; font-weight: 700; word-break: break-all; font-size: 0.95rem;">メール: <strong>${userEmail}</strong></p>
@@ -1014,7 +1012,6 @@ document.getElementById("setupModal").classList.add("hidden");
 document.getElementById("adminPostForm").style.display = "block";
 document.getElementById("adminDashboardButton").style.display = "block";
 
-// ハンバーガーメニュー表示
 if (window.innerWidth <= 768) {
 document.getElementById("hamburgerButton").style.display = "flex";
 document.getElementById("hamburgerMenu").style.display = "block";
@@ -1044,7 +1041,6 @@ document.getElementById("mainContent").style.display = "block";
 document.getElementById("setupModal").classList.add("hidden");
 document.getElementById("adminPostForm").style.display = "none";
 
-// ハンバーガーメニュー表示
 if (window.innerWidth <= 768) {
 document.getElementById("hamburgerButton").style.display = "flex";
 document.getElementById("hamburgerMenu").style.display = "block";
