@@ -401,18 +401,19 @@ display: none !important;
 <body>
 <div class="modal" id="loginModal">
 <div class="modal-panel" style="width: min(500px, 100%);">
-<h2 class="modal-title">ログイン</h2>
+<h2 class="modal-title">ログイン / 新規登録</h2>
 <form id="emailLoginForm" style="display: grid; gap: 12px;">
 <input id="emailInput" type="email" placeholder="メール" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
 <input id="passwordInput" type="password" placeholder="パスワード" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
-<button type="submit" class="button" style="width: 100%;">ログイン</button>
+<button type="submit" class="button" style="width: 100%;">ログイン / 登録</button>
 </form>
 </div>
 </div>
 
 <div class="modal hidden" id="setupModal">
 <div class="modal-panel" style="width: min(500px, 100%);">
-<h2 class="modal-title">セットアップ</h2>
+<h2 class="modal-title">初期セットアップ</h2>
+<p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 16px;">利用を開始するためにお名前とクラスを登録してください。登録後、管理者の承認待ち画面に進みます。</p>
 <form id="setupForm" style="display: grid; gap: 16px;">
 <input id="setupName" type="text" maxlength="30" placeholder="お名前" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
 <select id="setupClass" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
@@ -420,8 +421,16 @@ display: none !important;
 <option value="7-1">7-1組</option>
 <option value="7-2">7-2組</option>
 </select>
-<button type="submit" class="button" style="width: 100%;">始める</button>
+<button type="submit" class="button" style="width: 100%;">登録して承認申請</button>
 </form>
+</div>
+</div>
+
+<div class="modal hidden" id="pendingApprovalModal">
+<div class="modal-panel" style="width: min(500px, 100%); text-align: center; padding: 40px 28px;">
+<h2 class="modal-title" style="color: var(--accent); font-size: 1.6rem; margin-bottom: 16px;">⏳ 承認待ち</h2>
+<p style="line-height: 1.6; margin-bottom: 24px;">アカウントの登録が完了しました。<br>現在、管理者の承認を待っています。<br>承認されると自動的に画面が切り替わります。</p>
+<button type="button" id="pendingLogoutButton" class="ghost-button" style="width: 100%;">ログイン画面に戻る</button>
 </div>
 </div>
 
@@ -556,6 +565,7 @@ comments: {},
 commentUnsubscribes: {},
 postUnsubscribe: null,
 adminUnsubscribes: { pendingUsers: null, allowedUsers: null, reports: null },
+approvalUnsubscribe: null,
 categoryFilter: "all"
 };
 
@@ -615,10 +625,6 @@ ${state.isAdmin ? `<button class="danger-button deletePost-btn" data-post-id="${
 </div>
 <p class="post-body">${post.body}</p>
 <div id="comments-${post.id}" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);"></div>
-<form class="addComment-form" data-post-id="${post.id}" style="display: grid; gap: 10px; margin-top: 12px;">
-<textarea placeholder="コメント..." required style="padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; min-height: 60px;"></textarea>
-<button type="submit" class="button" style="align-self: flex-start;">送信</button>
-</form>
 </div>
 `).join("");
 
@@ -781,8 +787,10 @@ const password = document.getElementById("passwordInput").value;
 try {
 try {
 await signInWithEmailAndPassword(auth, email, password);
+showToast("ログインしました");
 } catch {
 await createUserWithEmailAndPassword(auth, email, password);
+showToast("アカウントを作成しました");
 }
 } catch (error) {
 showToast("ログイン失敗");
@@ -795,44 +803,17 @@ state.userName = document.getElementById("setupName").value;
 state.userClass = document.getElementById("setupClass").value;
 localStorage.setItem(`user_setup_${state.user.uid}`, JSON.stringify({ name: state.userName, class: state.userClass }));
 document.getElementById("setupModal").classList.add("hidden");
-document.getElementById("mainContent").style.display = "block";
-
-// スマホ版なら日付ナビゲーションを表示
-if (window.innerWidth <= 768) {
-document.getElementById("mobileDateNav").style.display = "block";
-}
-
-initPosts();
-showToast(`${state.userName} でスタート`);
-}
-
-const form = e.target.closest(".addComment-form");
-if (form) {
-e.preventDefault();
-const postId = form.dataset.postId;
-const text = form.querySelector("textarea").value.trim();
-if (!text) return;
-
-for (const word of NG_WORDS) {
-if (text.includes(word)) {
-showToast("不適切な言葉");
-return;
-}
-}
-
 try {
-await addDoc(collection(db, "posts", postId, "comments"), {
-author: state.userName,
-text: text,
-createdAt: serverTimestamp(),
-likes: 0,
-likedBy: [],
-uid: state.user.uid
+await setDoc(doc(db, "pendingUsers", state.user.email), {
+email: state.user.email,
+name: state.userName,
+class: state.userClass,
+requestedAt: serverTimestamp()
 });
-form.querySelector("textarea").value = "";
-showToast("コメント追加");
+checkApprovalStatus(state.user);
 } catch (error) {
-showToast("コメント失敗");
+console.error(error);
+showToast("申請の送信に失敗しました");
 }
 }
 });
@@ -890,11 +871,13 @@ return;
 }
 
 pendingList.innerHTML = snapshot.docs.map(doc => {
+const data = doc.data();
 const userEmail = doc.id;
 return `
 <div style="background: #f9fafb; border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
-<p style="margin: 0 0 12px 0; font-weight: 700; word-break: break-all; font-size: 0.95rem;">メール: <strong>${userEmail}</strong></p>
-<button class="button" onclick="window.approveUser('${userEmail}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem; margin-right: 8px;">承認</button>
+<p style="margin: 0 0 4px 0; font-weight: 700; word-break: break-all; font-size: 0.95rem;">お名前: <strong>${data.name || "不明"} (${data.class || "不明"})</strong></p>
+<p style="margin: 0 0 12px 0; font-size: 0.85rem; color: var(--muted); word-break: break-all;">メール: ${userEmail}</p>
+<button class="button" onclick="window.approveUser('${userEmail}', '${data.class || '7-1'}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem; margin-right: 8px;">承認</button>
 <button class="danger-button" onclick="window.rejectUser('${userEmail}')" style="min-height: 36px; padding: 0 12px; font-size: 0.85rem;">拒否</button>
 </div>
 `;
@@ -945,10 +928,10 @@ reportsList.innerHTML = `<p style="color: var(--muted);">読み込み失敗</p>`
 });
 }
 
-window.approveUser = async (email) => {
-if (!confirm(`${email} を承認？`)) return;
+window.approveUser = async (email, userClass) => {
+if (!confirm(`${email} を承認しますか？`)) return;
 try {
-await setDoc(doc(db, "allowedUsers", email), { email, class: "7-1", approvedAt: serverTimestamp() });
+await setDoc(doc(db, "allowedUsers", email), { email, class: userClass, approvedAt: serverTimestamp() });
 await deleteDoc(doc(db, "pendingUsers", email));
 showToast("承認しました");
 } catch (error) {
@@ -958,7 +941,7 @@ showToast("承認失敗");
 };
 
 window.rejectUser = async (email) => {
-if (!confirm("拒否？")) return;
+if (!confirm("拒否しますか？")) return;
 try {
 await deleteDoc(doc(db, "pendingUsers", email));
 showToast("拒否しました");
@@ -968,7 +951,7 @@ showToast("拒否失敗");
 };
 
 window.removeUser = async (email) => {
-if (!confirm("削除？")) return;
+if (!confirm("削除しますか？")) return;
 try {
 await deleteDoc(doc(db, "allowedUsers", email));
 showToast("削除しました");
@@ -986,29 +969,76 @@ showToast("削除失敗");
 }
 };
 
-document.getElementById("logoutButton")?.addEventListener("click", async () => {
-await signOut(auth);
-showToast("ログアウト");
+function handleLogout() {
+if (state.approvalUnsubscribe) {
+state.approvalUnsubscribe();
+state.approvalUnsubscribe = null;
+}
+signOut(auth).then(() => {
+showToast("ログアウトしました");
 });
+}
+
+document.getElementById("logoutButton")?.addEventListener("click", handleLogout);
+document.getElementById("pendingLogoutButton")?.addEventListener("click", handleLogout);
+
+function checkApprovalStatus(user) {
+if (state.approvalUnsubscribe) state.approvalUnsubscribe();
+
+state.approvalUnsubscribe = onSnapshot(doc(db, "allowedUsers", user.email), (snapshot) => {
+if (snapshot.exists()) {
+// 承認されている場合
+document.getElementById("pendingApprovalModal").classList.add("hidden");
+document.getElementById("mainContent").style.display = "block";
+
+if (window.innerWidth <= 768) {
+document.getElementById("hamburgerButton").style.display = "flex";
+document.getElementById("hamburgerMenu").style.display = "block";
+document.getElementById("mobileDateNav").style.display = "block";
+}
+
+updateDateDisplay();
+updateCategoryTitle();
+initPosts();
+if (state.approvalUnsubscribe) {
+state.approvalUnsubscribe();
+state.approvalUnsubscribe = null;
+}
+} else {
+// まだ承認されていない場合
+document.getElementById("pendingApprovalModal").classList.remove("hidden");
+document.getElementById("mainContent").style.display = "none";
+document.getElementById("hamburgerButton").style.display = "none";
+}
+});
+}
 
 onAuthStateChanged(auth, async (user) => {
 if (!user) {
 document.getElementById("loginModal").classList.remove("hidden");
+document.getElementById("setupModal").classList.add("hidden");
+document.getElementById("pendingApprovalModal").classList.add("hidden");
 document.getElementById("mainContent").style.display = "none";
 document.getElementById("hamburgerButton").style.display = "none";
 document.getElementById("hamburgerMenu").style.display = "none";
+if (state.approvalUnsubscribe) {
+state.approvalUnsubscribe();
+state.approvalUnsubscribe = null;
+}
 return;
 }
 
 state.user = user;
 
+// 管理者の処理
 if (user.email === ADMIN_EMAIL) {
 state.isAdmin = true;
 state.userName = "管理者";
 state.userClass = "ALL";
 document.getElementById("loginModal").classList.add("hidden");
-document.getElementById("mainContent").style.display = "block";
 document.getElementById("setupModal").classList.add("hidden");
+document.getElementById("pendingApprovalModal").classList.add("hidden");
+document.getElementById("mainContent").style.display = "block";
 document.getElementById("adminPostForm").style.display = "block";
 document.getElementById("adminDashboardButton").style.display = "block";
 
@@ -1024,10 +1054,13 @@ initPosts();
 return;
 }
 
+// 一般ユーザーの処理
+document.getElementById("loginModal").classList.add("hidden");
+
 const savedSetup = localStorage.getItem(`user_setup_${user.uid}`);
 if (!savedSetup) {
-document.getElementById("loginModal").classList.add("hidden");
 document.getElementById("setupModal").classList.remove("hidden");
+document.getElementById("pendingApprovalModal").classList.add("hidden");
 document.getElementById("mainContent").style.display = "none";
 document.getElementById("hamburgerButton").style.display = "none";
 return;
@@ -1036,20 +1069,12 @@ return;
 const setup = JSON.parse(savedSetup);
 state.userName = setup.name;
 state.userClass = setup.class;
-document.getElementById("loginModal").classList.add("hidden");
-document.getElementById("mainContent").style.display = "block";
+
 document.getElementById("setupModal").classList.add("hidden");
 document.getElementById("adminPostForm").style.display = "none";
 
-if (window.innerWidth <= 768) {
-document.getElementById("hamburgerButton").style.display = "flex";
-document.getElementById("hamburgerMenu").style.display = "block";
-document.getElementById("mobileDateNav").style.display = "block";
-}
-
-updateDateDisplay();
-updateCategoryTitle();
-initPosts();
+// Firestoreの承認状態を監視開始
+checkApprovalStatus(user);
 });
 
 updateDateDisplay();
