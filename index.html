@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>港区白金の丘中学校 第7学年 共有サイト</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
 <style>
 :root {
 color-scheme: light;
@@ -779,12 +780,12 @@ state.approvalUnsubscribe = onSnapshot(doc(db, "allowedUsers", user.email), (sna
 if (snapshot.exists()) {
 const data = snapshot.data();
 
-// 【🌟ここを修正】Firestoreの最新データを最優先で強制上書き
+// Firestoreの最新データを最優先で強制上書き
 state.userName = data.name ? data.name : state.userName;
 state.userClass = data.class ? data.class : state.userClass;
 state.userAvatarUrl = data.avatarUrl ? data.avatarUrl : "👤";
 
-// ローカルストレージの古い記憶を新しいデータで上書き！
+// ローカルストレージの記憶を新しいデータで上書き！
 localStorage.setItem(`user_setup_${user.uid}`, JSON.stringify({ name: state.userName, class: state.userClass, avatarUrl: state.userAvatarUrl }));
 
 document.getElementById("pendingApprovalModal").classList.add("hidden");
