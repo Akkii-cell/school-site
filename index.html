@@ -31,7 +31,7 @@ background: var(--bg);
 -webkit-font-smoothing: antialiased;
 }
 
-button, input, select, textarea { font: inherit; }
+button, input, select, textarea { font: inherit; width: 100%; box-sizing: border-box; }
 img { max-width: 100%; display: block; }
 button { border: none; cursor: pointer; }
 
@@ -117,6 +117,13 @@ justify-content: center;
 .panel { padding: 24px; margin-bottom: 16px; }
 .panel-title { font-size: 1.2rem; margin-bottom: 16px; font-weight: 700; }
 
+/* 投稿作成フォーム内のレイアウト設定 */
+.form-grid-2 {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 12px;
+}
+
 .post-card {
 border: 1px solid var(--border);
 background: var(--surface);
@@ -154,6 +161,7 @@ font-size: 0.85rem;
 font-weight: 600;
 color: var(--text);
 transition: all 0.15s ease;
+width: auto;
 }
 .reaction-btn:hover {
 background: rgba(15, 23, 42, 0.08);
@@ -169,7 +177,6 @@ font-size: 0.8rem;
 opacity: 0.8;
 }
 
-/* 💬 新設：コメントセクション全体のスタイリング */
 .comment-section {
 margin-top: 16px;
 padding-top: 16px;
@@ -240,6 +247,7 @@ font-size: 0.85rem;
 font-weight: 700;
 height: 38px;
 white-space: nowrap;
+width: auto;
 }
 .comment-delete-btn {
 background: transparent;
@@ -251,6 +259,7 @@ border-radius: 6px;
 cursor: pointer;
 margin-left: auto;
 align-self: center;
+width: auto;
 }
 .comment-delete-btn:hover {
 background: rgba(217, 45, 32, 0.08);
@@ -272,6 +281,7 @@ min-height: 44px;
 padding: 0 16px;
 border-radius: 999px;
 font-weight: 700;
+width: auto;
 }
 
 .button { background: linear-gradient(135deg, #0071e3, #2e90fa); color: #fff; }
@@ -295,14 +305,32 @@ z-index: 100;
 .modal-panel {
 width: min(720px, 100%);
 max-height: 90vh;
-overflow: auto;
+overflow-y: auto;
 padding: 28px;
 border-radius: 28px;
 background: var(--surface);
 border: 1px solid var(--border);
+box-shadow: var(--shadow);
 }
 
 .modal-title { font-size: 1.4rem; margin-bottom: 20px; font-weight: 700; }
+
+/* 📜 利用規約ボックス */
+.terms-box {
+background: #f9fafb;
+border: 1px solid var(--border);
+border-radius: 14px;
+padding: 16px;
+max-height: 280px;
+overflow-y: auto;
+font-size: 0.85rem;
+line-height: 1.6;
+color: #344054;
+margin-bottom: 16px;
+text-align: left;
+}
+.terms-box h4 { margin-top: 12px; margin-bottom: 4px; font-size: 0.9rem; color: var(--text); }
+.terms-box p { margin-bottom: 8px; }
 
 .toast {
 position: fixed;
@@ -317,11 +345,14 @@ opacity: 0;
 pointer-events: none;
 z-index: 120;
 transition: opacity 0.2s;
+text-align: center;
+width: max-content;
+max-width: 90vw;
 }
 .toast.show { opacity: 1; }
 
 .admin-footer { position: fixed; bottom: 16px; right: 16px; z-index: 100; display: flex; gap: 8px; }
-.badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; background: rgba(0, 113, 227, 0.1); color: #0071e3; margin-right: 6px; }
+.badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; background: rgba(0, 113, 227, 0.1); color: #0071e3; margin-right: 6px; width: auto; }
 
 .debug-error-box {
 background: #fef3c7;
@@ -373,9 +404,9 @@ font-size: 1.4rem;
 .hamburger-button.active { position: fixed; top: 16px; right: 16px; left: auto; }
 
 .menu-category { display: grid; gap: 12px; margin-bottom: 20px; }
-.menu-category-btn { padding: 16px; background: linear-gradient(135deg, #0071e3, #2e90fa); color: #fff; border-radius: 12px; font-weight: 700; font-size: 1rem; text-align: center; }
+.menu-category-btn { padding: 16px; background: linear-gradient(135deg, #0071e3, #2e90fa); color: #fff; border-radius: 12px; font-weight: 700; font-size: 1rem; text-align: center; width: 100%; }
 
-/* 📱 スマホ版レスポンシブ調整 */
+/* 📱 スマホ版レスポンシブ完全調整 */
 @media (max-width: 768px) {
 .hamburger-button { display: flex; }
 .hamburger-menu { display: block; }
@@ -383,6 +414,7 @@ font-size: 1.4rem;
 #mobileDateNav { display: block !important; }
 .shell { padding: 12px 0 100px; }
 
+/* ヘッダーカードを極限までコンパクトに */
 .hero-card { 
 padding: 10px 14px; 
 flex-direction: row; 
@@ -407,6 +439,7 @@ font-size: 0.65rem;
 line-height: 1.2;
 }
 
+/* スマホ用日付ナビをバグのない横幅いっぱいに */
 #mobileDateNav {
 padding: 8px 12px;
 margin-bottom: 12px;
@@ -427,6 +460,7 @@ padding: 0 10px;
 font-size: 0.75rem;
 border-radius: 10px;
 white-space: nowrap;
+width: auto;
 }
 #mobileDateNav .date-display {
 flex: 1 1 auto; 
@@ -436,9 +470,35 @@ margin: 0;
 text-align: center;
 }
 
+/* ⚠️ 【ここを修正】スマホ時に新規投稿フォームがはみ出さないよう1カラム化 */
+.form-grid-2 {
+grid-template-columns: 1fr !important;
+gap: 10px;
+}
+#adminPostForm .panel {
+padding: 14px;
+border-radius: var(--radius-lg);
+margin-bottom: 12px;
+width: 100%;
+}
+#adminPostForm .panel-title {
+font-size: 1rem;
+margin-bottom: 10px;
+}
+#adminPostForm input, #adminPostForm textarea, #adminPostForm select {
+padding: 10px 12px;
+font-size: 0.85rem;
+border-radius: 10px;
+width: 100% !important;
+}
+#adminPostForm button {
+width: 100% !important;
+}
+
 .panel { padding: 16px; border-radius: var(--radius-lg); margin-bottom: 12px; }
 .post-card { padding: 16px; border-radius: var(--radius-lg); }
 .admin-footer { bottom: 8px; right: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.admin-footer button { width: auto; }
 .hamburger-menu { left: -100%; width: 100%; }
 .hamburger-menu.active { left: 0; }
 }
@@ -462,6 +522,120 @@ text-align: center;
 <button type="submit" class="button" style="width: 100%;">ログイン / 登録</button>
 </form>
 <div id="loginDebugError" class="debug-error-box"></div>
+</div>
+</div>
+
+<div class="modal hidden" id="termsModal">
+<div class="modal-panel" style="width: min(600px, 100%);">
+<h2 class="modal-title" style="font-size: 1.3rem; margin-bottom: 12px;">利用規約・プライバシーポリシー</h2>
+<p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 12px;">本サービスをご利用になる前に、必ず以下の内容をお読みいただき、同意をお願いいたします。</p>
+
+<div class="terms-box">
+<strong>最終更新日：2026年6月27日</strong>
+<h4>利用規約</h4>
+<h4>第1条（適用）</h4>
+<p>本利用規約（以下「本規約」）は、AKKI（以下「管理者」）が運営する学校予定共有Webサイト（以下「本サービス」）の利用条件を定めるものです。本サービスを利用するすべての利用者は、本規約に同意したものとみなします。</p>
+<h4>第2条（本サービスについて）</h4>
+<p>1. 本サービスは、管理者（AKKI）が個人で運営する学校予定共有Webサイトです。<br>
+2. 本サービスは学校が運営・管理する公式Webサイトではありません。<br>
+3. 本サービスは、学校を代表するものではなく、学校の公式な見解を示すものではありません。<br>
+4. 掲載している予定やお知らせについては正確な情報の提供に努めていますが、誤りや更新漏れが生じる場合があります。正式な情報については、学校から配布されるお知らせや先生からの連絡をご確認ください。</p>
+<h4>第3条（利用対象）</h4>
+<p>1. 本サービスは、対象となる学校の生徒のみが利用できます。<br>
+2. 外部の方は、本サービスを利用することはできません。<br>
+3. 利用者は、本規約を守って本サービスを利用してください。</p>
+<h4>第4条（アカウント登録）</h4>
+<p>1. 本サービスを利用するには、アカウントを作成する必要があります。<br>
+2. 作成されたアカウントは、管理者による承認後に利用できます。<br>
+3. 利用者は、正確な情報を登録してください。<br>
+4. アカウント情報は利用者本人が責任を持って管理してください。<br>
+5. 他人にアカウントを貸与・譲渡することは禁止します。</p>
+<h4>第5条（利用できる機能）</h4>
+<p>1. 管理者のみが学校予定やお知らせを投稿できます。<br>
+2. 利用者は投稿にコメントできます。<br>
+3. 利用者は投稿に「グッド（いいね）」でリアクションできます。</p>
+<h4>第6条（禁止事項）</h4>
+<p>利用者は、次の行為を行ってはいけません。<br>
+・他人への誹謗中傷や嫌がらせ<br>
+・荒らし行為、スパム行為<br>
+・不適切なコメントの投稿<br>
+・法令や学校のルールに反する内容の投稿<br>
+・他人になりすます行為<br>
+・他人のアカウントを使用する行為<br>
+・システムへの不正アクセスや改ざんを試みる行為<br>
+・本サービスの運営を妨害する行為<br>
+・他の利用者に迷惑をかける行為<br>
+・その他、管理者が不適切と判断する行為</p>
+<h4>第7条（違反への対応）</h4>
+<p>管理者は、本規約に違反した利用者に対し、必要に応じて以下の対応を行うことがあります。<br>
+・コメントの削除<br>
+・警告<br>
+・アカウントの一時停止<br>
+・アカウントの削除<br>
+・本サービスの利用禁止<br>
+悪質な場合は、事前の通知なく対応することがあります。</p>
+<h4>第8条（免責事項）</h4>
+<p>1. 管理者は、本サービスに掲載する情報の正確性・完全性・最新性を保証するものではありません。<br>
+2. 本サービスの利用により利用者または第三者に生じた損害について、管理者は責任を負いません。<br>
+3. サーバーメンテナンスや障害などにより、本サービスが一時的に利用できなくなる場合があります。</p>
+<h4>第9条（サービスの変更・停止）</h4>
+<p>管理者は、事前の通知なく本サービスの内容を変更、停止または終了することがあります。</p>
+<h4>第10条（規約の変更）</h4>
+<p>管理者は、必要に応じて本規約を変更できます。変更後の規約は、本サービスへ掲載した時点から効力を生じます。</p>
+
+<hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;">
+
+<h4>プライバシーポリシー</h4>
+<h4>第1条（取得する情報）</h4>
+<p>本サービスでは、以下の情報を取得する場合があります。<br>
+・氏名または表示名<br>
+・学年・クラス（必要な場合）<br>
+・メールアドレス<br>
+・ログイン情報<br>
+・コメント内容<br>
+・アクセス日時などの利用記録</p>
+<h4>第2条（利用目的）</h4>
+<p>取得した情報は、以下の目的で利用します。<br>
+・本サービスの提供・運営<br>
+・本人確認<br>
+・アカウント管理<br>
+・学校予定やお知らせの共有<br>
+・コメント機能の提供<br>
+・不正利用や荒らし行為への対応<br>
+・サービス改善<br>
+・お問い合わせへの対応</p>
+<h4>第3条（個人情報の管理）</h4>
+<p>管理者は、取得した個人情報を適切に管理し、漏えい、改ざん、不正アクセスなどの防止に努めます。</p>
+<h4>第4条（第三者への提供）</h4>
+<p>管理者は、次の場合を除き、利用者の個人情報を第三者へ提供しません。<br>
+・利用者本人の同意がある場合<br>
+・法令に基づき提供が必要な場合</p>
+<h4>第5条（コメント）</h4>
+<p>1. 利用者が投稿したコメントは、他の利用者が閲覧できます。<br>
+2. 管理者は、誹謗中傷、荒らし行為、不適切な内容を含むコメントを予告なく削除できるものとします。</p>
+<h4>第6条（アカウントの削除）</h4>
+<p>利用者が退会した場合、または本規約に違反した場合は、管理者はアカウントおよび関連データを削除することがあります。</p>
+<h4>第7条（プライバシーポリシーの変更）</h4>
+<p>管理者は、必要に応じて本ポリシーを変更できます。変更後は本サービスに掲載した時点から効力を生じます。</p>
+
+<hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;">
+
+<h4>お問い合わせ</h4>
+<p>本サービスに関するお問い合わせは、管理者（AKKI）までご連絡ください。<br>
+運営者：AKKI（個人運営）</p>
+<h4>本サービスについて</h4>
+<p>・本サービスは学校の公式Webサイトではありません。個人（AKKI）が運営する学校予定共有Webサイトです。<br>
+・学校を代表するものではなく、学校の公式な見解を示すものでもありません。<br>
+・正式な情報については、学校からのお知らせや先生からの連絡をご確認ください。</p>
+</div>
+
+<form id="termsForm" style="display: grid; gap: 14px;">
+<label style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer;">
+<input id="termsCheckbox" type="checkbox" required style="width: 18px; height: 18px; margin: 0;">
+<span>利用規約とプライバシーポリシーに同意する</span>
+</label>
+<button type="submit" class="button" style="width: 100%;">次へ進む</button>
+</form>
 </div>
 </div>
 
@@ -520,7 +694,7 @@ text-align: center;
 </section>
 
 <main class="shell">
-<section class="hero-card frosted">
+<section class="hero-card frosted" style="margin-bottom: 12px;">
 <div id="userAvatarHeader" class="profile-avatar">👤</div>
 <div>
 <h1 class="hero-title" id="categoryTitle">予定・宿題・連絡</h1>
@@ -540,9 +714,9 @@ text-align: center;
 <div class="panel">
 <h3 class="panel-title">新規投稿</h3>
 <form id="postForm" style="display: grid; gap: 14px;">
-<input id="postTitle" type="text" maxlength="100" placeholder="タイトル" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
-<textarea id="postBody" placeholder="内容" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; min-height: 100px;"></textarea>
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+<input id="postTitle" type="text" maxlength="100" placeholder="タイトル" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; width: 100%;">
+<textarea id="postBody" placeholder="内容" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; min-height: 100px; width: 100%;"></textarea>
+<div class="form-grid-2">
 <select id="postCategory" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
 <option value="予定">予定</option>
 <option value="宿題">宿題</option>
@@ -554,11 +728,11 @@ text-align: center;
 <option value="7-2">7-2組</option>
 </select>
 </div>
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+<div class="form-grid-2">
 <input id="postStartDate" type="date" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
 <input id="postEndDate" type="date" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
 </div>
-<button type="submit" class="button">投稿</button>
+<button type="submit" class="button" style="width: 100%;">投稿</button>
 </form>
 </div>
 </section>
@@ -571,7 +745,7 @@ text-align: center;
 <div class="modal-panel" style="width: min(800px, 100%); max-height: 90vh; overflow: auto;">
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
 <h2 class="modal-title">📊 管理者ダッシュボード</h2>
-<button type="button" id="closeAdminDashboard" class="ghost-button" style="min-height: 40px;">閉じる</button>
+<button type="button" id="closeAdminDashboard" class="ghost-button" style="min-height: 40px; width: auto;">閉じる</button>
 </div>
 <div id="dashboardDebugError" class="debug-error-box"></div>
 <div style="display: grid; gap: 24px;">
@@ -591,7 +765,7 @@ text-align: center;
 <div class="modal-panel" style="width: min(500px, 100%);">
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
 <h2 class="modal-title">👤 プロフィール設定</h2>
-<button type="button" id="closeProfileModal" class="ghost-button" style="min-height: 40px;">閉じる</button>
+<button type="button" id="closeProfileModal" class="ghost-button" style="min-height: 40px; width: auto;">閉じる</button>
 </div>
 <form id="profileEditForm" style="display: grid; gap: 16px;">
 <div>
@@ -653,7 +827,7 @@ userAvatarUrl: "👤",
 currentDate: new Date(),
 posts: [],
 userReactedMap: {},
-commentsMap: {}, // 各投稿のコメントデータを保持
+commentsMap: {},
 adminUnsubscribes: { pendingUsers: null, allowedUsers: null },
 approvalUnsubscribe: null,
 categoryFilter: "all"
@@ -737,7 +911,6 @@ container.innerHTML = filtered.length === 0
     const userReacted = state.userReactedMap[post.id] || { like: false, checked: false, thanks: false };
     const comments = state.commentsMap[post.id] || [];
 
-    // コメントリストのHTML組み立て
     const commentsHTML = comments.map(c => `
         <div class="comment-item">
             ${getAvatarHTML(c.avatarUrl, "comment-avatar")}
@@ -788,9 +961,7 @@ ${state.isAdmin ? `<button class="danger-button deletePost-btn" data-post-id="${
 }).join("");
 }
 
-// 🌟 イベントハンドラの統合管理
 document.getElementById("postsContainer").addEventListener("click", async (e) => {
-// リアクションボタン処理
 const targetBtn = e.target.closest(".reaction-btn");
 if (targetBtn) {
 const postId = targetBtn.getAttribute("data-post-id");
@@ -818,7 +989,6 @@ renderPosts();
 return;
 }
 
-// 投稿削除処理
 if (e.target.classList.contains("deletePost-btn")) {
 const postId = e.target.getAttribute("data-post-id");
 if (confirm("この投稿を本当に削除しますか？")) {
@@ -830,7 +1000,6 @@ showToast("投稿を削除しました");
 return;
 }
 
-// 🌟 コメント削除処理（管理者のみ）
 if (e.target.classList.contains("comment-delete-btn")) {
 const postId = e.target.getAttribute("data-post-id");
 const commentId = e.target.getAttribute("data-comment-id");
@@ -843,7 +1012,6 @@ showToast("コメントを削除しました");
 }
 });
 
-// 🌟 コメント送信の送信処理
 document.getElementById("postsContainer").addEventListener("submit", async (e) => {
 const form = e.target.closest(".comment-form");
 if (form) {
@@ -964,6 +1132,17 @@ showToast("アカウントを作成しました");
 } catch (error) { showDebugError("loginDebugError", error); }
 }
 
+// 📜 利用規約フォームのサブミット処理
+if (e.target.id === "termsForm") {
+e.preventDefault();
+if (document.getElementById("termsCheckbox").checked) {
+localStorage.setItem(`user_terms_agreed_${state.user.uid}`, "true");
+document.getElementById("termsModal").classList.add("hidden");
+// 同意後に次のステップ（セットアップ、またはステータスチェック）に進む
+proceedToNextStepAfterLogin(state.user);
+}
+}
+
 if (e.target.id === "setupForm") {
 e.preventDefault();
 state.userName = document.getElementById("setupName").value;
@@ -1023,7 +1202,6 @@ renderPosts();
 });
 }
 
-// 各投稿に対するコメントのリスナー保持用
 let activeCommentListeners = {};
 
 function initPosts() {
@@ -1031,8 +1209,6 @@ const postsRef = query(collection(db, "posts"), orderBy("createdAt", "desc"), li
 onSnapshot(postsRef, (snapshot) => {
 state.posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-
-// 新着や既存の各投稿に対して、コメントサブコレクションのリアルタイム監視を設定
 snapshot.docs.forEach(postDoc => {
     const postId = postDoc.id;
     if (!activeCommentListeners[postId]) {
@@ -1075,8 +1251,8 @@ ${getAvatarHTML(data.avatarUrl)}
 <p>お名前: <strong>${data.name || "不明"} (${data.class || "不明"})</strong></p>
 <p style="font-size: 0.85rem; color: var(--muted);">メール: ${userEmail}</p>
 <div style="margin-top:8px;">
-<button class="button" onclick="window.approveUser('${userEmail}', '${data.class || '7-1'}', '${data.name || ''}', '${data.avatarUrl || '👤'}')" style="min-height: 32px; padding: 0 12px; font-size: 0.85rem; margin-right: 8px;">承認</button>
-<button class="danger-button" onclick="window.rejectUser('${userEmail}')" style="min-height: 32px; padding: 0 12px; font-size: 0.85rem;">拒否</button>
+<button class="button" onclick="window.approveUser('${userEmail}', '${data.class || '7-1'}', '${data.name || ''}', '${data.avatarUrl || '👤'}')" style="min-height: 32px; padding: 0 12px; font-size: 0.85rem; margin-right: 8px; width:auto;">承認</button>
+<button class="danger-button" onclick="window.rejectUser('${userEmail}')" style="min-height: 32px; padding: 0 12px; font-size: 0.85rem; width:auto;">拒否</button>
 </div>
 </div>
 </div>
@@ -1095,7 +1271,7 @@ ${getAvatarHTML(data.avatarUrl)}
 <div>
 <p><strong>${data.name || "名前なし"} (${data.class || "不明"})</strong></p>
 <p style="font-size: 0.85rem; color: var(--muted);">メール: ${userEmail}</p>
-<button class="danger-button" onclick="window.removeUser('${userEmail}')" style="min-height: 32px; padding: 0 12px; font-size: 0.85rem; margin-top:8px;">削除</button>
+<button class="danger-button" onclick="window.removeUser('${userEmail}')" style="min-height: 32px; padding: 0 12px; font-size: 0.85rem; margin-top:8px; width:auto;">削除</button>
 </div>
 </div>
 `;
@@ -1121,7 +1297,6 @@ try { await deleteDoc(doc(db, "allowedUsers", email)); showToast("削除しま�
 
 function handleLogout() {
 if (state.approvalUnsubscribe) { state.approvalUnsubscribe(); state.approvalUnsubscribe = null; }
-// コメントの全監視リスナーをクリア
 Object.values(activeCommentListeners).forEach(unsub => unsub());
 activeCommentListeners = {};
 signOut(auth).then(() => { showToast("ログアウトしました"); });
@@ -1163,27 +1338,13 @@ document.getElementById("mainContent").style.display = "none";
 }, (error) => { showDebugError("pendingDebugError", error); });
 }
 
-onAuthStateChanged(auth, async (user) => {
-clearDebugErrors();
-if (!user) {
-document.getElementById("loginModal").classList.remove("hidden");
-document.getElementById("setupModal").classList.add("hidden");
-document.getElementById("pendingApprovalModal").classList.add("hidden");
-document.getElementById("mainContent").style.display = "none";
-document.getElementById("hamburgerButton").style.display = "none";
-return;
-}
-
-state.user = user;
-
+// ログイン/同意後に次の適切なモーダルへ誘導するロジック
+function proceedToNextStepAfterLogin(user) {
 if (user.uid === ADMIN_UID) {
 state.isAdmin = true;
 state.userName = "管理者";
 state.userClass = "管理";
 state.userAvatarUrl = "👑";
-document.getElementById("loginModal").classList.add("hidden");
-document.getElementById("setupModal").classList.add("hidden");
-document.getElementById("pendingApprovalModal").classList.add("hidden");
 document.getElementById("mainContent").style.display = "block";
 document.getElementById("adminPostForm").style.display = "block";
 document.getElementById("adminDashboardButton").style.display = "block";
@@ -1202,7 +1363,6 @@ loadAdminData();
 return;
 }
 
-document.getElementById("loginModal").classList.add("hidden");
 const savedSetup = localStorage.getItem(`user_setup_${user.uid}`);
 if (!savedSetup) {
 document.getElementById("setupModal").classList.remove("hidden");
@@ -1215,6 +1375,33 @@ state.userName = setup.name;
 state.userClass = setup.class;
 state.userAvatarUrl = setup.avatarUrl || "👤";
 checkApprovalStatus(user);
+}
+
+onAuthStateChanged(auth, async (user) => {
+clearDebugErrors();
+if (!user) {
+document.getElementById("loginModal").classList.remove("hidden");
+document.getElementById("termsModal").classList.add("hidden");
+document.getElementById("setupModal").classList.add("hidden");
+document.getElementById("pendingApprovalModal").classList.add("hidden");
+document.getElementById("mainContent").style.display = "none";
+document.getElementById("hamburgerButton").style.display = "none";
+return;
+}
+
+state.user = user;
+document.getElementById("loginModal").classList.add("hidden");
+
+// 📜 初めて利用するか（規約に同意しているか）チェック
+const hasAgreed = localStorage.getItem(`user_terms_agreed_${user.uid}`);
+if (!hasAgreed) {
+document.getElementById("termsModal").classList.remove("hidden");
+document.getElementById("setupModal").classList.add("hidden");
+document.getElementById("pendingApprovalModal").classList.add("hidden");
+return;
+}
+
+proceedToNextStepAfterLogin(user);
 });
 
 updateDateDisplay();
