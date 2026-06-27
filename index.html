@@ -48,6 +48,7 @@ border-radius: var(--radius-xl);
 box-shadow: var(--shadow);
 }
 
+/* ヘッダーカードの基本設定（PC版） */
 .hero-card { padding: 32px; position: relative; display: flex; align-items: center; gap: 20px; }
 h1, h2, h3, h4, p { margin: 0; }
 
@@ -72,6 +73,7 @@ font-size: 32px;
 display: flex;
 align-items: center;
 justify-content: center;
+flex-shrink: 0;
 }
 
 .avatar-grid {
@@ -97,6 +99,7 @@ border: 2px solid transparent;
 .avatar-option:hover { transform: scale(1.1); }
 .avatar-option.selected { background: rgba(0, 113, 227, 0.1); border-color: var(--accent); }
 
+/* PC用ナビのグリッド配置設定 */
 .toolbar {
 display: grid;
 gap: 16px;
@@ -109,9 +112,10 @@ display: flex;
 flex-wrap: wrap;
 gap: 14px;
 align-items: center;
+justify-content: center;
 }
 
-.date-display { font-size: 1.1rem; font-weight: 700; min-width: 220px; }
+.date-display { font-size: 1.1rem; font-weight: 700; min-width: 220px; text-align: center; }
 
 .panel { padding: 24px; margin-bottom: 16px; }
 .panel-title { font-size: 1.2rem; margin-bottom: 16px; font-weight: 700; }
@@ -251,15 +255,72 @@ font-size: 1.4rem;
 .menu-category { display: grid; gap: 12px; margin-bottom: 20px; }
 .menu-category-btn { padding: 16px; background: linear-gradient(135deg, #0071e3, #2e90fa); color: #fff; border-radius: 12px; font-weight: 700; font-size: 1rem; text-align: center; }
 
+/* 📱 スマホ版レスポンシブ：ここを劇的に改善調整 */
 @media (max-width: 768px) {
 .hamburger-button { display: flex; }
 .hamburger-menu { display: block; }
 #pcDateNav { display: none; }
 #mobileDateNav { display: block !important; }
-.shell { padding: 20px 0 100px; }
-.hero-card { padding: 20px; flex-direction: column; text-align: center; }
-.panel { padding: 16px; }
-.post-card { padding: 16px; }
+.shell { padding: 12px 0 100px; }
+
+
+/* スマホ時のヘッダーを圧倒的にコンパクトにする（極小化） */
+.hero-card { 
+padding: 10px 14px; 
+flex-direction: row; 
+text-align: left; 
+gap: 12px; 
+border-radius: 18px;
+margin-bottom: 8px;
+}
+.profile-avatar { 
+width: 32px; 
+height: 32px; 
+font-size: 18px; 
+border-width: 1px;
+}
+.hero-title { 
+font-size: 0.95rem; 
+font-weight: 800; 
+margin-bottom: 0;
+}
+.hero-lead { 
+font-size: 0.65rem; 
+line-height: 1.2;
+}
+
+/* スマホ用の日付バー：前日・日付・次日を完全に横一列配置（挟み込み） */
+#mobileDateNav {
+padding: 8px 12px;
+margin-bottom: 12px;
+border-radius: 18px;
+}
+#mobileDateNav .toolbar-row {
+display: flex;
+flex-wrap: nowrap; /* 絶対に折り返さない */
+justify-content: space-between;
+align-items: center;
+gap: 8px;
+width: 100%;
+}
+#mobileDateNav .ghost-button {
+flex: 0 0 auto; /* ボタン幅を固定 */
+min-height: 34px;
+padding: 0 10px;
+font-size: 0.75rem;
+border-radius: 10px;
+white-space: nowrap;
+}
+#mobileDateNav .date-display {
+flex: 1 1 auto; /* 日付エリアを中央一杯に広げる */
+font-size: 0.85rem;
+min-width: 0;
+margin: 0;
+text-align: center;
+}
+
+.panel { padding: 16px; border-radius: var(--radius-lg); }
+.post-card { padding: 16px; border-radius: var(--radius-lg); }
 .admin-footer { bottom: 8px; right: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .hamburger-menu { left: -100%; width: 100%; }
 .hamburger-menu.active { left: 0; }
@@ -459,11 +520,11 @@ const ADMIN_UID = "Z4YHNqiKySV3KLkHIjtDaj36WUa2";
 
 // 選択できるアバターのリスト（全50種類）
 const AVATARS = [
-  "👤", "🐱", "🐶", "🦊", "🦁", "🐼", "🐨", "🐻", "🐰", "🐸", "🐵", "🐧", "🐦", "🦖", "🦄",
-  "✏️", "📐", "📚", "🎒", "🎓", "🧪", "🎨", "🎺", "🎸", "💻",
-  "⚽", "🏀", "⚾", "🎾", "🏐", "🏓", "🏸", "🏃", "💃",
-  "🎮", "🕹️", "🎧", "🎬", "📸", "🔮", "🛹",
-  "🚀", "🛸", "✈️", "🏎️", "🔥", "⚡", "🌟", "🌈", "👑"
+"👤", "🐱", "🐶", "🦊", "🦁", "🐼", "🐨", "🐻", "🐰", "🐸", "🐵", "🐧", "🐦", "🦖", "🦄",
+"✏️", "📐", "📚", "🎒", "🎓", "🧪", "🎨", "🎺", "🎸", "💻",
+"⚽", "🏀", "⚾", "🎾", "🏐", "🏓", "🏸", "🏃", "💃",
+"🎮", "🕹️", "🎧", "🎬", "📸", "🔮", "🛹",
+"🚀", "🛸", "✈️", "🏎️", "🔥", "⚡", "🌟", "🌈", "👑"
 ];
 let selectedAvatar = "👤";
 
@@ -819,12 +880,10 @@ state.approvalUnsubscribe = onSnapshot(doc(db, "allowedUsers", user.email), (sna
 if (snapshot.exists()) {
 const data = snapshot.data();
 
-// Firestoreの最新データを最優先で強制上書き
 state.userName = data.name ? data.name : state.userName;
 state.userClass = data.class ? data.class : state.userClass;
 state.userAvatarUrl = data.avatarUrl ? data.avatarUrl : "👤";
 
-// ローカルストレージの記憶を新しいデータで上書き！
 localStorage.setItem(`user_setup_${user.uid}`, JSON.stringify({ name: state.userName, class: state.userClass, avatarUrl: state.userAvatarUrl }));
 
 document.getElementById("pendingApprovalModal").classList.add("hidden");
