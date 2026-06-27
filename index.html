@@ -403,7 +403,7 @@ font-size: 1.4rem;
 .menu-category { display: grid; gap: 12px; margin-bottom: 20px; }
 .menu-category-btn { padding: 16px; background: linear-gradient(135deg, #0071e3, #2e90fa); color: #fff; border-radius: 12px; font-weight: 700; font-size: 1rem; text-align: center; width: 100%; }
 
-/* 📱 スマホ用レスポンシブスタイル完全版 */
+/* 📱 スマホ用レスポンシブスタイル */
 @media (max-width: 768px) {
 .hamburger-button { display: flex; }
 .hamburger-menu { display: block; }
@@ -465,7 +465,6 @@ margin: 0;
 text-align: center;
 }
 
-/* 管理者新規投稿画面の横幅はみ出しを1カラム化で完全解決 */
 .form-grid-2 {
 grid-template-columns: 1fr !important;
 gap: 10px;
@@ -555,7 +554,7 @@ width: 100% !important;
 ・荒らし行為、スパム行為<br>
 ・不適切なコメントの投稿<br>
 ・法令や学校のルールに反する内容の投稿<br>
-・他人になりすます行為<br>
+・他人なりすます行為<br>
 ・他人のアカウントを使用する行為<br>
 ・システムへの不正アクセスや改ざんを試みる行為<br>
 ・本サービスの運営を妨害する行為<br>
@@ -972,7 +971,6 @@ try {
 if (hasReacted) {
 await deleteDoc(userReactionRef);
 await updateDoc(postRef, { [`reactions.${type}`]: increment(-1) });
-// ⚠️ 連打時のクラッシュを防ぐため、stateにオブジェクトが存在するときのみ安全に書き換え
 if (state.userReactedMap[postId]) {
     state.userReactedMap[postId][type] = false;
 }
@@ -1178,7 +1176,7 @@ localStorage.setItem(`user_setup_${state.user.uid}`, JSON.stringify({ name: stat
 updateUIProfile();
 document.getElementById("profileModal").classList.add("hidden");
 showToast("プロフィールを更新しました！");
-} catch (error) { showDebugError("profileDebugError", error); }
+} catch (error) { showDebugError("profileEditForm", error); }
 }
 });
 
@@ -1389,6 +1387,8 @@ document.getElementById("loginModal").classList.add("hidden");
 
 const hasAgreed = localStorage.getItem(`user_terms_agreed_${user.uid}`);
 if (!hasAgreed) {
+// ⚠️ チラつきを防ぐため、規約未同意のときはメインコンテンツを確実に非表示にしてからモーダルを出す
+document.getElementById("mainContent").style.display = "none";
 document.getElementById("termsModal").classList.remove("hidden");
 document.getElementById("setupModal").classList.add("hidden");
 document.getElementById("pendingApprovalModal").classList.add("hidden");
