@@ -285,17 +285,19 @@ width: auto;
 
 .button { background: linear-gradient(135deg, #0071e3, #2e90fa); color: #fff; }
 
-/* 🌟 ゴーストボタンの透明度をアップさせ、美しいすりガラス（透過）仕様に変更 */
+/* 💎 Appleの「リキッドグラス」風の極上すりガラス透過デザイン */
 .ghost-button { 
-background: rgba(255, 255, 255, 0.45); 
-backdrop-filter: blur(8px);
--webkit-backdrop-filter: blur(8px);
-color: #1f2937; 
-border: 1px solid rgba(15, 23, 42, 0.08); 
-transition: background 0.2s ease, transform 0.1s ease;
+background: rgba(255, 255, 255, 0.08); 
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+color: #111827; 
+border: 1px solid rgba(255, 255, 255, 0.4); 
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+transition: background 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s, transform 0.1s;
 }
 .ghost-button:hover {
-background: rgba(255, 255, 255, 0.6);
+background: rgba(255, 255, 255, 0.25);
+border-color: rgba(255, 255, 255, 0.5);
 }
 
 .danger-button { background: rgba(217, 45, 32, 0.12); color: #d92d20; min-height: 36px; padding: 0 12px; font-size: 0.85rem; }
@@ -469,6 +471,8 @@ font-size: 0.75rem;
 border-radius: 10px;
 white-space: nowrap;
 width: auto;
+/* スマホでも枠線を綺麗に見せる調整 */
+border: 1px solid rgba(255, 255, 255, 0.45); 
 }
 #mobileDateNav .date-display {
 flex: 1 1 auto; 
@@ -569,7 +573,7 @@ width: 100% !important;
 ・荒らし行為、スパム行為<br>
 ・不適切なコメントの投稿<br>
 ・法令や学校のルールに反する内容の投稿<br>
-・他人なりすます行為<br>
+・他人になりすます行為<br>
 ・他人のアカウントを使用する行為<br>
 ・システムへの不正アクセスや改ざんを試みる行為<br>
 ・本サービスの運営を妨害する行為<br>
