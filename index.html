@@ -284,7 +284,20 @@ width: auto;
 }
 
 .button { background: linear-gradient(135deg, #0071e3, #2e90fa); color: #fff; }
-.ghost-button { background: rgba(255, 255, 255, 0.88); color: #1f2937; border: 1px solid var(--border); }
+
+/* 🌟 ゴーストボタンの透明度をアップさせ、美しいすりガラス（透過）仕様に変更 */
+.ghost-button { 
+background: rgba(255, 255, 255, 0.45); 
+backdrop-filter: blur(8px);
+-webkit-backdrop-filter: blur(8px);
+color: #1f2937; 
+border: 1px solid rgba(15, 23, 42, 0.08); 
+transition: background 0.2s ease, transform 0.1s ease;
+}
+.ghost-button:hover {
+background: rgba(255, 255, 255, 0.6);
+}
+
 .danger-button { background: rgba(217, 45, 32, 0.12); color: #d92d20; min-height: 36px; padding: 0 12px; font-size: 0.85rem; }
 
 .modal {
@@ -507,6 +520,7 @@ width: 100% !important;
 </head>
 <body>
 
+<!-- 1. ログイン・新規登録モーダル -->
 <div class="modal" id="loginModal">
 <div class="modal-panel" style="width: min(500px, 100%);">
 <h2 class="modal-title">ログイン / 新規登録</h2>
@@ -519,6 +533,7 @@ width: 100% !important;
 </div>
 </div>
 
+<!-- 2. 利用規約・プライバシーポリシー同意モーダル -->
 <div class="modal hidden" id="termsModal">
 <div class="modal-panel" style="width: min(600px, 100%);">
 <h2 class="modal-title" style="font-size: 1.3rem; margin-bottom: 12px;">利用規約・プライバシーポリシー</h2>
@@ -633,6 +648,7 @@ width: 100% !important;
 </div>
 </div>
 
+<!-- 3. 初期セットアップモーダル -->
 <div class="modal hidden" id="setupModal">
 <div class="modal-panel" style="width: min(500px, 100%);">
 <h2 class="modal-title">初期セットアップ</h2>
@@ -650,6 +666,7 @@ width: 100% !important;
 </div>
 </div>
 
+<!-- 4. 承認待ちモーダル -->
 <div class="modal hidden" id="pendingApprovalModal">
 <div class="modal-panel" style="width: min(500px, 100%); text-align: center; padding: 40px 28px;">
 <h2 class="modal-title" style="color: var(--accent); font-size: 1.6rem; margin-bottom: 16px;">⏳ 承認待ち</h2>
@@ -659,6 +676,7 @@ width: 100% !important;
 </div>
 </div>
 
+<!-- ハンバーガーメニュー関連 -->
 <div class="hamburger-menu" id="hamburgerMenu">
 <h2 style="margin-bottom: 24px; font-size: 1.2rem;">カテゴリを選択</h2>
 <div class="menu-category">
@@ -672,6 +690,7 @@ width: 100% !important;
 <div class="hamburger-overlay" id="hamburgerOverlay"></div>
 <button class="hamburger-button" id="hamburgerButton">☰</button>
 
+<!-- メインコンテンツ -->
 <div id="mainContent" style="display: none;">
 <div class="admin-footer" id="adminFooter">
 <button class="ghost-button" id="adminDashboardButton" style="display: none; min-height: 40px; padding: 0 14px; font-size: 0.85rem;">📊 ダッシュボード</button>
@@ -679,6 +698,7 @@ width: 100% !important;
 <button class="ghost-button" id="logoutButton" style="min-height: 40px; padding: 0 14px; font-size: 0.85rem;">ログアウト</button>
 </div>
 
+<!-- PC専用ナビゲーションバー -->
 <section class="toolbar frosted" id="pcDateNav">
 <div class="toolbar-row">
 <button class="ghost-button" id="prevDateButton">← 前日</button>
@@ -688,6 +708,7 @@ width: 100% !important;
 </section>
 
 <main class="shell">
+<!-- 1. ヘッダー（ヒーローカード） -->
 <section class="hero-card frosted" style="margin-bottom: 12px;">
 <div id="userAvatarHeader" class="profile-avatar">👤</div>
 <div>
@@ -696,6 +717,7 @@ width: 100% !important;
 </div>
 </section>
 
+<!-- 2. スマホ専用ナビゲーションバー -->
 <section class="toolbar frosted" id="mobileDateNav" style="display: none;">
 <div class="toolbar-row">
 <button class="ghost-button" id="prevDateButtonMobile">← 前日</button>
@@ -704,6 +726,7 @@ width: 100% !important;
 </div>
 </section>
 
+<!-- 3. 新規投稿フォーム -->
 <section id="adminPostForm" style="display: none;">
 <div class="panel">
 <h3 class="panel-title">新規投稿</h3>
@@ -731,10 +754,12 @@ width: 100% !important;
 </div>
 </section>
 
+<!-- 4. タイムライン -->
 <section id="postsContainer"></section>
 </main>
 </div>
 
+<!-- ダッシュボードモーダル -->
 <div class="modal hidden" id="adminDashboardModal">
 <div class="modal-panel" style="width: min(800px, 100%); max-height: 90vh; overflow: auto;">
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -755,6 +780,7 @@ width: 100% !important;
 </div>
 </div>
 
+<!-- プロフィール設定モーダル -->
 <div class="modal hidden" id="profileModal">
 <div class="modal-panel" style="width: min(500px, 100%);">
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -1387,7 +1413,6 @@ document.getElementById("loginModal").classList.add("hidden");
 
 const hasAgreed = localStorage.getItem(`user_terms_agreed_${user.uid}`);
 if (!hasAgreed) {
-// ⚠️ チラつきを防ぐため、規約未同意のときはメインコンテンツを確実に非表示にしてからモーダルを出す
 document.getElementById("mainContent").style.display = "none";
 document.getElementById("termsModal").classList.remove("hidden");
 document.getElementById("setupModal").classList.add("hidden");
