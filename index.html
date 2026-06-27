@@ -117,7 +117,6 @@ justify-content: center;
 .panel { padding: 24px; margin-bottom: 16px; }
 .panel-title { font-size: 1.2rem; margin-bottom: 16px; font-weight: 700; }
 
-/* 投稿作成フォーム内のレイアウト設定 */
 .form-grid-2 {
 display: grid;
 grid-template-columns: 1fr 1fr;
@@ -315,7 +314,6 @@ box-shadow: var(--shadow);
 
 .modal-title { font-size: 1.4rem; margin-bottom: 20px; font-weight: 700; }
 
-/* 📜 利用規約ボックス */
 .terms-box {
 background: #f9fafb;
 border: 1px solid var(--border);
@@ -369,7 +367,6 @@ word-break: break-all;
 text-align: left;
 }
 
-/* ハンバーガーメニュー */
 .hamburger-menu {
 display: none;
 position: fixed;
@@ -406,7 +403,7 @@ font-size: 1.4rem;
 .menu-category { display: grid; gap: 12px; margin-bottom: 20px; }
 .menu-category-btn { padding: 16px; background: linear-gradient(135deg, #0071e3, #2e90fa); color: #fff; border-radius: 12px; font-weight: 700; font-size: 1rem; text-align: center; width: 100%; }
 
-/* 📱 スマホ版レスポンシブ完全調整 */
+/* 📱 スマホ用レスポンシブスタイル完全版 */
 @media (max-width: 768px) {
 .hamburger-button { display: flex; }
 .hamburger-menu { display: block; }
@@ -414,7 +411,6 @@ font-size: 1.4rem;
 #mobileDateNav { display: block !important; }
 .shell { padding: 12px 0 100px; }
 
-/* ヘッダーカードを極限までコンパクトに */
 .hero-card { 
 padding: 10px 14px; 
 flex-direction: row; 
@@ -439,7 +435,6 @@ font-size: 0.65rem;
 line-height: 1.2;
 }
 
-/* スマホ用日付ナビをバグのない横幅いっぱいに */
 #mobileDateNav {
 padding: 8px 12px;
 margin-bottom: 12px;
@@ -470,7 +465,7 @@ margin: 0;
 text-align: center;
 }
 
-/* ⚠️ 【ここを修正】スマホ時に新規投稿フォームがはみ出さないよう1カラム化 */
+/* 管理者新規投稿画面の横幅はみ出しを1カラム化で完全解決 */
 .form-grid-2 {
 grid-template-columns: 1fr !important;
 gap: 10px;
@@ -556,7 +551,7 @@ width: 100% !important;
 3. 利用者は投稿に「グッド（いいね）」でリアクションできます。</p>
 <h4>第6条（禁止事項）</h4>
 <p>利用者は、次の行為を行ってはいけません。<br>
-・他人への誹謗中傷や嫌がらせ<br>
+・他人への誹傷中傷や嫌がらせ<br>
 ・荒らし行為、スパム行為<br>
 ・不適切なコメントの投稿<br>
 ・法令や学校のルールに反する内容の投稿<br>
@@ -977,7 +972,10 @@ try {
 if (hasReacted) {
 await deleteDoc(userReactionRef);
 await updateDoc(postRef, { [`reactions.${type}`]: increment(-1) });
-state.userReactedMap[postId][type] = false;
+// ⚠️ 連打時のクラッシュを防ぐため、stateにオブジェクトが存在するときのみ安全に書き換え
+if (state.userReactedMap[postId]) {
+    state.userReactedMap[postId][type] = false;
+}
 } else {
 await setDoc(userReactionRef, { userId: state.user.uid, postId, type, timestamp: serverTimestamp() });
 await updateDoc(postRef, { [`reactions.${type}`]: increment(1) });
@@ -1132,13 +1130,11 @@ showToast("アカウントを作成しました");
 } catch (error) { showDebugError("loginDebugError", error); }
 }
 
-// 📜 利用規約フォームのサブミット処理
 if (e.target.id === "termsForm") {
 e.preventDefault();
 if (document.getElementById("termsCheckbox").checked) {
 localStorage.setItem(`user_terms_agreed_${state.user.uid}`, "true");
 document.getElementById("termsModal").classList.add("hidden");
-// 同意後に次のステップ（セットアップ、またはステータスチェック）に進む
 proceedToNextStepAfterLogin(state.user);
 }
 }
@@ -1338,7 +1334,6 @@ document.getElementById("mainContent").style.display = "none";
 }, (error) => { showDebugError("pendingDebugError", error); });
 }
 
-// ログイン/同意後に次の適切なモーダルへ誘導するロジック
 function proceedToNextStepAfterLogin(user) {
 if (user.uid === ADMIN_UID) {
 state.isAdmin = true;
@@ -1392,7 +1387,6 @@ return;
 state.user = user;
 document.getElementById("loginModal").classList.add("hidden");
 
-// 📜 初めて利用するか（規約に同意しているか）チェック
 const hasAgreed = localStorage.getItem(`user_terms_agreed_${user.uid}`);
 if (!hasAgreed) {
 document.getElementById("termsModal").classList.remove("hidden");
