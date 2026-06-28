@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>港区白金の丘中学校 第7学年 共有サイト</title>
-<link rel="icon" href="ChatGPT Image 2026年6月28日 00_40_40 - コピー.png">
+<link rel="icon" href="ChatGPT Image 2026年6月28日 00_40_40.png">
 <style>
 :root {
 color-scheme: light;
@@ -304,6 +304,43 @@ border-color: rgba(255, 255, 255, 0.65);
 box-shadow: 
   0 6px 20px rgba(0, 0, 0, 0.04), 
   inset 0 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+/* 🌟 初回ガイドの吹き出しスタイルとアニメーション */
+@keyframes popIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+.guide-bubble {
+  position: fixed;
+  left: 50%;
+  bottom: 80px;
+  transform: translateX(-50%);
+  background: rgba(17, 24, 39, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  padding: 16px 20px;
+  border-radius: 20px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+  z-index: 2000;
+  font-size: 0.9rem;
+  width: max-content;
+  max-width: 320px;
+  animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  text-align: left;
+}
+.guide-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px 8px 0;
+  border-style: solid;
+  border-color: rgba(17, 24, 39, 0.96) transparent;
+  display: block;
+  width: 0;
 }
 
 .danger-button { background: rgba(217, 45, 32, 0.12); color: #d92d20; min-height: 36px; padding: 0 12px; font-size: 0.85rem; }
@@ -639,10 +676,6 @@ width: 100% !important;
 <h4>お問い合わせ</h4>
 <p>本サービスに関するお問い合わせは、管理者（AKKI）までご連絡ください。<br>
 運営者：AKKI（個人運営）</p>
-<h4>本サービスについて</h4>
-<p>・本サービスは学校の公式Webサイトではありません。個人（AKKI）が運営する学校予定共有Webサイトです。<br>
-・学校を代表するものではなく、学校の公式な見解を示すものでもありません。<br>
-・正式な情報については、学校からのお知らせや先生からの連絡をご確認ください。</p>
 </div>
 
 <form id="termsForm" style="display: grid; gap: 14px;">
@@ -907,6 +940,27 @@ return `<img src="${avatarUrl}" class="${className}" style="border-radius:50%; o
 } else {
 return `<div class="${className}" style="display:flex; align-items:center; justify-content:center; background:#e5e7eb; border-radius:50%;">${avatarUrl || "👤"}</div>`;
 }
+}
+
+// 🌟 初回利用ガイド表示関数
+function showFirstTimeGuide() {
+if (localStorage.getItem("guide_seen")) return;
+
+const guide = document.createElement("div");
+guide.className = "guide-bubble";
+guide.innerHTML = `
+<div style="font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:6px;">💡 使い方のヒント</div>
+<p style="margin:0 0 10px 0; opacity:0.95; line-height:1.5; font-size:0.85rem;">
+予定や宿題を確認したら、リアクションボタン（👍や👀）を押して周りのみんなに共有しよう！
+</p>
+<button id="closeGuide" style="width:100%; background:#0071e3; color:#fff; border:none; padding:6px 0; border-radius:10px; cursor:pointer; font-weight:700; font-size:0.8rem;">了解！</button>
+`;
+document.body.appendChild(guide);
+
+document.getElementById("closeGuide").addEventListener("click", () => {
+guide.remove();
+localStorage.setItem("guide_seen", "true");
+});
 }
 
 function renderPosts() {
@@ -1346,6 +1400,9 @@ updateCategoryTitle();
 updateUIProfile();
 initPosts();
 initUserReactions();
+// 🌟 承認され、メインコンテンツが表示されたら初回ガイドを実行
+showFirstTimeGuide();
+
 if (state.approvalUnsubscribe) { state.approvalUnsubscribe(); state.approvalUnsubscribe = null; }
 } else {
 document.getElementById("pendingApprovalModal").classList.remove("hidden");
@@ -1375,6 +1432,8 @@ updateUIProfile();
 initPosts();
 initUserReactions();
 loadAdminData();
+// 🌟 管理者ログイン時も一応表示（不要なら localStorage.setItem("guide_seen", "true") してください）
+showFirstTimeGuide();
 return;
 }
 
