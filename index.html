@@ -567,7 +567,7 @@ width: 100% !important;
 <div class="modal-panel" style="width: min(500px, 100%);">
 <h2 class="modal-title">ログイン / 新規登録</h2>
 <form id="emailLoginForm" style="display: grid; gap: 12px;">
-<input id="emailInput" type="email" placeholder="メール" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+<input id="emailInput" type="text" placeholder="メールアドレス または ユーザー名" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
 <input id="passwordInput" type="password" placeholder="パスワード" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
 <button type="submit" class="button" style="width: 100%;">ログイン / 登録</button>
 </form>
@@ -1229,8 +1229,15 @@ clearDebugErrors();
 
 if (e.target.id === "emailLoginForm") {
 e.preventDefault();
-const email = document.getElementById("emailInput").value;
+let email = document.getElementById("emailInput").value.trim();
 const password = document.getElementById("passwordInput").value;
+
+// 有効なメールアドレスならそのまま、そうでなければ @shiragane.com を付ける
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+if (!emailRegex.test(email)) {
+email += "@shiragane.com";
+}
 try {
 try {
 await signInWithEmailAndPassword(auth, email, password);
@@ -1621,3 +1628,5 @@ updateDateDisplay();
 </script>
 </body>
 </html>
+
+
