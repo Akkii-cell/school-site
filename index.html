@@ -29,6 +29,18 @@ color-scheme: light;
 --max-width: 1220px;
 }
 
+/* ダークモード用のテーマ変数 */
+body.dark-mode {
+color-scheme: dark;
+--bg: #050816;
+--surface: rgba(15, 23, 42, 0.92);
+--border: rgba(148, 163, 184, 0.2);
+--text: #f8fafc;
+--muted: #94a3b8;
+--accent: #60a5fa;
+--shadow: 0 18px 40px rgba(2, 6, 23, 0.45);
+}
+
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {
@@ -43,6 +55,31 @@ background: var(--bg);
 button, input, select, textarea { font: inherit; width: 100%; box-sizing: border-box; }
 img { max-width: 100%; display: block; }
 button { border: none; cursor: pointer; }
+
+/* ダークモード切替ボタン */
+.theme-toggle-button {
+position: fixed;
+right: 24px;
+bottom: 92px;
+z-index: 1100;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+padding: 12px 16px;
+border-radius: 999px;
+background: rgba(255, 255, 255, 0.9);
+color: #111827;
+border: 1px solid rgba(15, 23, 42, 0.08);
+box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+backdrop-filter: blur(24px);
+-webkit-backdrop-filter: blur(24px);
+font-weight: 700;
+font-size: 0.95rem;
+width: auto;
+min-height: 46px;
+transition: transform 0.15s ease, background 0.2s ease;
+}
+.theme-toggle-button:hover { transform: translateY(-1px); }
 
 .shell {
 width: min(var(--max-width), calc(100vw - 32px));
@@ -432,6 +469,56 @@ word-break: break-all;
 text-align: left;
 }
 
+.admin-dashboard-section {
+display: grid;
+gap: 16px;
+}
+.admin-dashboard-list {
+display: grid;
+gap: 12px;
+}
+.admin-dashboard-card {
+background: rgba(255, 255, 255, 0.96);
+border: 1px solid var(--border);
+border-radius: 14px;
+padding: 14px;
+display: flex;
+align-items: flex-start;
+gap: 12px;
+box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+}
+.admin-dashboard-card p {
+margin: 0;
+line-height: 1.5;
+}
+.admin-dashboard-card .admin-dashboard-meta {
+font-size: 0.85rem;
+color: var(--muted);
+}
+.admin-dashboard-card .admin-dashboard-title {
+font-weight: 700;
+color: var(--text);
+margin-bottom: 2px;
+}
+.admin-dashboard-appeal-card {
+background: rgba(255, 255, 255, 0.96);
+border: 1px solid var(--border);
+border-left: 4px solid #f59e0b;
+border-radius: 14px;
+padding: 14px;
+position: relative;
+box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+}
+.admin-dashboard-appeal-card .admin-dashboard-appeal-reason {
+background: rgba(249, 250, 251, 0.95);
+padding: 10px;
+border-radius: 8px;
+font-size: 0.9rem;
+color: #344054;
+white-space: pre-wrap;
+margin: 8px 0;
+}
+
 .hamburger-menu {
 display: none;
 position: fixed;
@@ -468,12 +555,51 @@ font-size: 1.4rem;
 .menu-category { display: grid; gap: 12px; margin-bottom: 20px; }
 .menu-category-btn { padding: 16px; background: linear-gradient(135deg, #0071e3, #2e90fa); color: #fff; border-radius: 12px; font-weight: 700; font-size: 1rem; text-align: center; width: 100%; }
 
+body.dark-mode .avatar-option { background: rgba(30, 41, 59, 0.9); color: var(--text); }
+body.dark-mode .avatar-option.selected { background: rgba(96, 165, 250, 0.16); border-color: var(--accent); }
+body.dark-mode .post-body { color: #d1d5db; }
+body.dark-mode .reaction-btn { background: rgba(148, 163, 184, 0.12); color: var(--text); border-color: rgba(148, 163, 184, 0.16); }
+body.dark-mode .reaction-btn:hover { background: rgba(148, 163, 184, 0.2); }
+body.dark-mode .reaction-btn.active { background: rgba(96, 165, 250, 0.16); border-color: rgba(96, 165, 250, 0.35); color: var(--accent); }
+body.dark-mode .comment-item { background: rgba(148, 163, 184, 0.12); }
+body.dark-mode .comment-text { color: #cbd5e1; }
+body.dark-mode .comment-input, body.dark-mode input, body.dark-mode textarea, body.dark-mode select {
+background: rgba(15, 23, 42, 0.9);
+color: var(--text);
+border-color: var(--border);
+}
+body.dark-mode .comment-input::placeholder, body.dark-mode input::placeholder, body.dark-mode textarea::placeholder { color: #94a3b8; }
+body.dark-mode .empty-state { background: rgba(15, 23, 42, 0.7); color: var(--muted); }
+body.dark-mode .terms-box { background: rgba(15, 23, 42, 0.78); color: #cbd5e1; }
+body.dark-mode .ghost-button { background: rgba(15, 23, 42, 0.6); color: var(--text); border-color: rgba(148, 163, 184, 0.24); box-shadow: 0 6px 16px rgba(2, 6, 23, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.06); }
+body.dark-mode .ghost-button:hover { background: rgba(30, 41, 59, 0.85); border-color: rgba(148, 163, 184, 0.35); }
+body.dark-mode .danger-button { background: rgba(248, 113, 113, 0.14); color: #fda4af; }
+body.dark-mode .modal { background: rgba(2, 6, 23, 0.74); }
+body.dark-mode .toast { background: rgba(15, 23, 42, 0.95); color: #f8fafc; }
+body.dark-mode .guide-bubble { background: rgba(15, 23, 42, 0.96); color: #f8fafc; }
+body.dark-mode .guide-bubble::after { border-color: rgba(15, 23, 42, 0.96) transparent; }
+body.dark-mode .badge { background: rgba(96, 165, 250, 0.16); color: #93c5fd; }
+body.dark-mode .profile-avatar, body.dark-mode .comment-avatar { background: #334155; color: #f8fafc; border-color: rgba(15, 23, 42, 0.8); }
+body.dark-mode .hamburger-menu, body.dark-mode .hamburger-button, body.dark-mode .modal-panel, body.dark-mode .panel, body.dark-mode .post-card, body.dark-mode .card, body.dark-mode .frosted { background: var(--surface); }
+body.dark-mode .hamburger-overlay { background: rgba(2, 6, 23, 0.72); }
+body.dark-mode .menu-category-btn { box-shadow: 0 8px 20px rgba(2, 6, 23, 0.3); }
+body.dark-mode .theme-toggle-button { background: rgba(15, 23, 42, 0.86); color: #f8fafc; border-color: rgba(148, 163, 184, 0.24); box-shadow: 0 14px 34px rgba(2, 6, 23, 0.34); }
+body.dark-mode a { color: #93c5fd; }
+body.dark-mode .debug-error-box { background: rgba(120, 53, 15, 0.35); border-color: #fb923c; color: #fed7aa; }
+body.dark-mode .admin-dashboard-card { background: rgba(15, 23, 42, 0.78); box-shadow: 0 8px 20px rgba(2, 6, 23, 0.28); }
+body.dark-mode .admin-dashboard-appeal-card { background: rgba(30, 41, 59, 0.82); box-shadow: 0 8px 20px rgba(2, 6, 23, 0.28); }
+body.dark-mode .admin-dashboard-appeal-card .admin-dashboard-appeal-reason { background: rgba(15, 23, 42, 0.7); color: #cbd5e1; }
+body.dark-mode ::-webkit-scrollbar { width: 10px; }
+body.dark-mode ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+body.dark-mode ::-webkit-scrollbar-thumb { background: rgba(96, 165, 250, 0.35); border-radius: 999px; }
+
 @media (max-width: 768px) {
 .hamburger-button { display: flex; }
 .hamburger-menu { display: block; }
 #pcDateNav { display: none !important; }
 #mobileDateNav { display: block !important; }
 .shell { padding: 12px 0 100px; }
+.theme-toggle-button { right: 12px; bottom: 76px; padding: 10px 14px; font-size: 0.9rem; }
 
 .hero-card { 
 padding: 10px 14px; 
@@ -753,6 +879,7 @@ width: 100% !important;
 
 <div class="hamburger-overlay" id="hamburgerOverlay"></div>
 <button class="hamburger-button" id="hamburgerButton">☰</button>
+<button type="button" class="theme-toggle-button" id="themeToggleButton" aria-pressed="false" title="ダークモードに切り替え">🌙 ダークモード</button>
 
 <div id="mainContent" style="display: none;">
 <div class="admin-footer" id="adminFooter">
@@ -869,6 +996,42 @@ width: 100% !important;
 
 <div class="toast" id="toast"></div>
 
+<script>
+// ダークモード: localStorageとボタン表示を同期する
+(function () {
+const storageKey = "site-theme";
+const toggleButton = document.getElementById("themeToggleButton");
+
+function updateToggleLabel(theme) {
+if (!toggleButton) return;
+const isDark = theme === "dark";
+toggleButton.innerHTML = isDark ? "☀️ 通常モード" : "🌙 ダークモード";
+toggleButton.setAttribute("aria-pressed", String(isDark));
+toggleButton.setAttribute("title", isDark ? "通常モードに切り替え" : "ダークモードに切り替え");
+}
+
+function applyTheme(theme) {
+const isDark = theme === "dark";
+document.body.classList.toggle("dark-mode", isDark);
+document.documentElement.classList.toggle("dark-mode", isDark);
+document.body.setAttribute("data-theme", theme);
+document.documentElement.setAttribute("data-theme", theme);
+updateToggleLabel(theme);
+localStorage.setItem(storageKey, theme);
+}
+
+const storedTheme = localStorage.getItem(storageKey);
+const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+const initialTheme = storedTheme || (prefersDark ? "dark" : "light");
+applyTheme(initialTheme);
+
+toggleButton?.addEventListener("click", () => {
+const nextTheme = document.body.classList.contains("dark-mode") ? "light" : "dark";
+applyTheme(nextTheme);
+});
+})();
+</script>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -918,13 +1081,78 @@ categoryFilter: "all"
 function showDebugError(elementId, error) {
 const box = document.getElementById(elementId);
 if (box) {
-box.textContent = `⚠️ エラー発生: ${error.name || 'Error'}\nメッセージ: ${error.message}`;
+console.error(error);
+box.textContent = "⚠️ 操作に失敗しました。しばらくしてから再度お試しください。";
 box.style.display = "block";
 }
 }
 
 function clearDebugErrors() {
 document.querySelectorAll(".debug-error-box").forEach(box => { box.style.display = "none"; });
+}
+
+function escapeHTML(value) {
+return String(value)
+.replace(/&/g, "&amp;")
+.replace(/</g, "&lt;")
+.replace(/>/g, "&gt;")
+.replace(/"/g, "&quot;")
+.replace(/'/g, "&#39;");
+}
+
+function isSafeUrl(value) {
+if (!value || typeof value !== "string") return false;
+try {
+const url = new URL(value.trim());
+return (url.protocol === "https:" || url.protocol === "http:") && !/^(javascript|data):/i.test(url.protocol);
+} catch {
+return false;
+}
+}
+
+function isSafeImageUrl(value) {
+if (!isSafeUrl(value)) return false;
+return /\.(jpe?g|png|gif|webp|svg|bmp)(\?.*)?$/i.test(value.trim());
+}
+
+function sanitizeUserText(value, minLength = 1, maxLength = 1000) {
+if (typeof value !== "string") return "";
+const trimmed = value.trim();
+if (trimmed.length < minLength || trimmed.length > maxLength) return "";
+if (/javascript:|data:|<\s*script/i.test(trimmed)) return "";
+return escapeHTML(trimmed);
+}
+
+function validateTextInput(value, fieldName, minLength, maxLength) {
+const trimmed = String(value || "").trim();
+if (trimmed.length < minLength) {
+alert(`${fieldName}は${minLength}文字以上で入力してください。`);
+return null;
+}
+if (trimmed.length > maxLength) {
+alert(`${fieldName}は${maxLength}文字以内で入力してください。`);
+return null;
+}
+if (/javascript:|data:|<\s*script/i.test(trimmed)) {
+alert(`${fieldName}に危険な文字列が含まれています。`);
+return null;
+}
+return trimmed;
+}
+
+async function logAdminAction(action, details = {}) {
+if (!state.user || !state.isAdmin) return;
+try {
+await addDoc(collection(db, "adminLogs"), {
+action,
+actorUid: state.user.uid,
+actorEmail: state.user.email,
+details,
+timestamp: serverTimestamp()
+});
+} catch (error) {
+console.warn("監査ログの保存に失敗しました", error);
+}
 }
 
 function showToast(msg) {
@@ -959,20 +1187,21 @@ headerLead.textContent = "AKKI によって開発された共有サイト";
 
 const avatarContainer = document.getElementById("userAvatarHeader");
 if (avatarContainer) {
-if (state.userAvatarUrl.startsWith("http")) {
-avatarContainer.innerHTML = `<img src="${state.userAvatarUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+if (isSafeImageUrl(state.userAvatarUrl)) {
+const safeUrl = escapeHTML(state.userAvatarUrl);
+avatarContainer.innerHTML = `<img src="${safeUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
 } else {
-avatarContainer.textContent = state.userAvatarUrl || "👤";
+avatarContainer.textContent = escapeHTML(state.userAvatarUrl) || "👤";
 }
 }
 }
 
 function getAvatarHTML(avatarUrl, className = "profile-avatar") {
-if (avatarUrl && avatarUrl.startsWith("http")) {
-return `<img src="${avatarUrl}" class="${className}" style="border-radius:50%; object-fit:cover;">`;
-} else {
-return `<div class="${className}" style="display:flex; align-items:center; justify-content:center; background:#e5e7eb; border-radius:50%;">${avatarUrl || "👤"}</div>`;
+if (isSafeImageUrl(avatarUrl)) {
+const safeUrl = escapeHTML(avatarUrl);
+return `<img src="${safeUrl}" class="${className}" style="border-radius:50%; object-fit:cover;">`;
 }
+return `<div class="${className}" style="display:flex; align-items:center; justify-content:center; background:#e5e7eb; border-radius:50%;">${escapeHTML(avatarUrl) || "👤"}</div>`;
 }
 
 function showFirstTimeGuide() {
@@ -1028,16 +1257,23 @@ container.innerHTML = filtered.length === 0
     const userReacted = state.userReactedMap[post.id] || { like: false, checked: false, thanks: false };
     const comments = state.commentsMap[post.id] || [];
 
+    const safeTitle = escapeHTML(post.title || "");
+    const safeCategory = escapeHTML(post.category || "");
+    const safeStartDate = escapeHTML(post.startDate || "");
+    const safeEndDate = escapeHTML(post.endDate || "");
+    const safeBody = escapeHTML(post.body || "");
+
     const commentsHTML = comments.map(c => {
         // ✨ コメント投稿者がアイコンや名前を変更していた場合、最新状態を反映させる
         const currentAvatar = getDynamicUserAvatar(c.userId, c.avatarUrl);
-        const currentName = getDynamicUserName(c.userId, c.userName);
+        const currentName = escapeHTML(getDynamicUserName(c.userId, c.userName));
+        const safeCommentText = escapeHTML(c.text || "");
         return `
         <div class="comment-item">
             ${getAvatarHTML(currentAvatar, "comment-avatar")}
             <div class="comment-content">
                 <div class="comment-author">${currentName}</div>
-                <div class="comment-text">${c.text}</div>
+                <div class="comment-text">${safeCommentText}</div>
             </div>
             ${state.isAdmin ? `<button class="comment-delete-btn" data-post-id="${post.id}" data-comment-id="${c.id}">削除</button>` : ""}
         </div>
@@ -1047,14 +1283,14 @@ container.innerHTML = filtered.length === 0
     return `
 <div class="post-card">
 <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px; margin-bottom: 12px;">
-<h3 style="font-size: 1.2rem; margin: 0;">${post.title}</h3>
+<h3 style="font-size: 1.2rem; margin: 0;">${safeTitle}</h3>
 ${state.isAdmin ? `<button class="danger-button deletePost-btn" data-post-id="${post.id}">削除</button>` : ""}
 </div>
 <div style="margin-bottom: 12px;">
-<span class="badge">${post.category}</span>
-<span class="badge">${post.startDate}～${post.endDate}</span>
+<span class="badge">${safeCategory}</span>
+<span class="badge">${safeStartDate}～${safeEndDate}</span>
 </div>
-<p class="post-body">${post.body}</p>
+<p class="post-body">${safeBody}</p>
 
 <div class="reaction-container">
 <button class="reaction-btn ${userReacted.like ? 'active' : ''}" data-post-id="${post.id}" data-type="like">
@@ -1114,10 +1350,15 @@ return;
 }
 
 if (e.target.classList.contains("deletePost-btn")) {
+if (!state.user || !state.isAdmin) {
+alert("権限がありません。");
+return;
+}
 const postId = e.target.getAttribute("data-post-id");
 if (confirm("この投稿を本当に削除しますか？")) {
 try {
 await deleteDoc(doc(db, "posts", postId));
+await logAdminAction("deletePost", { postId });
 showToast("投稿を削除しました");
 } catch (error) { alert("削除に失敗しました: " + error.message); }
 }
@@ -1140,10 +1381,32 @@ document.getElementById("postsContainer").addEventListener("submit", async (e) =
 const form = e.target.closest(".comment-form");
 if (form) {
 e.preventDefault();
+if (!state.user) return;
 const postId = form.getAttribute("data-post-id");
 const input = form.querySelector(".comment-input");
-const text = input.value.trim();
+const text = validateTextInput(input.value, "コメント", 2, 300);
 if (!text) return;
+if (/javascript:|data:/i.test(text)) {
+alert("コメントに危険なURLは禁止されています。");
+return;
+}
+const urlMatches = text.match(/https?:\/\/(?:www\.)?[\w\-\.@:%_\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)/g) || [];
+if (urlMatches.length > 2) {
+alert("コメント内のリンクは最大2件までにしてください。");
+return;
+}
+const recentKey = `last_comment_time_${state.user.uid}_${postId}`;
+const contentKey = `last_comment_text_${state.user.uid}_${postId}`;
+const lastTime = Number(localStorage.getItem(recentKey) || 0);
+if (Date.now() - lastTime < 20000) {
+alert("コメントは20秒ごとに投稿してください。");
+return;
+}
+const lastComment = localStorage.getItem(contentKey);
+if (lastComment === text) {
+alert("同じ内容のコメントは連続して投稿できません。");
+return;
+}
 
 try {
 await addDoc(collection(db, "posts", postId, "comments"), {
@@ -1154,20 +1417,34 @@ text: text,
 createdAt: serverTimestamp()
 });
 input.value = "";
+localStorage.setItem(recentKey, String(Date.now()));
+localStorage.setItem(contentKey, text);
 } catch (error) {
-alert("コメントの送信に失敗しました: " + error.message);
+console.error(error);
+alert("コメントの送信に失敗しました。時間をおいて再試行してください。");
 }
 }
 });
 
 document.getElementById("postForm")?.addEventListener("submit", async (e) => {
 e.preventDefault();
-const title = document.getElementById("postTitle").value;
-const body = document.getElementById("postBody").value;
-const category = document.getElementById("postCategory").value;
-const classTarget = document.getElementById("postTarget").value;
-const startDate = document.getElementById("postStartDate").value;
-const endDate = document.getElementById("postEndDate").value;
+const title = validateTextInput(document.getElementById("postTitle").value, "タイトル", 3, 100);
+const body = validateTextInput(document.getElementById("postBody").value, "内容", 3, 1500);
+const category = validateTextInput(document.getElementById("postCategory").value, "カテゴリ", 1, 30);
+const classTarget = validateTextInput(document.getElementById("postTarget").value, "対象クラス", 1, 10);
+const startDate = validateTextInput(document.getElementById("postStartDate").value, "開始日", 10, 10);
+const endDate = validateTextInput(document.getElementById("postEndDate").value, "終了日", 10, 10);
+if (!title || !body || !category || !classTarget || !startDate || !endDate) return;
+if (!state.user || !state.isAdmin) {
+alert("投稿する権限がありません。");
+return;
+}
+const recentPostKey = `last_post_time_${state.user.uid}`;
+const lastPostTime = Number(localStorage.getItem(recentPostKey) || 0);
+if (Date.now() - lastPostTime < 30000) {
+alert("投稿は30秒ごとに行ってください。");
+return;
+}
 
 try {
 await addDoc(collection(db, "posts"), {
@@ -1175,6 +1452,7 @@ title, body, category, classTarget, startDate, endDate,
 reactions: { like: 0, checked: 0, thanks: 0 },
 createdAt: serverTimestamp()
 });
+localStorage.setItem(recentPostKey, String(Date.now()));
 showToast("投稿しました！");
 document.getElementById("postForm").reset();
 } catch (error) { alert("投稿に失敗しました: " + error.message); }
@@ -1243,25 +1521,40 @@ clearDebugErrors();
 
 if (e.target.id === "emailLoginForm") {
 e.preventDefault();
-let email = document.getElementById("emailInput").value.trim();
-const password = document.getElementById("passwordInput").value;
+const rawEmail = validateTextInput(document.getElementById("emailInput").value, "メールアドレス", 5, 80);
+const password = validateTextInput(document.getElementById("passwordInput").value, "パスワード", 6, 60);
 const loginType = document.getElementById("loginType").value;
+if (!rawEmail || !password) return;
+let email = rawEmail;
 
 // ユーザー名ログインなら学校ドメインを付ける
 if (loginType === "username") {
-    email += "@shiragane.com";
+    email = `${rawEmail}@shiragane.com`;
 }
 
+const loginAttemptsKey = `login_attempts`;
+const loginAttemptData = JSON.parse(localStorage.getItem(loginAttemptsKey) || '{"count":0,"first":0}');
+if (loginAttemptData.first && Date.now() - loginAttemptData.first < 10 * 60 * 1000 && loginAttemptData.count >= 5) {
+    alert("ログイン試行が多すぎます。しばらく待ってから再度お試しください。");
+    return;
+}
 
 try {
-try {
-await signInWithEmailAndPassword(auth, email, password);
-showToast("ログインしました");
-} catch {
-await createUserWithEmailAndPassword(auth, email, password);
-showToast("アカウントを作成しました");
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        showToast("ログインしました");
+        localStorage.removeItem(loginAttemptsKey);
+    } catch (err) {
+        await createUserWithEmailAndPassword(auth, email, password);
+        showToast("アカウントを作成しました");
+        localStorage.removeItem(loginAttemptsKey);
+    }
+} catch (error) {
+    const count = (loginAttemptData.count || 0) + 1;
+    const first = loginAttemptData.first || Date.now();
+    localStorage.setItem(loginAttemptsKey, JSON.stringify({ count, first }));
+    showDebugError("loginDebugError", error);
 }
-} catch (error) { showDebugError("loginDebugError", error); }
 }
 
 if (e.target.id === "termsForm") {
@@ -1275,8 +1568,11 @@ proceedToNextStepAfterLogin(state.user);
 
 if (e.target.id === "setupForm") {
 e.preventDefault();
-state.userName = document.getElementById("setupName").value;
-state.userClass = document.getElementById("setupClass").value;
+const nameValue = validateTextInput(document.getElementById("setupName").value, "お名前", 2, 30);
+const classValue = validateTextInput(document.getElementById("setupClass").value, "クラス", 1, 10);
+if (!nameValue || !classValue) return;
+state.userName = nameValue;
+state.userClass = classValue;
 state.userAvatarUrl = "👤";
 
 localStorage.setItem(`user_setup_${state.user.uid}`, JSON.stringify({ name: state.userName, class: state.userClass, avatarUrl: "👤" }));
@@ -1296,10 +1592,19 @@ checkApprovalStatus(state.user);
 
 if (e.target.id === "profileEditForm") {
 e.preventDefault();
-const newName = document.getElementById("profileNameInput").value;
+const newName = validateTextInput(document.getElementById("profileNameInput").value, "お名前", 2, 30);
+if (!newName) return;
 const urlInput = document.getElementById("profileImageUrlInput").value.trim();
-
-let finalAvatar = urlInput !== "" ? urlInput : selectedAvatar;
+let finalAvatar = "👤";
+if (urlInput !== "") {
+    if (!isSafeImageUrl(urlInput)) {
+        alert("プロフィール画像のURLは安全な画像形式のみを許可します。");
+        return;
+    }
+    finalAvatar = urlInput;
+} else {
+    finalAvatar = selectedAvatar || state.userAvatarUrl || "👤";
+}
 
 try {
 await setDoc(doc(db, "allowedUsers", state.user.email), {
@@ -1319,7 +1624,7 @@ showToast("プロフィールを更新しました！");
 // 🛑 ユーザーから送信された異議申し立ての処理
 if (e.target.id === "appealForm") {
 e.preventDefault();
-const reason = document.getElementById("appealReason").value.trim();
+const reason = validateTextInput(document.getElementById("appealReason").value, "申し立て理由", 10, 500);
 if (!reason) return;
 try {
 await addDoc(collection(db, "appeals"), {
@@ -1407,18 +1712,18 @@ const allowedList = document.getElementById("allowedUsersListAdmin");
 const appealsList = document.getElementById("appealsListAdmin");
 
 state.adminUnsubscribes.pendingUsers = onSnapshot(collection(db, "pendingUsers"), (snapshot) => {
-if (snapshot.empty) { pendingList.innerHTML = `<p style="color:var(--muted);">申請者なし</p>`; return; }
+if (snapshot.empty) { pendingList.innerHTML = `<p class="admin-dashboard-empty" style="color:var(--muted);">申請者なし</p>`; return; }
 pendingList.innerHTML = snapshot.docs.map(doc => {
 const data = doc.data();
 const userEmail = doc.id;
 return `
-<div style="background: #f9fafb; border: 1px solid var(--border); border-radius: 12px; padding: 14px; display:flex; align-items:center; gap:12px;">
+<div class="admin-dashboard-card">
 ${getAvatarHTML(data.avatarUrl)}
-<div>
-<p>お名前: <strong>${data.name || "不明"} (${data.class || "不明"})</strong></p>
-<p style="font-size: 0.85rem; color: var(--muted);">メール: ${userEmail}</p>
-<div style="margin-top:8px;">
-<button class="button" onclick="window.approveUser('${userEmail}', '${data.class || '7-1'}', '${data.name || ''}', '${data.avatarUrl || '👤'}', '${data.uid || ''}')" style="min-height: 32px; padding: 0 12px; font-size: 0.85rem; margin-right: 8px; width:auto;">承認</button>
+<div style="flex:1;">
+<p class="admin-dashboard-title">お名前: ${escapeHTML(data.name || "不明")} (${escapeHTML(data.class || "不明")})</p>
+<p class="admin-dashboard-meta">メール: ${escapeHTML(userEmail)}</p>
+<div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:8px;">
+<button class="button" onclick="window.approveUser('${escapeHTML(userEmail)}', '${escapeHTML(data.class || '7-1')}', '${escapeHTML(data.name || '')}', '${escapeHTML(data.avatarUrl || '👤')}', '${escapeHTML(data.uid || '')}')" style="min-height: 32px; padding: 0 12px; font-size: 0.85rem; margin-right: 8px; width:auto;">承認</button>
 <button class="danger-button" onclick="window.rejectUser('${userEmail}')" style="min-height: 32px; padding: 0 12px; font-size: 0.85rem; width:auto;">拒否</button>
 </div>
 </div>
@@ -1428,23 +1733,23 @@ ${getAvatarHTML(data.avatarUrl)}
 }, (error) => { showDebugError("dashboardDebugError", error); });
 
 state.adminUnsubscribes.allowedUsers = onSnapshot(collection(db, "allowedUsers"), (snapshot) => {
-if (snapshot.empty) { allowedList.innerHTML = `<p style="color:var(--muted);">承認済みなし</p>`; return; }
+if (snapshot.empty) { allowedList.innerHTML = `<p class="admin-dashboard-empty" style="color:var(--muted);">承認済みなし</p>`; return; }
 allowedList.innerHTML = snapshot.docs.map(doc => {
 const userEmail = doc.id;
 const data = doc.data();
 const isSuspended = data.suspended === true;
 return `
-<div style="background: #f9fafb; border: 1px solid var(--border); border-radius: 12px; padding: 14px; display:flex; align-items:center; gap:12px; ${isSuspended ? 'border-left: 5px solid #d92d20; background: #fef2f2;' : ''}">
+<div class="admin-dashboard-card" style="${isSuspended ? 'border-left: 5px solid #d92d20;' : ''}">
 ${getAvatarHTML(data.avatarUrl)}
 <div style="flex:1;">
-<p><strong>${data.name || "名前なし"}</strong> ${isSuspended ? '<span style="color:#d92d20; font-weight:bold; font-size:0.8rem;">[停止中]</span>' : ''}</p>
-<p style="font-size: 0.85rem; color: var(--muted); margin-bottom:6px;">メール: ${userEmail}</p>
+<p class="admin-dashboard-title">${escapeHTML(data.name || "名前なし")} ${isSuspended ? '<span style="color:#d92d20; font-weight:bold; font-size:0.8rem;">[停止中]</span>' : ''}</p>
+<p class="admin-dashboard-meta" style="margin-bottom:6px;">メール: ${escapeHTML(userEmail)}</p>
 <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
-    <select onchange="window.updateUserClass('${userEmail}', this.value)" style="padding: 4px 8px; border: 1px solid var(--border); border-radius: 8px; font-size:0.8rem; width:auto; height:32px; display:inline-block;">
+    <select onchange="window.updateUserClass('${escapeHTML(userEmail)}', this.value)" style="padding: 4px 8px; border: 1px solid var(--border); border-radius: 8px; font-size:0.8rem; width:auto; height:32px; display:inline-block;">
         <option value="7-1" ${data.class === '7-1' ? 'selected' : ''}>7-1組</option>
         <option value="7-2" ${data.class === '7-2' ? 'selected' : ''}>7-2組</option>
     </select>
-    <button class="danger-button" onclick="window.toggleSuspendUser('${userEmail}', ${isSuspended})" style="min-height: 32px; padding: 0 12px; font-size: 0.8rem; width:auto; background: ${isSuspended ? 'rgba(16,185,129,0.12)' : 'rgba(217,45,32,0.12)'}; color: ${isSuspended ? '#10b981' : '#d92d20'}">
+    <button class="danger-button" onclick="window.toggleSuspendUser('${escapeHTML(userEmail)}', ${isSuspended})" style="min-height: 32px; padding: 0 12px; font-size: 0.8rem; width:auto; background: ${isSuspended ? 'rgba(16,185,129,0.12)' : 'rgba(217,45,32,0.12)'}; color: ${isSuspended ? '#10b981' : '#d92d20'}">
         ${isSuspended ? 'アカウント再開' : 'アカウント停止'}
     </button>
     <button class="danger-button" onclick="window.removeUser('${userEmail}')" style="min-height: 32px; padding: 0 12px; font-size: 0.8rem; width:auto;">削除</button>
@@ -1464,9 +1769,9 @@ const date = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleString("
 return `
 <div style="background: #fff; border: 1px solid #f3f4f6; border-left: 4px solid #f59e0b; border-radius: 12px; padding: 14px; position:relative;">
     <div style="font-size: 0.8rem; color: var(--muted); margin-bottom: 4px;">${date}</div>
-    <div style="font-weight: 700; margin-bottom: 6px;">${d.name || "不明"} (${d.email})</div>
-    <div style="background: #f9fafb; padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #344054; white-space: pre-wrap; margin-bottom: 8px;">${d.reason}</div>
-    <button class="danger-button" onclick="window.deleteAppeal('${doc.id}')" style="min-height: 28px; padding: 0 10px; font-size: 0.75rem; width:auto;">履歴から削除</button>
+    <div style="font-weight: 700; margin-bottom: 6px;">${escapeHTML(d.name || "不明")} (${escapeHTML(d.email)})</div>
+    <div style="background: #f9fafb; padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #344054; white-space: pre-wrap; margin-bottom: 8px;">${escapeHTML(d.reason)}</div>
+    <button class="danger-button" onclick="window.deleteAppeal('${escapeHTML(doc.id)}')" style="min-height: 28px; padding: 0 10px; font-size: 0.75rem; width:auto;">履歴から削除</button>
 </div>
 `;
 }).join("");
@@ -1474,42 +1779,51 @@ return `
 }
 
 window.approveUser = async (email, userClass, name, avatarUrl, uid) => {
+if (!state.user || !state.isAdmin) { alert("権限がありません。"); return; }
 try {
 await setDoc(doc(db, "allowedUsers", email), { email, class: userClass, name: name, avatarUrl: avatarUrl, uid: uid, suspended: false, approvedAt: serverTimestamp() });
 await deleteDoc(doc(db, "pendingUsers", email));
+await logAdminAction("approveUser", { targetEmail: email, userClass, name, avatarUrl, uid });
 showToast("承認しました");
 } catch (error) { showDebugError("dashboardDebugError", error); }
 };
 
 window.rejectUser = async (email) => {
-try { await deleteDoc(doc(db, "pendingUsers", email)); showToast("拒否しました"); } catch (error) { showDebugError("dashboardDebugError", error); }
+if (!state.user || !state.isAdmin) { alert("権限がありません。"); return; }
+try { await deleteDoc(doc(db, "pendingUsers", email)); await logAdminAction("rejectUser", { targetEmail: email }); showToast("拒否しました"); } catch (error) { showDebugError("dashboardDebugError", error); }
 };
 
 window.removeUser = async (email) => {
-try { await deleteDoc(doc(db, "allowedUsers", email)); showToast("削除しました"); } catch (error) { showDebugError("dashboardDebugError", error); }
+if (!state.user || !state.isAdmin) { alert("権限がありません。"); return; }
+try { await deleteDoc(doc(db, "allowedUsers", email)); await logAdminAction("removeUser", { targetEmail: email }); showToast("削除しました"); } catch (error) { showDebugError("dashboardDebugError", error); }
 };
 
 // ✏️ 管理者がユーザーのクラスを即時変更する関数
 window.updateUserClass = async (email, newClass) => {
+if (!state.user || !state.isAdmin) { alert("権限がありません。"); return; }
 try {
 await updateDoc(doc(db, "allowedUsers", email), { class: newClass });
+await logAdminAction("updateUserClass", { targetEmail: email, newClass });
 showToast(`クラスを ${newClass} 組に変更しました`);
 } catch (error) { alert("クラスの変更に失敗しました"); }
 };
 
 // 🛑 管理者がアカウント停止（BAN）を切り替える関数
 window.toggleSuspendUser = async (email, currentSuspendedState) => {
+if (!state.user || !state.isAdmin) { alert("権限がありません。"); return; }
 const actionStr = currentSuspendedState ? "再開" : "停止";
 if (confirm(`このユーザーのアカウントを本当に${actionStr}しますか？`)) {
 try {
 await updateDoc(doc(db, "allowedUsers", email), { suspended: !currentSuspendedState });
+await logAdminAction("toggleSuspendUser", { targetEmail: email, newState: !currentSuspendedState });
 showToast(`アカウントを${actionStr}しました`);
 } catch (error) { alert(`アカウントの${actionStr}処理に失敗しました`); }
 }
 };
 
 window.deleteAppeal = async (id) => {
-try { await deleteDoc(doc(db, "appeals", id)); showToast("申し立て履歴を削除しました"); } catch (error) { alert("削除失敗"); }
+if (!state.user || !state.isAdmin) { alert("権限がありません。"); return; }
+try { await deleteDoc(doc(db, "appeals", id)); await logAdminAction("deleteAppeal", { appealId: id }); showToast("申し立て履歴を削除しました"); } catch (error) { alert("削除失敗"); }
 };
 
 function handleLogout() {
