@@ -139,6 +139,78 @@ overflow-wrap: anywhere;
 margin-bottom: 16px;
 }
 
+.format-toolbar {
+display: flex;
+flex-wrap: wrap;
+gap: 10px;
+align-items: center;
+margin-bottom: 12px;
+}
+
+.format-toolbar label,
+.format-toolbar button {
+font-size: 0.9rem;
+}
+
+.format-toolbar input[type="color"],
+.format-toolbar select,
+.format-toolbar button {
+min-width: 110px;
+padding: 10px 12px;
+border: 1px solid var(--border);
+border-radius: 12px;
+background: #fff;
+}
+
+.tag-chip {
+display: inline-flex;
+align-items: center;
+gap: 6px;
+padding: 4px 10px;
+border-radius: 999px;
+font-size: 0.78rem;
+font-weight: 700;
+margin-right: 6px;
+margin-bottom: 6px;
+background: rgba(0, 0, 0, 0.04);
+border: 1px solid transparent;
+}
+
+.post-image {
+margin: 14px 0;
+border-radius: 18px;
+overflow: hidden;
+box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.post-image img {
+width: 100%;
+display: block;
+}
+
+.admin-dashboard-section {
+display: grid;
+gap: 18px;
+}
+
+.tag-management-row {
+display: grid;
+grid-template-columns: 1fr 120px auto auto;
+gap: 10px;
+align-items: center;
+margin-bottom: 10px;
+}
+
+.tag-management-row input,
+.tag-management-row button {
+width: 100%;
+}
+
+.tag-management-list {
+display: grid;
+gap: 10px;
+}
+
 .reaction-container {
 display: flex;
 gap: 8px;
@@ -782,7 +854,13 @@ width: 100% !important;
 <h3 class="panel-title">新規投稿</h3>
 <form id="postForm" style="display: grid; gap: 14px;">
 <input id="postTitle" type="text" maxlength="100" placeholder="タイトル" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; width: 100%;">
-<textarea id="postBody" placeholder="内容" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; min-height: 100px; width: 100%;"></textarea>
+<textarea id="postBody" placeholder="内容" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; min-height: 120px; width: 100%;"></textarea>
+<div class="format-toolbar">
+<button type="button" id="formatBold" class="ghost-button" style="width:auto;">太字</button>
+<label style="display:flex; align-items:center; gap:8px; margin:0; font-size:0.9rem;">色<input id="postFormatColor" type="color" value="#0071e3" style="width:auto; padding:0; border:none; background:none;"></label>
+<label style="display:flex; align-items:center; gap:8px; margin:0; font-size:0.9rem;">大きさ<select id="postFormatSize" style="width:auto;"><option value="1">標準</option><option value="1.1">やや大きい</option><option value="1.2">大きい</option><option value="0.9">小さめ</option></select></label>
+<button type="button" id="applyFormat" class="ghost-button" style="width:auto;">選択に適用</button>
+</div>
 <div class="form-grid-2">
 <select id="postCategory" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
 <option value="予定">予定</option>
@@ -798,6 +876,22 @@ width: 100% !important;
 <div class="form-grid-2">
 <input id="postStartDate" type="date" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
 <input id="postEndDate" type="date" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+</div>
+<div class="form-grid-2">
+<input id="postImageFile" type="file" accept="image/*" style="padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; background:#fff;">
+<select id="postTagSelect" style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+<option value="">タグなし</option>
+</select>
+</div>
+<div style="display: grid; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 16px; background: #f8fafc;">
+<label style="display:flex; align-items:center; gap:10px; font-size:0.95rem;">
+<input id="postReactionsEnabled" type="checkbox" checked>
+<span>この投稿でリアクションを有効にする</span>
+</label>
+<label style="display:flex; align-items:center; gap:10px; font-size:0.95rem;">
+<input id="postCommentsEnabled" type="checkbox" checked>
+<span>この投稿でコメントを有効にする</span>
+</label>
 </div>
 <button type="submit" class="button" style="width: 100%;">投稿</button>
 </form>
@@ -816,6 +910,17 @@ width: 100% !important;
 </div>
 <div id="dashboardDebugError" class="debug-error-box"></div>
 <div style="display: grid; gap: 24px;">
+<div class="admin-dashboard-section">
+<h3 style="font-size: 1.1rem; margin-bottom: 12px; font-weight: 700;">🏷 タグ管理</h3>
+<div style="padding: 14px; border: 1px solid var(--border); border-radius: 16px; background:#f9fafb;">
+<div class="tag-management-row">
+<input id="newTagName" type="text" placeholder="タグ名" style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+<input id="newTagColor" type="color" value="#10b981" style="padding: 0; border:none; width: 90px; background:none;">
+<button type="button" id="addTagButton" class="button" style="width:auto; min-width:120px;">追加</button>
+</div>
+<div id="tagManagementList" class="tag-management-list"></div>
+</div>
+</div>
 <div>
 <h3 style="font-size: 1.1rem; margin-bottom: 12px; font-weight: 700;">📋 申請中</h3>
 <div id="pendingUsersListAdmin" style="display: grid; gap: 12px;"></div>
@@ -864,6 +969,7 @@ width: 100% !important;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, query, orderBy, limit, increment, arrayUnion, arrayRemove, serverTimestamp, getDocs, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyDoMvVErqyv06Tdn-rXNhHkcW_-Q7BfoAg",
@@ -877,6 +983,7 @@ appId: "1:69139986081:web:11c1b1b8277e503e9ee2e0"
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 const ADMIN_UID = "Z4YHNqiKySV3KLkHIjtDaj36WUa2";
 
@@ -899,9 +1006,10 @@ currentDate: new Date(),
 posts: [],
 userReactedMap: {},
 commentsMap: {},
+tags: [],
 // 各ユーザーの最新プロフィール情報をリアルタイム同期してキャッシュするマップ
 usersProfileMap: {},
-adminUnsubscribes: { pendingUsers: null, allowedUsers: null, appeals: null, dynamicProfiles: null },
+adminUnsubscribes: { pendingUsers: null, allowedUsers: null, appeals: null, dynamicProfiles: null, tags: null },
 approvalUnsubscribe: null,
 categoryFilter: "all"
 };
@@ -1001,6 +1109,18 @@ return state.usersProfileMap[commentUserId].name;
 return fallbackName;
 }
 
+function parsePostBody(body) {
+if (!body) return "";
+return body
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br>")
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\[color=(#?[0-9a-fA-F]{3,6})\](.*?)\[\/color\]/g, "<span style=\"color:$1;\">$2</span>")
+    .replace(/\[size=([0-9.]+)\](.*?)\[\/size\]/g, "<span style=\"font-size:$1em;\">$2</span>");
+}
+
 function renderPosts() {
 const container = document.getElementById("postsContainer");
 const today = getLocalDateString(state.currentDate);
@@ -1018,6 +1138,10 @@ container.innerHTML = filtered.length === 0
     const reactions = post.reactions || { like: 0, checked: 0, thanks: 0 };
     const userReacted = state.userReactedMap[post.id] || { like: false, checked: false, thanks: false };
     const comments = state.commentsMap[post.id] || [];
+    const reactionsEnabled = post.reactionsEnabled !== false;
+    const commentsEnabled = post.commentsEnabled !== false;
+    const tag = post.tagId ? state.tags.find(t => t.id === post.tagId) : null;
+    const cardStyle = tag ? `border-color:${tag.color};` : "";
 
     const commentsHTML = comments.map(c => {
         // ✨ コメント投稿者がアイコンや名前を変更していた場合、最新状態を反映させる
@@ -1035,18 +1159,22 @@ container.innerHTML = filtered.length === 0
         `;
     }).join("");
 
+    const postBodyHtml = parsePostBody(post.body);
+
     return `
-<div class="post-card">
+<div class="post-card" style="${cardStyle}">
 <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px; margin-bottom: 12px;">
 <h3 style="font-size: 1.2rem; margin: 0;">${post.title}</h3>
 ${state.isAdmin ? `<button class="danger-button deletePost-btn" data-post-id="${post.id}">削除</button>` : ""}
 </div>
-<div style="margin-bottom: 12px;">
+<div style="margin-bottom: 12px; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
 <span class="badge">${post.category}</span>
 <span class="badge">${post.startDate}～${post.endDate}</span>
+${tag ? `<span class="tag-chip" style="background:${tag.color}20; color:${tag.color}; border-color:${tag.color}40;">${tag.name}</span>` : ''}
 </div>
-<p class="post-body">${post.body}</p>
-
+${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="投稿画像"></div>` : ''}
+<p class="post-body">${postBodyHtml}</p>
+${reactionsEnabled ? `
 <div class="reaction-container">
 <button class="reaction-btn ${userReacted.like ? 'active' : ''}" data-post-id="${post.id}" data-type="like">
 <span>👍 いいね</span>
@@ -1061,7 +1189,8 @@ ${state.isAdmin ? `<button class="danger-button deletePost-btn" data-post-id="${
 <span class="reaction-count">${reactions.thanks || 0}</span>
 </button>
 </div>
-
+` : ''}
+${commentsEnabled ? `
 <div class="comment-section">
     <div class="comment-list">${commentsHTML}</div>
     <form class="comment-form" data-post-id="${post.id}">
@@ -1069,6 +1198,7 @@ ${state.isAdmin ? `<button class="danger-button deletePost-btn" data-post-id="${
         <button type="submit" class="comment-submit-btn">送信</button>
     </form>
 </div>
+` : ''}
 </div>
 `;
 }).join("");
@@ -1159,25 +1289,72 @@ const category = document.getElementById("postCategory").value;
 const classTarget = document.getElementById("postTarget").value;
 const startDate = document.getElementById("postStartDate").value;
 const endDate = document.getElementById("postEndDate").value;
+const tagId = document.getElementById("postTagSelect").value || null;
+const imageFile = document.getElementById("postImageFile").files[0];
+const reactionsEnabled = document.getElementById("postReactionsEnabled").checked;
+const commentsEnabled = document.getElementById("postCommentsEnabled").checked;
 
 try {
-await addDoc(collection(db, "posts"), {
-title, body, category, classTarget, startDate, endDate,
-reactions: { like: 0, checked: 0, thanks: 0 },
-createdAt: serverTimestamp()
-});
-showToast("投稿しました！");
-document.getElementById("postForm").reset();
+ let imageUrl = null;
+ if (imageFile) {
+  const fileRef = storageRef(storage, `post-images/${Date.now()}_${imageFile.name}`);
+  await uploadBytes(fileRef, imageFile);
+  imageUrl = await getDownloadURL(fileRef);
+ }
+ await addDoc(collection(db, "posts"), {
+  title,
+  body,
+  category,
+  classTarget,
+  startDate,
+  endDate,
+  tagId,
+  imageUrl,
+  reactions: { like: 0, checked: 0, thanks: 0 },
+  reactionsEnabled,
+  commentsEnabled,
+  createdAt: serverTimestamp()
+ });
+ showToast("投稿しました！");
+ document.getElementById("postForm").reset();
 } catch (error) { alert("投稿に失敗しました: " + error.message); }
 });
 
+document.getElementById("formatBold")?.addEventListener("click", () => {
+ const textarea = document.getElementById("postBody");
+ const start = textarea.selectionStart;
+ const end = textarea.selectionEnd;
+ if (start === end) return;
+ const original = textarea.value;
+ textarea.value = original.slice(0, start) + `**${original.slice(start, end)}**` + original.slice(end);
+ textarea.focus();
+ textarea.setSelectionRange(start + 2, end + 2);
+});
+
+document.getElementById("applyFormat")?.addEventListener("click", () => {
+ const textarea = document.getElementById("postBody");
+ const start = textarea.selectionStart;
+ const end = textarea.selectionEnd;
+ if (start === end) return;
+ const color = document.getElementById("postFormatColor").value;
+ const size = document.getElementById("postFormatSize").value;
+ const original = textarea.value;
+ const selected = original.slice(start, end);
+ let wrapped = selected;
+ if (color) wrapped = `[color=${color}]${wrapped}[/color]`;
+ if (size && size !== "1") wrapped = `[size=${size}]${wrapped}[/size]`;
+ textarea.value = original.slice(0, start) + wrapped + original.slice(end);
+ textarea.focus();
+ textarea.setSelectionRange(start, start + wrapped.length);
+});
+
 window.selectCategory = function(category) {
-state.categoryFilter = category;
-updateCategoryTitle();
-renderPosts();
-document.getElementById("hamburgerMenu").classList.remove("active");
-document.getElementById("hamburgerOverlay").classList.remove("active");
-document.getElementById("hamburgerButton").classList.remove("active");
+ state.categoryFilter = category;
+ updateCategoryTitle();
+ renderPosts();
+ document.getElementById("hamburgerMenu").classList.remove("active");
+ document.getElementById("hamburgerOverlay").classList.remove("active");
+ document.getElementById("hamburgerButton").classList.remove("active");
 };
 
 document.getElementById("hamburgerButton")?.addEventListener("click", () => {
@@ -1379,13 +1556,64 @@ renderPosts();
 });
 }
 
+function loadTagData() {
+if (state.adminUnsubscribes.tags) state.adminUnsubscribes.tags();
+const tagSelect = document.getElementById("postTagSelect");
+const tagList = document.getElementById("tagManagementList");
+
+state.adminUnsubscribes.tags = onSnapshot(collection(db, "postTags"), (snapshot) => {
+ state.tags = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+ tagSelect.innerHTML = `<option value="">タグなし</option>` + state.tags.map(tag => `<option value="${tag.id}">${tag.name}</option>`).join("");
+ tagList.innerHTML = state.tags.map(tag => `
+ <div class="tag-management-row" style="gap:10px;">
+ <input type="text" value="${tag.name}" data-tag-id="${tag.id}" class="editTagName" style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
+ <input type="color" value="${tag.color}" data-tag-id="${tag.id}" class="editTagColor" style="padding:0; border:none; width:90px; background:none;">
+ <button type="button" class="button saveTagButton" data-tag-id="${tag.id}" style="width:auto; min-width:100px;">保存</button>
+ <button type="button" class="danger-button deleteTagButton" data-tag-id="${tag.id}" style="width:auto; min-width:90px;">削除</button>
+ </div>
+ `).join("");
+}, (error) => { showDebugError("dashboardDebugError", error); });
+}
+
+
 document.getElementById("adminDashboardButton")?.addEventListener("click", () => {
+loadTagData();
 document.getElementById("adminDashboardModal").classList.remove("hidden");
 });
 
 document.getElementById("closeAdminDashboard")?.addEventListener("click", () => {
 document.getElementById("adminDashboardModal").classList.add("hidden");
 });
+
+document.getElementById("addTagButton")?.addEventListener("click", async () => {
+const tagName = document.getElementById("newTagName").value.trim();
+const tagColor = document.getElementById("newTagColor").value;
+if (!tagName) return;
+try {
+await addDoc(collection(db, "postTags"), { name: tagName, color: tagColor });
+showToast("タグを追加しました");
+document.getElementById("newTagName").value = "";
+} catch (error) { showDebugError("dashboardDebugError", error); }
+});
+
+document.getElementById("tagManagementList")?.addEventListener("click", async (e) => {
+const saveBtn = e.target.closest(".saveTagButton");
+const deleteBtn = e.target.closest(".deleteTagButton");
+if (saveBtn) {
+ const tagId = saveBtn.dataset.tagId;
+ const row = saveBtn.closest(".tag-management-row");
+ const newName = row.querySelector(".editTagName").value.trim();
+ const newColor = row.querySelector(".editTagColor").value;
+ if (!newName) return;
+ try { await updateDoc(doc(db, "postTags", tagId), { name: newName, color: newColor }); showToast("タグを更新しました"); } catch (error) { showDebugError("dashboardDebugError", error); }
+}
+if (deleteBtn) {
+ const tagId = deleteBtn.dataset.tagId;
+ if (!confirm("このタグを削除しますか？")) return;
+ try { await deleteDoc(doc(db, "postTags", tagId)); showToast("タグを削除しました"); } catch (error) { showDebugError("dashboardDebugError", error); }
+}
+});
+
 
 function loadAdminData() {
 // 既存のリスナーのクリーンアップ
@@ -1551,12 +1779,7 @@ updateUIProfile();
 initPosts();
 initUserReactions();
 initUsersProfiles();
-showFirstTimeGuide();
-
-} else {
-document.getElementById("pendingApprovalModal").classList.remove("hidden");
-document.getElementById("mainContent").style.display = "none";
-document.getElementById("suspendedModal").classList.add("hidden");
+    loadTagData();
 }
 }, (error) => { showDebugError("pendingDebugError", error); });
 }
@@ -1634,7 +1857,3 @@ updateDateDisplay();
 </script>
 </body>
 </html>
-
-
-
-
