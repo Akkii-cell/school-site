@@ -975,7 +975,7 @@ const firebaseConfig = {
 apiKey: "AIzaSyDoMvVErqyv06Tdn-rXNhHkcW_-Q7BfoAg",
 authDomain: "school-site-475fc.firebaseapp.com",
 projectId: "school-site-475fc",
-storageBucket: "school-site-475fc.firebasestorage.app",
+storageBucket: "school-site-475fc.appspot.com",
 messagingSenderId: "69139986081",
 appId: "1:69139986081:web:11c1b1b8277e503e9ee2e0"
 };
@@ -1038,6 +1038,28 @@ const year = date.getFullYear();
 const month = String(date.getMonth() + 1).padStart(2, '0');
 const day = String(date.getDate()).padStart(2, '0');
 return `${year}-${month}-${day}`;
+}
+
+function readFileAsDataUrl(file) {
+return new Promise((resolve, reject) => {
+const reader = new FileReader();
+reader.onload = () => resolve(reader.result);
+reader.onerror = () => reject(new Error("画像の読み込みに失敗しました"));
+reader.readAsDataURL(file);
+});
+}
+
+async function uploadPostImage(file) {
+const safeFileName = file.name.replace(/[^\w.\-]/g, "_");
+const fileRef = storageRef(storage, `post-images/${Date.now()}_${safeFileName}`);
+
+try {
+await uploadBytes(fileRef, file);
+return await getDownloadURL(fileRef);
+} catch (error) {
+console.warn("Firebase Storage へのアップロードに失敗したため、画像を直接埋め込みます。", error);
+return await readFileAsDataUrl(file);
+}
 }
 
 function updateDateDisplay() {
@@ -1297,9 +1319,7 @@ const commentsEnabled = document.getElementById("postCommentsEnabled").checked;
 try {
  let imageUrl = null;
  if (imageFile) {
-  const fileRef = storageRef(storage, `post-images/${Date.now()}_${imageFile.name}`);
-  await uploadBytes(fileRef, imageFile);
-  imageUrl = await getDownloadURL(fileRef);
+  imageUrl = await uploadPostImage(imageFile);
  }
  await addDoc(collection(db, "posts"), {
   title,
