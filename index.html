@@ -1044,22 +1044,27 @@ function readFileAsDataUrl(file) {
 return new Promise((resolve, reject) => {
 const reader = new FileReader();
 reader.onload = () => resolve(reader.result);
-reader.onerror = () => reject(new Error("画像の読み込みに失敗しました"));
+reader.onerror = () => reject(new Error("ファイルの読み込みに失敗しました"));
 reader.readAsDataURL(file);
 });
 }
 
-async function uploadPostImage(file) {
-const safeFileName = file.name.replace(/[^\w.\-]/g, "_");
-const fileRef = storageRef(storage, `post-images/${Date.now()}_${safeFileName}`);
-
+async function preparePostAttachment(file) {
+if (!file) return null;
 try {
-await uploadBytes(fileRef, file);
-return await getDownloadURL(fileRef);
-} catch (error) {
-console.warn("Firebase Storage へのアップロードに失敗したため、画像を直接埋め込みます。", error);
 return await readFileAsDataUrl(file);
+} catch (error) {
+console.warn("添付ファイルの読み込みに失敗しました。", error);
+return null;
 }
+}
+
+function renderAttachmentPreview(url) {
+if (!url) return "";
+if (url.startsWith("data:image/")) {
+return `<div class="post-image"><img src="${url}" alt="投稿画像"></div>`;
+}
+return `<div class="post-image"><a href="${url}" target="_blank" rel="noopener" style="display:inline-block;padding:12px 14px;background:#f9fafb;border:1px solid var(--border);border-radius:12px;">📎 添付ファイルを開く</a></div>`;
 }
 
 function updateDateDisplay() {
@@ -1194,7 +1199,7 @@ ${state.isAdmin ? `<button class="danger-button deletePost-btn" data-post-id="${
 <span class="badge">${post.startDate}～${post.endDate}</span>
 ${tag ? `<span class="tag-chip" style="background:${tag.color}20; color:${tag.color}; border-color:${tag.color}40;">${tag.name}</span>` : ''}
 </div>
-${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="投稿画像"></div>` : ''}
+${post.imageUrl ? renderAttachmentPreview(post.imageUrl) : ''}
 <p class="post-body">${postBodyHtml}</p>
 ${reactionsEnabled ? `
 <div class="reaction-container">
@@ -1319,7 +1324,7 @@ const commentsEnabled = document.getElementById("postCommentsEnabled").checked;
 try {
  let imageUrl = null;
  if (imageFile) {
-  imageUrl = await uploadPostImage(imageFile);
+  imageUrl = await preparePostAttachment(imageFile);
  }
  await addDoc(collection(db, "posts"), {
   title,
