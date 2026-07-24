@@ -98,26 +98,36 @@ border: 2px solid transparent;
 .avatar-option.selected { background: rgba(0, 113, 227, 0.1); border-color: var(--accent); }
 
 .toolbar {
-display: grid;
-gap: 16px;
-padding: 22px;
-margin-bottom: 18px;
-}
+ let imageUrl = null;
+ let imageUrlToSave = null;
+ if (imageFile) {
+    imageUrl = await preparePostAttachment(imageFile);
+    // Firestore のドキュメントサイズ制限やパフォーマンスのため、大きな DataURL は保存しない
+    if (imageUrl && imageUrl.length > 500000) {
+        alert("添付ファイルが大きすぎるため、投稿には保存されません。代わりにプレビューで表示されます。大きなファイルを永続化するには Firebase Storage の CORS 設定が必要です。");
+        imageUrlToSave = null;
+    } else {
+        imageUrlToSave = imageUrl;
+    }
+ }
 
-.toolbar-row {
-display: flex;
-flex-wrap: wrap;
-gap: 14px;
-align-items: center;
-justify-content: center;
-}
-
-.date-display { font-size: 1.1rem; font-weight: 700; min-width: 220px; text-align: center; }
-
-.panel { padding: 24px; margin-bottom: 16px; }
-.panel-title { font-size: 1.2rem; margin-bottom: 16px; font-weight: 700; }
-
-.form-grid-2 {
+ await addDoc(collection(db, "posts"), {
+  title,
+  body,
+  category,
+  classTarget,
+  startDate,
+  endDate,
+  tagId,
+  imageUrl: imageUrlToSave,
+  attachmentName: imageFile ? imageFile.name : null,
+  reactions: { like: 0, checked: 0, thanks: 0 },
+  reactionsEnabled,
+  commentsEnabled,
+  createdAt: serverTimestamp()
+ });
+ showToast("投稿しました！");
+ document.getElementById("postForm").reset();
 display: grid;
 grid-template-columns: 1fr 1fr;
 gap: 12px;
@@ -1064,6 +1074,17 @@ if (!url) return "";
 if (url.startsWith("data:image/")) {
 return `<div class="post-image"><img src="${url}" alt="投稿画像"></div>`;
 }
+// PDF をデータ URL で受け取った場合は object 埋め込みで表示する（iframe より互換性が高い）
+if (url.startsWith("data:application/pdf") || url.endsWith(".pdf")) {
+    return `
+    <div class="post-image" style="padding:6px 0;">
+        <object data="${url}" type="application/pdf" width="100%" height="560" style="border-radius:12px; border:1px solid var(--border);">
+            <p style="padding:12px; background:#f9fafb; border-radius:8px;">PDF を表示できません。<a href="${url}" target="_blank" rel="noopener">こちらから開く</a></p>
+        </object>
+    </div>
+    `;
+}
+
 return `<div class="post-image"><a href="${url}" target="_blank" rel="noopener" style="display:inline-block;padding:12px 14px;background:#f9fafb;border:1px solid var(--border);border-radius:12px;">📎 添付ファイルを開く</a></div>`;
 }
 
@@ -1196,9 +1217,12 @@ ${state.isAdmin ? `<button class="danger-button deletePost-btn" data-post-id="${
 </div>
 <div style="margin-bottom: 12px; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
 <span class="badge">${post.category}</span>
+</span>
 <span class="badge">${post.startDate}～${post.endDate}</span>
 ${tag ? `<span class="tag-chip" style="background:${tag.color}20; color:${tag.color}; border-color:${tag.color}40;">${tag.name}</span>` : ''}
 </div>
+${post.attachmentName ? `<div style="margin:8px 0; font-size:0.9rem; color:var(--muted);">📎 ${post.attachmentName}</div>` : ''}
+${post.imageUrl ? renderAttachmentPreview(post.imageUrl) : ''}
 ${post.imageUrl ? renderAttachmentPreview(post.imageUrl) : ''}
 <p class="post-body">${postBodyHtml}</p>
 ${reactionsEnabled ? `
