@@ -98,40 +98,21 @@ border: 2px solid transparent;
 .avatar-option.selected { background: rgba(0, 113, 227, 0.1); border-color: var(--accent); }
 
 .toolbar {
- let imageUrl = null;
- let imageUrlToSave = null;
- if (imageFile) {
-    imageUrl = await preparePostAttachment(imageFile);
-    // Firestore のドキュメントサイズ制限やパフォーマンスのため、大きな DataURL は保存しない
-    if (imageUrl && imageUrl.length > 500000) {
-        alert("添付ファイルが大きすぎるため、投稿には保存されません。代わりにプレビューで表示されます。大きなファイルを永続化するには Firebase Storage の CORS 設定が必要です。");
-        imageUrlToSave = null;
-    } else {
-        imageUrlToSave = imageUrl;
-    }
- }
-
- await addDoc(collection(db, "posts"), {
-  title,
-  body,
-  category,
-  classTarget,
-  startDate,
-  endDate,
-  tagId,
-  imageUrl: imageUrlToSave,
-  attachmentName: imageFile ? imageFile.name : null,
-  reactions: { like: 0, checked: 0, thanks: 0 },
-  reactionsEnabled,
-  commentsEnabled,
-  createdAt: serverTimestamp()
- });
- showToast("投稿しました！");
- document.getElementById("postForm").reset();
 display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 12px;
+gap: 16px;
+padding: 22px;
+margin-bottom: 18px;
 }
+
+.toolbar-row {
+display: flex;
+flex-wrap: wrap;
+gap: 14px;
+align-items: center;
+justify-content: center;
+}
+
+.date-display { font-size: 1.1rem; font-weight: 700; min-width: 220px; text-align: center; }
 
 .post-card {
 border: 1px solid var(--border);
@@ -985,7 +966,7 @@ const firebaseConfig = {
 apiKey: "AIzaSyDoMvVErqyv06Tdn-rXNhHkcW_-Q7BfoAg",
 authDomain: "school-site-475fc.firebaseapp.com",
 projectId: "school-site-475fc",
-storageBucket: "school-site-475fc.appspot.com",
+storageBucket: "school-site-475fc.firebasestorage.app",
 messagingSenderId: "69139986081",
 appId: "1:69139986081:web:11c1b1b8277e503e9ee2e0"
 };
@@ -1048,44 +1029,6 @@ const year = date.getFullYear();
 const month = String(date.getMonth() + 1).padStart(2, '0');
 const day = String(date.getDate()).padStart(2, '0');
 return `${year}-${month}-${day}`;
-}
-
-function readFileAsDataUrl(file) {
-return new Promise((resolve, reject) => {
-const reader = new FileReader();
-reader.onload = () => resolve(reader.result);
-reader.onerror = () => reject(new Error("ファイルの読み込みに失敗しました"));
-reader.readAsDataURL(file);
-});
-}
-
-async function preparePostAttachment(file) {
-if (!file) return null;
-try {
-return await readFileAsDataUrl(file);
-} catch (error) {
-console.warn("添付ファイルの読み込みに失敗しました。", error);
-return null;
-}
-}
-
-function renderAttachmentPreview(url) {
-if (!url) return "";
-if (url.startsWith("data:image/")) {
-return `<div class="post-image"><img src="${url}" alt="投稿画像"></div>`;
-}
-// PDF をデータ URL で受け取った場合は object 埋め込みで表示する（iframe より互換性が高い）
-if (url.startsWith("data:application/pdf") || url.endsWith(".pdf")) {
-    return `
-    <div class="post-image" style="padding:6px 0;">
-        <object data="${url}" type="application/pdf" width="100%" height="560" style="border-radius:12px; border:1px solid var(--border);">
-            <p style="padding:12px; background:#f9fafb; border-radius:8px;">PDF を表示できません。<a href="${url}" target="_blank" rel="noopener">こちらから開く</a></p>
-        </object>
-    </div>
-    `;
-}
-
-return `<div class="post-image"><a href="${url}" target="_blank" rel="noopener" style="display:inline-block;padding:12px 14px;background:#f9fafb;border:1px solid var(--border);border-radius:12px;">📎 添付ファイルを開く</a></div>`;
 }
 
 function updateDateDisplay() {
@@ -1221,9 +1164,7 @@ ${state.isAdmin ? `<button class="danger-button deletePost-btn" data-post-id="${
 <span class="badge">${post.startDate}～${post.endDate}</span>
 ${tag ? `<span class="tag-chip" style="background:${tag.color}20; color:${tag.color}; border-color:${tag.color}40;">${tag.name}</span>` : ''}
 </div>
-${post.attachmentName ? `<div style="margin:8px 0; font-size:0.9rem; color:var(--muted);">📎 ${post.attachmentName}</div>` : ''}
-${post.imageUrl ? renderAttachmentPreview(post.imageUrl) : ''}
-${post.imageUrl ? renderAttachmentPreview(post.imageUrl) : ''}
+${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="投稿画像"></div>` : ''}
 <p class="post-body">${postBodyHtml}</p>
 ${reactionsEnabled ? `
 <div class="reaction-container">
@@ -1348,7 +1289,9 @@ const commentsEnabled = document.getElementById("postCommentsEnabled").checked;
 try {
  let imageUrl = null;
  if (imageFile) {
-  imageUrl = await preparePostAttachment(imageFile);
+  const fileRef = storageRef(storage, `post-images/${Date.now()}_${imageFile.name}`);
+  await uploadBytes(fileRef, imageFile);
+  imageUrl = await getDownloadURL(fileRef);
  }
  await addDoc(collection(db, "posts"), {
   title,
