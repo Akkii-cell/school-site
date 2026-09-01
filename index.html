@@ -21,8 +21,8 @@ color-scheme: light;
 --surface-hover: #f4f1ea;
 --line: #ece7db;
 --line-strong: #ddd6c4;
---navy: #cc785c;
---navy-deep: #b35f45;
+--navy: #3a63f0;
+--navy-deep: #2748c9;
 --stamp: #d64545;
 --stamp-soft: #fceeee;
 --gold: #b8862f;
@@ -172,7 +172,7 @@ cursor: pointer;
 border: 2px solid transparent;
 }
 .avatar-option:hover { border-color: var(--line-strong); }
-.avatar-option.selected { background: #fceee9; border-color: var(--navy); }
+.avatar-option.selected { background: #e8edfd; border-color: var(--navy); }
 
 .toolbar {
 display: flex;
@@ -334,7 +334,7 @@ color: var(--muted);
 width: auto;
 }
 .reaction-btn:hover { background: var(--surface-hover); border-color: var(--line-strong); color: var(--ink); }
-.reaction-btn.active { background: #fceee9; border-color: var(--navy); color: var(--navy-deep); }
+.reaction-btn.active { background: #e8edfd; border-color: var(--navy); color: var(--navy-deep); }
 .reaction-count { font-size: 0.78rem; opacity: 0.9; }
 
 .comment-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
@@ -449,7 +449,7 @@ background: var(--surface); border: 1px solid var(--line); border-radius: var(--
 .notification-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--line); background: var(--surface-hover); }
 .notification-list { padding: 8px; display: grid; gap: 6px; overflow-y: auto; }
 .notification-item { text-align: left; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid transparent; background: #fff; color: var(--ink); width: 100%; display: grid; gap: 3px; }
-.notification-item.unread { border-color: var(--navy); background: #fceee9; }
+.notification-item.unread { border-color: var(--navy); background: #e8edfd; }
 .notification-title { font-weight: 700; font-size: 0.86rem; }
 .notification-message { font-size: 0.79rem; color: var(--muted); line-height: 1.45; }
 .notification-meta { font-size: 0.7rem; color: var(--muted); }
@@ -512,39 +512,214 @@ box-shadow: var(--shadow-card);
 #pcDateNav { display: flex; }
 #mobileDateNav { display: none !important; }
 }
+
+/* ── ログイン画面（分割レイアウト） ── */
+.auth-overlay {
+background: linear-gradient(160deg, #eaf0fe 0%, #f7f5f0 55%, #f7f5f0 100%);
+padding: 24px;
+align-items: center;
+}
+.auth-shell {
+width: min(1040px, 100%);
+max-height: 92vh;
+display: flex;
+background: var(--surface);
+border-radius: 28px;
+overflow: hidden;
+box-shadow: 0 30px 80px rgba(23,20,15,0.18);
+}
+.auth-illustration {
+flex: 0 0 42%;
+background: linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 100%);
+color: #fff;
+padding: 32px 34px;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+gap: 18px;
+position: relative;
+}
+.auth-illustration-top { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 0.95rem; }
+.auth-logo-mark {
+width: 32px; height: 32px; border-radius: 9px; background: rgba(255,255,255,0.18);
+display: flex; align-items: center; justify-content: center;
+}
+.auth-illustration-mid h2 { color: #fff; font-size: 1.5rem; line-height: 1.4; margin-bottom: 10px; }
+.auth-illustration-mid p { color: rgba(255,255,255,0.82); font-size: 0.86rem; line-height: 1.6; }
+.auth-illustration-art { flex: 1; min-height: 0; display: flex; align-items: flex-end; }
+.auth-panel-right {
+flex: 1;
+display: flex;
+flex-direction: column;
+padding: 26px 40px;
+overflow-y: auto;
+}
+.auth-topbar { display: flex; justify-content: flex-end; margin-bottom: 6px; }
+.auth-form-wrap { flex: 1; max-width: 360px; width: 100%; margin: 0 auto; padding-top: 6px; }
+.auth-field { position: relative; display: flex; align-items: center; }
+.auth-input-icon { position: absolute; left: 14px; color: var(--muted); display: flex; pointer-events: none; }
+.auth-input { padding-left: 40px; }
+.password-toggle-btn { position: absolute; right: 10px; width: auto; background: none; color: var(--muted); padding: 6px; border-radius: 8px; display: flex; }
+.password-toggle-btn:hover { color: var(--ink); background: var(--surface-hover); }
+.auth-remember-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: -4px; }
+.auth-primary-btn {
+width: 100%; min-height: 48px; border-radius: var(--radius-pill); border: none; cursor: pointer;
+background: linear-gradient(135deg, var(--navy), var(--navy-deep)); color: #fff; font-weight: 700; font-size: 0.92rem;
+display: flex; align-items: center; justify-content: center; gap: 8px;
+box-shadow: 0 10px 24px color-mix(in srgb, var(--navy) 35%, transparent);
+transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+.auth-primary-btn:hover { box-shadow: 0 12px 28px color-mix(in srgb, var(--navy) 45%, transparent); }
+.auth-primary-btn:active { transform: scale(0.99); }
+.auth-divider { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 0.78rem; margin: 2px 0; }
+.auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.auth-secondary-btn {
+width: 100%; min-height: 48px; border-radius: var(--radius-pill); border: 1px solid var(--line-strong); background: #fff;
+color: var(--ink); font-weight: 700; font-size: 0.9rem; cursor: pointer;
+}
+.auth-secondary-btn:hover { border-color: var(--navy); color: var(--navy-deep); background: var(--surface-hover); }
+.auth-footer {
+text-align: center; font-size: 0.72rem; color: var(--muted); margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line);
+display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+}
+.auth-footer .link-button { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+.auth-footer .link-button:hover { color: var(--navy-deep); }
+.auth-footer-sep { color: var(--line-strong); }
+
+@media (max-width: 860px) {
+.auth-overlay { padding: 0; align-items: stretch; }
+.auth-shell { border-radius: 0; max-height: none; min-height: 100vh; flex-direction: column; }
+.auth-illustration { flex: 0 0 auto; padding: 24px 24px 28px; }
+.auth-illustration-mid h2 { font-size: 1.25rem; }
+.auth-illustration-art { display: none; }
+.auth-panel-right { padding: 28px 22px 22px; }
+.auth-form-wrap { max-width: none; }
+}
 </style>
 </head>
 <body>
 
 <div class="trust-bar">港区白金の丘中学校 第7学年 <strong>非公式</strong> 生徒・保護者運営の連絡共有サイト（運営者: AKKI）</div>
 
-<div class="modal" id="loginModal">
-<div class="modal-panel" style="width: min(520px, 100%);">
-<h2 class="modal-title">ログイン / 新規登録</h2>
-<p style="color: var(--muted); font-size: 0.92rem; margin-top: -8px; margin-bottom: 14px;">メールアドレスまたはユーザー名とパスワードを入力してください。</p>
-<form id="authForm" style="display: grid; gap: 12px;">
-<label for="loginType">ログイン方法</label>
+<div class="modal auth-overlay" id="loginModal">
+<div class="auth-shell">
+<div class="auth-illustration">
+<div class="auth-illustration-top">
+<div class="auth-logo-mark">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 4h7v16H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" fill="#fff" fill-opacity="0.55"/><path d="M13 4h7a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-7V4Z" fill="#fff"/></svg>
+</div>
+<span>白金の丘中学校</span>
+</div>
+<div class="auth-illustration-mid">
+<h2>学校生活を、<br>もっとスマートに。</h2>
+<p>みんなで予定を共有し、毎日をもっと充実させよう。</p>
+</div>
+<div class="auth-illustration-art" aria-hidden="true">
+<svg viewBox="0 0 320 260" width="100%" height="100%">
+<ellipse cx="160" cy="235" rx="130" ry="16" fill="#ffffff" opacity="0.35"/>
+<rect x="30" y="150" width="72" height="14" rx="7" fill="#ffffff" opacity="0.85"/>
+<rect x="34" y="132" width="64" height="14" rx="7" fill="#ffffff" opacity="0.7"/>
+<ellipse cx="55" cy="112" rx="16" ry="20" fill="#bfe0c8"/>
+<rect x="46" y="122" width="18" height="14" fill="#e7d9c2"/>
+<g>
+<rect x="105" y="55" width="120" height="140" rx="16" fill="#ffffff"/>
+<rect x="105" y="55" width="120" height="34" rx="16" fill="var(--navy)"/>
+<rect x="105" y="73" width="120" height="16" fill="var(--navy)"/>
+<circle cx="128" cy="48" r="6" fill="var(--navy-deep)"/>
+<circle cx="202" cy="48" r="6" fill="var(--navy-deep)"/>
+<g opacity="0.55">
+<rect x="120" y="100" width="18" height="18" rx="4" fill="#eef1fb"/>
+<rect x="145" y="100" width="18" height="18" rx="4" fill="#eef1fb"/>
+<rect x="170" y="100" width="18" height="18" rx="4" fill="#eef1fb"/>
+<rect x="195" y="100" width="18" height="18" rx="4" fill="#eef1fb"/>
+<rect x="120" y="126" width="18" height="18" rx="4" fill="#eef1fb"/>
+<rect x="170" y="126" width="18" height="18" rx="4" fill="#eef1fb"/>
+<rect x="195" y="126" width="18" height="18" rx="4" fill="#eef1fb"/>
+<rect x="120" y="152" width="18" height="18" rx="4" fill="#eef1fb"/>
+<rect x="145" y="152" width="18" height="18" rx="4" fill="#eef1fb"/>
+<rect x="170" y="152" width="18" height="18" rx="4" fill="#eef1fb"/>
+</g>
+<rect x="145" y="126" width="18" height="18" rx="4" fill="var(--navy)"/>
+</g>
+<g>
+<circle cx="248" cy="168" r="34" fill="#ffffff"/>
+<circle cx="248" cy="168" r="34" fill="none" stroke="var(--navy)" stroke-width="4"/>
+<path d="M248 148v20l14 10" stroke="var(--navy)" stroke-width="4" stroke-linecap="round" fill="none"/>
+</g>
+<g opacity="0.9">
+<rect x="235" y="70" width="14" height="34" fill="#eef1fb"/>
+<path d="M235 70l7-14 7 14Z" fill="var(--navy)"/>
+<rect x="262" y="86" width="12" height="18" fill="#eef1fb"/>
+<path d="M262 86l6-11 6 11Z" fill="#bfe0c8"/>
+</g>
+</svg>
+</div>
+</div>
+<div class="auth-panel-right">
+<div class="auth-topbar">
+<span class="badge">非公式サイト</span>
+</div>
+<div class="auth-form-wrap">
+<h2 class="modal-title" style="margin-bottom: 4px;">ログイン</h2>
+<p class="hero-lead" style="margin-bottom: 22px; font-size: 0.84rem;">アカウントにログインして続行します</p>
+<form id="authForm" style="display: grid; gap: 16px;">
+<div>
+<label for="loginType" style="font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 6px;">ログイン方法</label>
 <select id="loginType">
 <option value="username">ユーザー名</option>
 <option value="email">メールアドレス</option>
 </select>
-<label for="emailInput">メールアドレス / ユーザー名</label>
-<input id="emailInput" type="text" placeholder="メールアドレス または ユーザー名" required autocomplete="username">
-<label for="passwordInput">パスワード</label>
-<input id="passwordInput" type="password" placeholder="パスワード" required autocomplete="current-password" minlength="6">
-<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 4px;">
-<button type="submit" class="button" style="width: 100%;">ログイン</button>
-<button type="submit" class="ghost-button" style="width: 100%;">新規登録</button>
 </div>
+<div>
+<label for="emailInput" style="font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 6px;">ユーザー名 / メールアドレス</label>
+<div class="auth-field">
+<span class="auth-input-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+<input id="emailInput" class="auth-input" type="text" placeholder="ユーザー名またはメールアドレス" required autocomplete="username">
+</div>
+</div>
+<div>
+<label for="passwordInput" style="font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 6px;">パスワード</label>
+<div class="auth-field">
+<span class="auth-input-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 1 1 8 0v3" stroke="currentColor" stroke-width="2"/></svg></span>
+<input id="passwordInput" class="auth-input" type="password" placeholder="パスワード" required autocomplete="current-password" minlength="6" style="padding-right: 40px;">
+<button type="button" id="togglePasswordBtn" class="password-toggle-btn" aria-label="パスワードを表示">
+<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+</button>
+</div>
+</div>
+<div class="auth-remember-row">
+<label style="display:flex; align-items:center; gap:7px; font-size:0.82rem; color: var(--ink-soft); cursor:pointer;">
+<input type="checkbox" id="rememberMeCheckbox" checked style="width:16px; height:16px;"> ログインしたままにする
+</label>
+<button type="button" id="forgotPasswordBtn" class="link-button">パスワードをお忘れですか？</button>
+</div>
+<button type="submit" data-mode="login" class="auth-primary-btn">
+<span>ログイン</span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+<div class="auth-divider"><span>または</span></div>
+<button type="submit" data-mode="register" class="auth-secondary-btn">新規アカウントを作成</button>
 </form>
 <div id="loginDebugError" class="debug-error-box"></div>
 <div id="registerDebugError" class="debug-error-box"></div>
+</div>
+<div class="auth-footer">
+<span>© 2026 白金の丘中学校 第7学年 共有サイト（非公式）</span>
+<span class="auth-footer-sep">|</span>
+<button type="button" class="link-button" id="footerTermsBtn">利用規約</button>
+<span class="auth-footer-sep">|</span>
+<button type="button" class="link-button" id="footerPrivacyBtn">プライバシーポリシー</button>
+</div>
+</div>
 </div>
 </div>
 
 <div class="modal hidden" id="termsModal">
 <div class="modal-panel" style="width: min(600px, 100%);">
+<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
 <h2 class="modal-title" style="font-size: 1.2rem; margin-bottom: 12px;">利用規約・プライバシーポリシー</h2>
+<button type="button" id="closeTermsPreview" class="ghost-button" style="min-height:32px; width:auto; padding:0 12px; font-size:0.78rem;">閉じる</button>
+</div>
 <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 12px;">本サービスをご利用になる前に、必ず以下の内容をお読みいただき、同意をお願いいたします。</p>
 <div class="terms-box">
 <strong>最終更新日：2026年6月27日</strong>
@@ -758,7 +933,7 @@ box-shadow: var(--shadow-card);
 <textarea id="postBody" maxlength="4000" placeholder="内容" required style="min-height: 120px;"></textarea>
 <div class="format-toolbar">
 <button type="button" id="formatBold" class="ghost-button" style="width:auto;">太字</button>
-<label style="display:flex; align-items:center; gap:8px; margin:0; font-size:0.85rem;">色<input id="postFormatColor" type="color" value="#22406b" style="width:auto; padding:0; border:none; background:none;"></label>
+<label style="display:flex; align-items:center; gap:8px; margin:0; font-size:0.85rem;">色<input id="postFormatColor" type="color" value="#3a63f0" style="width:auto; padding:0; border:none; background:none;"></label>
 <label style="display:flex; align-items:center; gap:8px; margin:0; font-size:0.85rem;">大きさ<select id="postFormatSize" style="width:auto;"><option value="1">標準</option><option value="1.1">やや大きい</option><option value="1.2">大きい</option><option value="0.9">小さめ</option></select></label>
 <button type="button" id="applyFormat" class="ghost-button" style="width:auto;">選択に適用</button>
 </div>
@@ -920,7 +1095,7 @@ box-shadow: var(--shadow-card);
 <textarea id="editPostBody" maxlength="4000" placeholder="内容" required style="min-height: 140px;"></textarea>
 <div class="format-toolbar">
 <button type="button" id="editFormatBold" class="ghost-button" style="width:auto;">太字</button>
-<label style="display:flex; align-items:center; gap:8px; margin:0; font-size:0.85rem;">色<input id="editPostFormatColor" type="color" value="#22406b" style="width:auto; padding:0; border:none; background:none;"></label>
+<label style="display:flex; align-items:center; gap:8px; margin:0; font-size:0.85rem;">色<input id="editPostFormatColor" type="color" value="#3a63f0" style="width:auto; padding:0; border:none; background:none;"></label>
 <label style="display:flex; align-items:center; gap:8px; margin:0; font-size:0.85rem;">大きさ<select id="editPostFormatSize" style="width:auto;"><option value="1">標準</option><option value="1.1">やや大きい</option><option value="1.2">大きい</option><option value="0.9">小さめ</option></select></label>
 <button type="button" id="editApplyFormat" class="ghost-button" style="width:auto;">選択に適用</button>
 </div>
@@ -966,7 +1141,7 @@ box-shadow: var(--shadow-card);
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence, browserSessionPersistence, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, query, orderBy, limit, increment, serverTimestamp, getDocs, setDoc, getDoc, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
@@ -1496,7 +1671,7 @@ container.innerHTML = filtered.length === 0
     const reactionsEnabled = post.reactionsEnabled !== false;
     const commentsEnabled = post.commentsEnabled !== false;
     const tag = post.tagId ? state.tags.find(t => t.id === post.tagId) : null;
-    const cardStyle = tag ? `--card-accent:${/^#[0-9a-fA-F]{6}$/.test(tag.color) ? tag.color : '#22406b'};` : "";
+    const cardStyle = tag ? `--card-accent:${/^#[0-9a-fA-F]{6}$/.test(tag.color) ? tag.color : '#3a63f0'};` : "";
 
     const commentsHTML = comments.map(c => {
         // ✨ コメント投稿者がアイコンや名前を変更していた場合、最新状態を反映させる
@@ -1531,7 +1706,7 @@ ${state.isAdmin ? `<div class="post-head-actions">
 </div>` : ""}
 </div>
 <h3 class="post-title">${escapeHtml(post.title)}</h3>
-${tag ? `<div style="margin-bottom: 8px;"><span class="tag-chip" style="background:${/^#[0-9a-fA-F]{6}$/.test(tag.color) ? tag.color+'1a' : '#eef2f8'}; color:${/^#[0-9a-fA-F]{6}$/.test(tag.color) ? tag.color : '#22406b'}; border-color:${/^#[0-9a-fA-F]{6}$/.test(tag.color) ? tag.color+'40' : '#dbe3ef'};">${escapeHtml(tag.name)}</span></div>` : ''}
+${tag ? `<div style="margin-bottom: 8px;"><span class="tag-chip" style="background:${/^#[0-9a-fA-F]{6}$/.test(tag.color) ? tag.color+'1a' : '#eef2f8'}; color:${/^#[0-9a-fA-F]{6}$/.test(tag.color) ? tag.color : '#3a63f0'}; border-color:${/^#[0-9a-fA-F]{6}$/.test(tag.color) ? tag.color+'40' : '#dbe3ef'};">${escapeHtml(tag.name)}</span></div>` : ''}
 ${isSummerMode ? `<p class="post-body">${postBodyHtml}</p>` : `
 ${post.imageUrl && isSafeAvatarUrl(post.imageUrl) ? `<div class="post-image"><img src="${escapeAttr(post.imageUrl)}" alt="投稿画像"></div>` : ''}
 <p class="post-body">${postBodyHtml}</p>
@@ -1775,6 +1950,40 @@ document.getElementById(applyBtnId)?.addEventListener("click", () => {
 wireFormatToolbar("postBody", "formatBold", "postFormatColor", "postFormatSize", "applyFormat");
 wireFormatToolbar("editPostBody", "editFormatBold", "editPostFormatColor", "editPostFormatSize", "editApplyFormat");
 
+// ── ログイン画面: パスワード表示切替 ──
+document.getElementById("togglePasswordBtn")?.addEventListener("click", () => {
+const input = document.getElementById("passwordInput");
+const btn = document.getElementById("togglePasswordBtn");
+const showing = input.type === "text";
+input.type = showing ? "password" : "text";
+btn.setAttribute("aria-label", showing ? "パスワードを表示" : "パスワードを隠す");
+});
+
+// ── ログイン画面: パスワード再設定メール送信 ──
+document.getElementById("forgotPasswordBtn")?.addEventListener("click", async () => {
+let email = document.getElementById("emailInput").value.trim();
+if (!email) { showToast("メールアドレスまたはユーザー名を入力してください"); return; }
+const loginType = document.getElementById("loginType").value;
+if (loginType === "username") email += "@shiragane.com";
+try {
+await sendPasswordResetEmail(auth, email);
+showToast("パスワード再設定用のメールを送信しました");
+} catch (error) {
+showToast("送信に失敗しました。入力内容をご確認ください");
+}
+});
+
+// ── ログイン画面フッター: 利用規約・プライバシーポリシーのプレビュー表示 ──
+document.getElementById("footerTermsBtn")?.addEventListener("click", () => {
+document.getElementById("termsModal").classList.remove("hidden");
+});
+document.getElementById("footerPrivacyBtn")?.addEventListener("click", () => {
+document.getElementById("termsModal").classList.remove("hidden");
+});
+document.getElementById("closeTermsPreview")?.addEventListener("click", () => {
+document.getElementById("termsModal").classList.add("hidden");
+});
+
 window.selectCategory = function(category) {
  state.categoryFilter = category;
  updateCategoryTitle();
@@ -1904,14 +2113,16 @@ if (e.target.id === "authForm") {
 e.preventDefault();
 let email = document.getElementById("emailInput").value.trim();
 const password = document.getElementById("passwordInput").value;
-const mode = e.submitter && e.submitter.textContent.includes("新規登録") ? "register" : "login";
+const mode = e.submitter && e.submitter.dataset.mode === "register" ? "register" : "login";
 const loginType = document.getElementById("loginType").value;
+const rememberMe = document.getElementById("rememberMeCheckbox")?.checked !== false;
 
 if (loginType === "username") {
 email += "@shiragane.com";
 }
 
 try {
+await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
 if (mode === "register") {
 await createUserWithEmailAndPassword(auth, email, password);
 showToast("アカウントを作成しました");
