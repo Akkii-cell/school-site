@@ -1258,6 +1258,7 @@ const state = {
   userClass: "",
   userAvatarUrl: "👤",
   currentDate: new Date(),
+  categoryFilter: "all",
   posts: [],
   userReactedMap: {},
   commentsMap: {},
@@ -1483,12 +1484,15 @@ async function ensureNotificationPermission() {
 }
 
 function showSystemNotification(title, body, postId) {
-if (!("Notification" in window)) return;
-if (Notification.permission !== "granted") return;
 if (document.visibilityState === "visible") {
+showToast(title);
+if ("Notification" in window && Notification.permission === "granted") {
 playNotificationSound();
+}
 return;
 }
+if (!("Notification" in window)) return;
+if (Notification.permission !== "granted") return;
 const notification = new Notification(title, {
 body,
 icon: "ChatGPT Image 2026年6月28日 00_40_40 - コピー.png"
@@ -1542,9 +1546,6 @@ actorId: payload.actorId || null,
 read: false,
 createdAt: serverTimestamp()
 });
-if (state.user && recipientUid !== state.user.uid) {
-showSystemNotification(payload.title || "通知", payload.message || "", payload.postId || null);
-}
 } catch (error) {
 console.warn("通知の保存に失敗しました", error);
 }
@@ -1560,8 +1561,18 @@ state.notifications = [];
 renderNotifications();
 return;
 }
+let isFirstNotificationSnapshot = true;
 const q = query(collection(db, "notifications"), where("recipientId", "==", state.user.uid));
 state.notificationUnsubscribe = onSnapshot(q, (snapshot) => {
+if (!isFirstNotificationSnapshot) {
+snapshot.docChanges().forEach(change => {
+if (change.type === "added") {
+const data = change.doc.data();
+showSystemNotification(data.title || "通知", data.message || "", data.postId || null);
+}
+});
+}
+isFirstNotificationSnapshot = false;
 const items = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
 items.sort((a, b) => {
 const timeA = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
