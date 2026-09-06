@@ -2220,15 +2220,13 @@ document.getElementById("appealForm").reset();
 
 function initUserReactions() {
 if (!state.user) return;
-const q = query(collection(db, "userReactions"));
+const q = query(collection(db, "userReactions"), where("userId", "==", state.user.uid));
 onSnapshot(q, (snapshot) => {
 state.userReactedMap = {};
 snapshot.docs.forEach(doc => {
 const data = doc.data();
-if (data.userId === state.user.uid) {
 if (!state.userReactedMap[data.postId]) state.userReactedMap[data.postId] = {};
 state.userReactedMap[data.postId][data.type] = true;
-}
 });
 renderPosts();
 });
