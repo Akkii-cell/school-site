@@ -794,6 +794,19 @@ margin: 0 0 12px;
 </form>
 <div id="loginDebugError" class="debug-error-box"></div>
 <div id="registerDebugError" class="debug-error-box"></div>
+<div style="display:flex; align-items:center; gap:10px; margin:16px 0 12px; color: var(--muted); font-size:0.8rem;">
+<div style="flex:1; height:1px; background: var(--border);"></div>
+<span>または</span>
+<div style="flex:1; height:1px; background: var(--border);"></div>
+</div>
+<div style="display:grid; gap:10px;">
+<button type="button" id="googleLoginButton" class="ghost-button" style="width:100%; display:flex; align-items:center; justify-content:center; gap:10px;">
+<img src="Google.png" alt="" style="width:20px; height:20px; object-fit:contain; flex-shrink:0;" onerror="this.style.display='none';">
+<span>Googleでログイン</span>
+</button>
+</div>
+<p style="color: var(--muted); font-size:0.75rem; margin-top:10px; text-align:center;">はじめての方は自動的に新規登録されます。</p>
+<div id="oauthDebugError" class="debug-error-box"></div>
 </div>
 </div>
 
@@ -904,6 +917,7 @@ margin: 0 0 12px;
 </label>
 <button type="submit" class="button" style="width: 100%;">次へ進む</button>
 </form>
+<button type="button" id="closeTermsViewButton" class="ghost-button" style="width: 100%; display: none;">閉じる</button>
 </div>
 </div>
 
@@ -927,8 +941,9 @@ margin: 0 0 12px;
 <div class="modal hidden" id="pendingApprovalModal">
 <div class="modal-panel" style="width: min(500px, 100%); text-align: center; padding: 40px 28px;">
 <h2 class="modal-title" style="color: var(--accent); font-size: 1.6rem; margin-bottom: 16px;">⏳ 承認待ち</h2>
-<p style="line-height: 1.6; margin-bottom: 24px;">アカウントの登録が完了しました。<br>現在、管理者の承認を待っています。<br>承認されると自動的に画面が切り替わります。</p>
-<button type="button" id="pendingLogoutButton" class="ghost-button" style="width: 100%;">ログイン画面に戻る</button>
+<p style="line-height: 1.6; margin-bottom: 12px;">アカウントの登録が完了しました。<br>現在、管理者の承認をお待ちください。</p>
+<p style="line-height: 1.6; margin-bottom: 24px; color: var(--muted); font-size: 0.9rem;">新規登録の場合は、このまま画面を閉じていても大丈夫です。承認されると通知でお知らせします。通知が来たら、もう一度アプリを開けば自動的に利用を開始できます。</p>
+<button type="button" id="pendingAlreadyHaveAccountButton" class="ghost-button" style="width: 100%;">すでにアカウントをお持ちですか？</button>
 <div id="pendingDebugError" class="debug-error-box"></div>
 </div>
 </div>
@@ -966,6 +981,7 @@ margin: 0 0 12px;
 <div class="admin-footer" id="adminFooter">
 <button class="ghost-button" id="adminDashboardButton" style="display: none; min-height: 40px; padding: 0 14px; font-size: 0.85rem;">📊 ダッシュボード</button>
 <button class="ghost-button" id="reminderButton" style="display: none; min-height: 40px; padding: 0 14px; font-size: 0.85rem;">⏰ リマインダー</button>
+<button class="ghost-button" id="viewTermsButton" style="min-height: 40px; padding: 0 14px; font-size: 0.85rem;">📄 利用規約</button>
 <button class="ghost-button" id="profileModalButton" style="min-height: 40px; padding: 0 14px; font-size: 0.85rem;">👤 プロフィール</button>
 <button class="ghost-button" id="logoutButton" style="min-height: 40px; padding: 0 14px; font-size: 0.85rem;">ログアウト</button>
 </div>
@@ -1222,7 +1238,7 @@ margin: 0 0 12px;
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, query, orderBy, limit, increment, arrayUnion, arrayRemove, serverTimestamp, getDocs, setDoc, getDoc, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
@@ -1297,6 +1313,16 @@ const toast = document.getElementById("toast");
 toast.textContent = msg;
 toast.classList.add("show");
 setTimeout(() => toast.classList.remove("show"), 2000);
+}
+
+// 利用規約モーダルを表示する。viewOnly=true のときは同意チェック・送信フォームを隠し、
+// 「閉じる」ボタンだけを出す（フッターからいつでも見返せるようにするため）。
+function openTermsModal(viewOnly) {
+const form = document.getElementById("termsForm");
+const closeBtn = document.getElementById("closeTermsViewButton");
+if (form) form.style.display = viewOnly ? "none" : "grid";
+if (closeBtn) closeBtn.style.display = viewOnly ? "block" : "none";
+document.getElementById("termsModal").classList.remove("hidden");
 }
 
 let notificationAudioContext = null;
@@ -1613,6 +1639,18 @@ message = "このメールアドレスはすでに使用されています。";
 message = "メールアドレスの形式が正しくありません。";
 } else if (code === "auth/weak-password") {
 message = "パスワードは6文字以上で入力してください。";
+}
+} else if (mode === "oauth") {
+if (["auth/popup-closed-by-user", "auth/cancelled-popup-request"].includes(code)) {
+message = "ログインがキャンセルされました。もう一度お試しください。";
+} else if (code === "auth/popup-blocked") {
+message = "ポップアップがブロックされました。ブラウザの設定でポップアップを許可してください。";
+} else if (code === "auth/account-exists-with-different-credential") {
+message = "このメールアドレスは別のログイン方法ですでに登録されています。";
+} else if (code === "auth/operation-not-supported-in-this-environment" || code === "auth/operation-not-allowed") {
+message = "この環境ではこのログイン方法を利用できません。";
+} else if (code === "auth/network-request-failed") {
+message = "通信エラーが発生しました。電波状況を確認してもう一度お試しください。";
 }
 }
 
@@ -2034,6 +2072,14 @@ document.getElementById("profileImageUrlInput").value = "";
 });
 }
 
+document.getElementById("viewTermsButton")?.addEventListener("click", () => {
+openTermsModal(true);
+});
+
+document.getElementById("closeTermsViewButton")?.addEventListener("click", () => {
+document.getElementById("termsModal").classList.add("hidden");
+});
+
 document.getElementById("profileModalButton")?.addEventListener("click", () => {
 document.getElementById("profileNameInput").value = state.userName;
 document.querySelectorAll(".avatar-option").forEach(el => {
@@ -2111,6 +2157,19 @@ showToast("投稿を更新しました");
 document.getElementById("editPostModal").classList.add("hidden");
 } catch (error) {
 showDebugError("editPostDebugError", error);
+}
+});
+
+// 🔵 Googleでログイン（未登録なら自動的に新規登録、既存なら自動的にログインになる）
+document.getElementById("googleLoginButton")?.addEventListener("click", async () => {
+clearDebugErrors();
+try {
+const provider = new GoogleAuthProvider();
+await signInWithPopup(auth, provider);
+showToast("ログインしました");
+await ensureNotificationPermission();
+} catch (error) {
+showFriendlyAuthError("oauthDebugError", error, "oauth");
 }
 });
 
@@ -2567,6 +2626,13 @@ window.approveUser = async (email, userClass, name, avatarUrl, uid) => {
 try {
 await setDoc(doc(db, "allowedUsers", email), { email, class: userClass, name: name, avatarUrl: avatarUrl, uid: uid, suspended: false, approvedAt: serverTimestamp() });
 await deleteDoc(doc(db, "pendingUsers", email));
+if (uid) {
+  await addNotification(uid, {
+    title: "承認されました",
+    message: "アカウントの利用が承認されました。このままご利用いただけます。",
+    type: "approval"
+  });
+}
 showToast("承認しました");
 } catch (error) { showDebugError("dashboardDebugError", error); }
 };
@@ -2613,14 +2679,25 @@ signOut(auth).then(() => { showToast("ログアウトしました"); });
 }
 
 document.getElementById("logoutButton")?.addEventListener("click", handleLogout);
-document.getElementById("pendingLogoutButton")?.addEventListener("click", handleLogout);
+document.getElementById("pendingAlreadyHaveAccountButton")?.addEventListener("click", handleLogout);
 document.getElementById("suspendedLogoutButton")?.addEventListener("click", handleLogout);
 
 function checkApprovalStatus(user) {
 if (state.approvalUnsubscribe) state.approvalUnsubscribe();
 
+let previousDocExists = null;
+
 state.approvalUnsubscribe = onSnapshot(doc(db, "allowedUsers", user.email), (snapshot) => {
-  if (snapshot.exists()) {
+  const docExistsNow = snapshot.exists();
+
+  // 🎉 「承認待ち」→「承認済み」に変わった瞬間だけ通知する
+  if (docExistsNow && previousDocExists === false) {
+    showToast("🎉 アカウントが承認されました！");
+    showSystemNotification("承認されました", "アカウントの利用が承認されました。このままご利用いただけます。", null);
+  }
+  previousDocExists = docExistsNow;
+
+  if (docExistsNow) {
     const data = snapshot.data();
 
     // 🛑 BAN（停止状態）の監視ロジック
@@ -2665,6 +2742,8 @@ state.approvalUnsubscribe = onSnapshot(doc(db, "allowedUsers", user.email), (sna
     loadTagData();
     showFirstTimeGuide();
   } else {
+    // ⏳ 承認待ちの間にOS通知の許可をお願いしておく（承認された瞬間に気づけるように）
+    ensureNotificationPermission();
     document.getElementById("pendingApprovalModal").classList.remove("hidden");
     document.getElementById("mainContent").style.display = "none";
     document.getElementById("setupModal").classList.add("hidden");
@@ -2750,7 +2829,7 @@ document.getElementById("loginModal").classList.add("hidden");
 const hasAgreed = localStorage.getItem(`user_terms_agreed_${user.uid}`);
 if (!hasAgreed) {
   document.getElementById("mainContent").style.display = "none";
-  document.getElementById("termsModal").classList.remove("hidden");
+  openTermsModal(false);
   document.getElementById("setupModal").classList.add("hidden");
   document.getElementById("pendingApprovalModal").classList.add("hidden");
   return;
